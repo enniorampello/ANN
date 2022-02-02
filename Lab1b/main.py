@@ -11,7 +11,7 @@ sigma_A = 0.2
 sigma_B = 0.3
 
 bias = 1
-hidden_nodes = 3
+hidden_nodes = 30
 learning_rate = 0.001
 n_epochs = 200
 np.random.seed(7)
@@ -29,8 +29,8 @@ def get_patterns():
     classA_1 = multivariate_normal(m_A, [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
     classA_2 = multivariate_normal([-m_A[0], -m_A[1]], [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
 
-    classA = np.concatenate((classA_1,classA_2))
-    classB = multivariate_normal(m_B, [[sigma_B,0],[0, sigma_B]], n)
+    classA = np.concatenate((classA_1, classA_2))
+    classB = multivariate_normal(m_B, [[sigma_B, 0], [0, sigma_B]], n)
 
     patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
     targets = np.array([1 for x in classA] + [-1 for x in classB])
