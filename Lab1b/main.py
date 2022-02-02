@@ -106,7 +106,6 @@ def main():
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
     plot_errors(MSE_errors, miscl_errors)
-    plt.show()
 
 if __name__ == '__main__':
     main()
