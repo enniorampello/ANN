@@ -1,8 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
 from numpy.random import multivariate_normal, normal
-import math
+import matplotlib.pyplot as plt
 
 n = 100
 m_A = [1.0, 0.3]
