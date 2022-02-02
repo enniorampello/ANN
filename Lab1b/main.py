@@ -79,8 +79,7 @@ def main():
     patterns, targets = get_patterns()
 
     w = normal(0, 1, [hidden_nodes, 3])
-    v = normal(0, 1, hidden_nodes)
-    #print(w)
+    v = normal(0, 1, hidden_nodes).reshape(1, 3)
 
     dw = 0
     dv = 0
@@ -88,7 +87,6 @@ def main():
     for i_epoch in range(n_epochs):
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
-        print(w.shape)
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
         
