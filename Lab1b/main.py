@@ -14,6 +14,7 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
+n_epochs = 20
 
 def f(x):
     return (2 / (1 + np.exp(-x))) - 1
@@ -52,11 +53,12 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
 def main():
     patterns, targets = get_patterns()
 
-    W = normal(0, 1, [hidden_nodes, 3])
-    V = normal(0, 1, hidden_nodes)
+    for i_epoch in range(n_epochs):
+        W = normal(0, 1, [hidden_nodes, 3])
+        V = normal(0, 1, hidden_nodes)
 
-    H = f(np.dot(W, patterns))
-    O = f(np.dot(V, H))
+        H = f(np.dot(W, patterns))
+        O = f(np.dot(V, H))
 
 
 if __name__ == '__main__':
