@@ -42,5 +42,4 @@ def get_patterns():
     return patterns, targets
 
 W = normal(0, 1, [hidden_nodes, 3])
-V = norma(0, 1, 3)
-
+V = normal(0, 1, 3)
