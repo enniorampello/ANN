@@ -69,7 +69,8 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
 
 def MSE(preds, targets):
     errors = preds - targets
-    return sum(errors ** 2) / len(preds)
+
+    return np.sum(errors ** 2) / len(preds)
 
 def misclass_rate(o_out, targets):
     error_rate = 0
@@ -80,7 +81,7 @@ def misclass_rate(o_out, targets):
     return error_rate/len(preds)
 
 def plot_errors(MSE_errors, miscl_errors):
-    print(MSE_errors.shape)
+    print(MSE_errors)
     plt.plot(np.arange(len(MSE_errors)), MSE_errors)
     plt.show()
 
