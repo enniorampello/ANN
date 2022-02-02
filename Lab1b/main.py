@@ -36,6 +36,20 @@ def get_patterns():
 
     return patterns.transpose(), targets
 
+def forward_pass(patterns, w, v):
+    h_in = w @ patterns
+    h_out = f(h_in)
+    o_in = v @ h_out
+    o_out = f(o_in)
+
+    return h_in, h_out, o_in, o_out
+
+
+def backward_pass(v, targets, h_in, o_out, o_in):
+    delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
+    delta_h = np.multiply((v @ delta_o), h_in)
+
+    return delta_h, delta_o
 
 def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
     if momentum:
@@ -53,7 +67,6 @@ def backward_pass(V, targets, h_in, out_out, out_in):
 
     return delta_h, delta_o
 
-
 def MSE(preds, targets):
     errors = preds - targets
     return sum(errors ** 2) / len(preds)
@@ -61,13 +74,16 @@ def MSE(preds, targets):
 
 def main():
     patterns, targets = get_patterns()
-    W = normal(0, 1, [hidden_nodes, 3])
-    V = normal(0, 1, hidden_nodes)
+
+    w = normal(0, 1, [hidden_nodes, 3])
+    v = normal(0, 1, hidden_nodes)
+    
     for i_epoch in range(n_epochs):
-
-        H = f(np.dot(W, patterns))
-        O = f(np.dot(V, H))
-
+        h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
+        delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
+        w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False)
+        v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False)
+        
 
 if __name__ == '__main__':
     main()
