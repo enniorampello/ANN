@@ -14,7 +14,7 @@ bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
 n_epochs = 1500
-np.random.seed(2)
+np.random.seed(1)
 
 
 def f(x):
@@ -28,11 +28,11 @@ def f_prime(x):
 def get_patterns():
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
     # return classes with bias coordinate
-    classA_1 = multivariate_normal(m_A, [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
-    classA_2 = multivariate_normal([-m_A[0], -m_A[1]], [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
+    classA_1 = multivariate_normal(m_A, [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
+    classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
 
     classA = np.concatenate((classA_1, classA_2))
-    classB = multivariate_normal(m_B, [[sigma_B, 0],[0, sigma_B]], n)
+    classB = multivariate_normal(m_B, [[sigma_B**2, 0],[0, sigma_B**2]], n)
 
     patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
     targets = np.array([1 for x in classA] + [-1 for x in classB])
