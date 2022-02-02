@@ -14,6 +14,8 @@ hidden_nodes = 3
 learning_rate = 0.001
 n_epochs = 20
 
+
+
 def f(x):
     return (2 / (1 + np.exp(-x))) - 1
 
@@ -41,9 +43,11 @@ def forward_pass(patterns, w, v):
     h_out = f(h_in)
     o_in = v @ h_out
     o_out = f(o_in)
-
     return h_in, h_out, o_in, o_out
 
+def save_errors(o_out,targets, MSE_errors, miscl_error):
+    miscl_error.append(misclass_rate(o_out, targets))
+    MSE_errors.append(MSE(o_out, targets))
 
 def backward_pass(v, targets, h_in, o_out, o_in):
 
@@ -67,8 +71,9 @@ def MSE(preds, targets):
     errors = preds - targets
     return sum(errors ** 2) / len(preds)
 
-def misclass_rate(preds, targets):
+def misclass_rate(o_out, targets):
     error_rate = 0
+    preds = np.where(o_out > 0, 1, -1)[0]
     for i in range(len(preds)):
         if preds[i] != targets[i]:
             error_rate += 1
@@ -84,14 +89,19 @@ def main():
     dw = 0
     dv = 0
 
+    MSE_errors = []
+    miscl_errors = []
+
     for i_epoch in range(n_epochs):
         print('------ EPOCH {i_epoch} ------')
 
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
+        save_errors(o_out, targets,MSE_errors, miscl_errors)
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
-        
+
+
 
 if __name__ == '__main__':
     main()
