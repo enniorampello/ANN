@@ -60,7 +60,7 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
     else:
         d = delta * np.transpose(inputs)
 
-    weights += (d * learning_rate)
+    weights += (d * lr)
     return weights, d
 
 def backward_pass(V, targets, h_in, out_out, out_in):
