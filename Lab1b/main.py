@@ -60,8 +60,11 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
         print("momentum")
         d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
     else:
+        print(delta.shape)
+        print(inputs.shape)
         d = np.multiply(delta, inputs)
 
+    print(weights.shape)
     weights += (d * lr)
     return weights, d
 
