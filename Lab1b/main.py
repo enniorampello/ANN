@@ -13,7 +13,7 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 30
 learning_rate = 0.001
-n_epochs = 1500
+n_epochs = 1100
 np.random.seed(2)
 
 
@@ -90,6 +90,7 @@ def plot_errors(MSE_errors, miscl_errors):
     miscl_line, = ax2.plot(miscl_errors, color='blue', label='Misclassification rate')
     ax2.legend(handles=[mse_line, miscl_line])
     fig.tight_layout()
+    print(miscl_errors[-1])
     plt.show()
 
 def plot_boundary(classA, classB, targets, w, v):
@@ -107,7 +108,7 @@ def plot_boundary(classA, classB, targets, w, v):
     Z = Z.reshape(xx.shape)
     fig, ax = plt.subplots()
     ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
-    ax.axis('off')
+    ax.axis('on')
 
     points = np.concatenate((classA, classB))
     # Plot also the training points
