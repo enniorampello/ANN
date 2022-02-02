@@ -41,5 +41,11 @@ def get_patterns():
 
     return patterns, targets
 
+def backward_pass(V, targets, h_in, out_out, out_in):
+    delta_o = np.multiply(np.subtract(out_out, targets), f_prime(out_in))
+    delta_h = np.multiply((V @ delta_o), h_in)
+
+    return delta_h, delta_o
+
 W = normal(0, 1, [hidden_nodes, 3])
 V = normal(0, 1, 3)
