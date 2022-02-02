@@ -1,3 +1,4 @@
+from cProfile import label
 import numpy as np
 from numpy.random import multivariate_normal, normal
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
 n_epochs = 200
-
+np.random.seed(7)
 
 
 def f(x):
@@ -65,7 +66,7 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
         d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
     else:
         d = delta @ inputs.transpose()
-    weights += np.multiply(d, lr)
+    weights -= np.multiply(d, lr)
     return weights, d
 
 def MSE(preds, targets):
@@ -81,7 +82,14 @@ def misclass_rate(o_out, targets):
     return error_rate/len(preds)
 
 def plot_errors(MSE_errors, miscl_errors):
-    plt.plot(np.arange(len(MSE_errors)), MSE_errors)
+    plt.rcParams["figure.figsize"] = [7.00, 3.50]
+    plt.rcParams["figure.autolayout"] = True
+    fig, ax1 = plt.subplots()
+    mse_line, = ax1.plot(MSE_errors, color='red', label='MSE')
+    ax2 = ax1.twinx()
+    miscl_line, = ax2.plot(miscl_errors, color='blue', label='Misclassification rate')
+    ax2.legend(handles=[mse_line, miscl_line])
+    fig.tight_layout()
     plt.show()
 
 def main():
