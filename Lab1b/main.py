@@ -46,6 +46,7 @@ def forward_pass(patterns, w, v):
 
 
 def backward_pass(v, targets, h_in, o_out, o_in):
+
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
     v = v.reshape(1, hidden_nodes)
     delta_o = delta_o.reshape(1, 200)
