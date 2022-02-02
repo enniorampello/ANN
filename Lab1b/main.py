@@ -63,6 +63,16 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
     weights += (d * learning_rate)
     return weights, d
 
+def backward_pass(V, targets, h_in, out_out, out_in):
+    delta_o = np.multiply(np.subtract(out_out, targets), f_prime(out_in))
+    delta_h = np.multiply((V @ delta_o), h_in)
+
+    return delta_h, delta_o
+
+def MSE(preds, targets):
+    errors = preds - targets
+    return sum(errors ** 2) / len(preds)
+
 
 def main():
     patterns, targets = get_patterns()
@@ -76,8 +86,6 @@ def main():
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False)
         
-
-
 
 if __name__ == '__main__':
     main()
