@@ -46,7 +46,7 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
     else:
         d = delta * np.transpose(inputs)
 
-    weights += (d * learning_rate)
+    weights += (d * lr)
     return weights, d
 
 def backward_pass(V, targets, h_in, out_out, out_in):
@@ -56,7 +56,7 @@ def backward_pass(V, targets, h_in, out_out, out_in):
     return delta_h, delta_o
 
 W = normal(0, 1, [hidden_nodes, 3])
-V = normal(0, 1, 3)
+V = normal(0, 1, hidden_nodes)
 
 def main():
     patterns, targets = get_patterns()
