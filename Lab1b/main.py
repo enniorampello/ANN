@@ -20,10 +20,8 @@ np.random.seed(7)
 def f(x):
     return (2 / (1 + np.exp(-x))) - 1
 
-
 def f_prime(x):
     return ((1 + f(x)) * (1 - f(x))) * 0.5
-
 
 def get_patterns():
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
@@ -92,12 +90,13 @@ def plot_errors(MSE_errors, miscl_errors):
     fig.tight_layout()
     plt.show()
 
+
 def main():
     np.random.seed(2)
     patterns, targets = get_patterns()
 
     w = normal(0, 1, [hidden_nodes, 3])
-    v = normal(0, 1, hidden_nodes).reshape(1, 3)
+    v = normal(0, 1, hidden_nodes).reshape(1, hidden_nodes)
 
     dw = 0
     dv = 0
@@ -109,12 +108,13 @@ def main():
         print("------ EPOCH {} ------".format(i_epoch))
 
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
-        save_errors(o_out, targets,MSE_errors, miscl_errors)
+        save_errors(o_out, targets, MSE_errors, miscl_errors)
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
     plot_errors(MSE_errors, miscl_errors)
+
 
 if __name__ == '__main__':
     main()
