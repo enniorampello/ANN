@@ -12,10 +12,11 @@ sigma_A = 0.2
 sigma_B = 0.3
 
 bias = 1
-hidden_nodes = 4
+hidden_nodes = 3
+learning_rate = 0.001
 
 def f(x):
-    return (2 / (1 + math.exp(-x))) - 1
+    return (2 / (1 + np.exp(-x))) - 1
 
 
 def f_prime(x):
@@ -31,15 +32,21 @@ def get_patterns():
     classA = np.concatenate((classA_1,classA_2))
     classB = multivariate_normal(m_B, [[sigma_B,0],[0, sigma_B]], n)
 
+    patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
+    targets = np.array([1 for x in classA] + [-1 for x in classB])
 
-    plt.scatter(classA[:,0], classA[:,1])
-    plt.scatter(classB[:,0], classB[:,1])
-
-    patterns = np.array([[[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB]])
-    targets = np.array([[1 for x in classA] + [-1 for x in classB]])
+    return patterns.transpose(), targets
 
 
-    return patterns, targets
+def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
+    if momentum:
+        print("momentum")
+        d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
+    else:
+        d = delta * np.transpose(inputs)
+
+    weights += (d * learning_rate)
+    return weights, d
 
 def backward_pass(V, targets, h_in, out_out, out_in):
     delta_o = np.multiply(np.subtract(out_out, targets), f_prime(out_in))
@@ -49,3 +56,16 @@ def backward_pass(V, targets, h_in, out_out, out_in):
 
 W = normal(0, 1, [hidden_nodes, 3])
 V = normal(0, 1, 3)
+
+def main():
+    patterns, targets = get_patterns()
+
+    W = normal(0, 1, [hidden_nodes, 3])
+    V = normal(0, 1, hidden_nodes)
+
+    H = f(np.dot(W, patterns))
+    O = f(np.dot(V, H))
+
+
+if __name__ == '__main__':
+    main()
