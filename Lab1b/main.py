@@ -41,3 +41,5 @@ def get_patterns():
 
     return patterns, targets
 
+
+    a = 100
