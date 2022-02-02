@@ -47,7 +47,6 @@ def forward_pass(patterns, w, v):
     return h_in, h_out, o_in, o_out
 
 def save_errors(o_out,targets, MSE_errors, miscl_error):
-    print(MSE(o_out, targets))
     miscl_error.append(misclass_rate(o_out, targets))
     MSE_errors.append(MSE(o_out, targets))
 
@@ -63,10 +62,10 @@ def backward_pass(v, targets, h_in, o_out, o_in):
 def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
     if momentum:
         print("momentum")
-        d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
+        d = np.multiply(d_old, alpha) - np.multiply((delta @ inputs.transpose()), (1 - alpha))
     else:
-        d = delta @ inputs.transpose()
-    weights -= np.multiply(d, lr)
+        d = - (delta @ inputs.transpose())
+    weights += np.multiply(d, lr)
     return weights, d
 
 def MSE(preds, targets):
@@ -136,6 +135,8 @@ def main():
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
     plot_errors(MSE_errors, miscl_errors)
+    print("MSE errors: {}".format(MSE_errors))
+    print("Proportions of mis-classifications: {}".format(miscl_errors))
     plot_boundary(classA, classB, targets, w, v)
 
 if __name__ == '__main__':
