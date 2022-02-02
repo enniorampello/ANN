@@ -12,10 +12,10 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
-n_epochs = 1000
-val = False
+n_epochs = 3000
+val = True
 
-np.random.seed(7)
+np.random.seed(2)
 
 
 def f(x):
@@ -36,7 +36,7 @@ def get_patterns(val, perc_A=0, perc_B=0):
     classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
     classA = np.concatenate((classA_1,classA_2))
     
-    classB = multivariate_normal(m_B, [[sigma_B,0],[0, sigma_B]], n)
+    classB = multivariate_normal(m_B, [[sigma_B**2,0],[0, sigma_B**2]], n)
     
     if not val:
         patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB]).transpose()
@@ -109,24 +109,24 @@ def plot_errors(MSE_errors, miscl_errors):
     plt.show()
 
 def plot_train_val(MSE_errors_train, MSE_errors_val):
-    # plt.rcParams["figure.figsize"] = [7.00, 3.50]
-    # plt.rcParams["figure.autolayout"] = True
-    # fig, ax1 = plt.subplots()
-    # mse_line, = ax1.plot(MSE_errors_train, color='red', label='Training MSE')
-    # ax2 = ax1.twinx()
-    # mse_line_val, = ax2.plot(MSE_errors_val, color='blue', label='Validation MSE')
-    # ax2.legend(handles=[mse_line, mse_line_val])
-    # fig.tight_layout()
-    # plt.show()
-
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
-    fig, ax = plt.subplots()
-    mse_line, = ax.plot(MSE_errors_train, color='red', label='Training MSE')
-    mse_line_val, = ax.plot(MSE_errors_val, color='blue', label='Validation MSE')
-    ax.legend(handles=[mse_line, mse_line_val])
+    fig, ax1 = plt.subplots()
+    mse_line, = ax1.plot(MSE_errors_train, color='red', label='Training MSE')
+    ax2 = ax1.twinx()
+    mse_line_val, = ax2.plot(MSE_errors_val, color='blue', label='Validation MSE')
+    ax2.legend(handles=[mse_line, mse_line_val])
     fig.tight_layout()
     plt.show()
+
+    # plt.rcParams["figure.figsize"] = [7.00, 3.50]
+    # plt.rcParams["figure.autolayout"] = True
+    # fig, ax = plt.subplots()
+    # mse_line, = ax.plot(MSE_errors_train, color='red', label='Training MSE')
+    # mse_line_val, = ax.plot(MSE_errors_val, color='blue', label='Validation MSE')
+    # ax.legend(handles=[mse_line, mse_line_val])
+    # fig.tight_layout()
+    # plt.show()
 
 def plot_boundary(patterns, targets, w, v):
     x_min = min(patterns[0,:]) - 1
