@@ -15,9 +15,9 @@ hidden_nodes = 3
 learning_rate = 0.001
 n_epochs = 200
 
-val = False
+val = True
 
-np.random.seed(7)
+np.random.seed(2)
 
 
 def f(x):
@@ -28,7 +28,7 @@ def f_prime(x):
     return ((1 + f(x)) * (1 - f(x))) * 0.5
 
 
-def get_patterns(val, perc_A=0, perc_B=0):
+def get_patterns(val, perc_A=0.0, perc_B=0.0):
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
     # return classes with bias coordinate
     patterns_val = None
@@ -185,7 +185,9 @@ def main():
     plot_errors(MSE_errors, miscl_errors)
     print("MSE errors: {}".format(MSE_errors))
     print("Proportions of mis-classifications: {}".format(miscl_errors))
+
     plot_boundary(classA, classB, targets, w, v)
+
 
 if __name__ == '__main__':
     main()
