@@ -71,6 +71,13 @@ def MSE(preds, targets):
     errors = preds - targets
     return sum(errors ** 2) / len(preds)
 
+def misclass_rate(preds, targets):
+    error_rate = 0
+    for i in range(len(preds)):
+        if preds[i] != targets[i]:
+            error_rate += 1
+    return error_rate/len(preds)
+
 
 def main():
     patterns, targets = get_patterns()
