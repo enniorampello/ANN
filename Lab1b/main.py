@@ -41,9 +41,7 @@ def forward_pass(patterns, w, v):
     h_out = f(h_in)
     o_in = v @ h_out
     o_out = f(o_in)
-
     return h_in, h_out, o_in, o_out
-
 
 def backward_pass(v, targets, h_in, o_out, o_in):
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
@@ -61,11 +59,12 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
     weights += (d * lr)
     return weights, d
 
+
 def backward_pass(V, targets, h_in, out_out, out_in):
     delta_o = np.multiply(np.subtract(out_out, targets), f_prime(out_in))
     delta_h = np.multiply((V @ delta_o), h_in)
-
     return delta_h, delta_o
+
 
 def MSE(preds, targets):
     errors = preds - targets
