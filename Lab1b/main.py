@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from numpy.random import multivariate_normal, normal
-import math
 
 n = 100
 m_A = [1.0, 0.3]
@@ -14,8 +13,9 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 4
 
+
 def f(x):
-    return (2 / (1 + math.exp(-x))) - 1
+    return (2 / (1 + np.exp(-x))) - 1
 
 
 def f_prime(x):
@@ -41,6 +41,6 @@ def get_patterns():
 
     return patterns, targets
 
-W = normaleeee(0, 1, [hidden_nodes, 3])
+W = normal(0, 1, [hidden_nodes, 3])
 V = normal(0, 1, 3)
 
