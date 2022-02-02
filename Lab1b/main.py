@@ -14,7 +14,7 @@ bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
 n_epochs = 1500
-np.random.seed(2)
+np.random.seed(3)
 
 
 def f(x):
@@ -106,12 +106,12 @@ def plot_boundary(classA, classB, targets, w, v):
     Z = np.where(mesh_preds > 0, 1, -1)[0]
     Z = Z.reshape(xx.shape)
     fig, ax = plt.subplots()
-    ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
+    ax.contourf(xx, yy, Z, cmap=plt.cm.viridis)
     ax.axis('off')
 
     points = np.concatenate((classA, classB))
     # Plot also the training points
-    ax.scatter(points[:, 0], points[:, 1], c=targets)
+    ax.scatter(points[:, 0], points[:, 1], c=targets, cmap=plt.cm.cool)
 
     plt.show()
 
@@ -136,7 +136,7 @@ def main():
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
-    plot_errors(MSE_errors, miscl_errors)
+    # plot_errors(MSE_errors, miscl_errors)
     plot_boundary(classA, classB, targets, w, v)
 
 if __name__ == '__main__':
