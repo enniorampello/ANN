@@ -12,10 +12,13 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
-n_epochs = 1000
-val = True
+n_epochs = 200
 
-np.random.seed(8)
+val = True
+batch = False
+
+
+np.random.seed(2)
 
 
 def f(x):
@@ -36,7 +39,7 @@ def get_patterns(val, perc_A=0, perc_B=0):
     classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A ** 2, 0], [0, sigma_A ** 2]], int(n * 0.5))
     classA = np.concatenate((classA_1, classA_2))
 
-    classB = multivariate_normal(m_B, [[sigma_B, 0], [0, sigma_B]], n)
+    classB = multivariate_normal(m_B, [[sigma_B ** 2, 0], [0, sigma_B ** 2]], n)
 
     if not val:
         patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB]).transpose()
@@ -45,10 +48,6 @@ def get_patterns(val, perc_A=0, perc_B=0):
         np.random.shuffle(classA)
         classA_train = classA[int(perc_A * classA.shape[0]):, :]
         classA_val = classA[:int(perc_A * classA.shape[0]), :]
-
-
-
-
         np.random.shuffle(classB)
         classB_train = classB[int(perc_B * classB.shape[0]):, :]
         classB_val = classB[:int(perc_B * classB.shape[0]), :]
@@ -56,7 +55,6 @@ def get_patterns(val, perc_A=0, perc_B=0):
         patterns = np.array(
             [[x[0], x[1], bias] for x in classA_train] + [[x[0], x[1], bias] for x in classB_train]).transpose()
         targets = np.array([1 for x in classA_train] + [-1 for x in classB_train])
-
         patterns_val = np.array(
             [[x[0], x[1], bias] for x in classA_val] + [[x[0], x[1], bias] for x in classB_val]).transpose()
         targets_val = np.array([1 for x in classA_val] + [-1 for x in classB_val])
@@ -65,6 +63,13 @@ def get_patterns(val, perc_A=0, perc_B=0):
 
 
 def forward_pass(patterns, w, v):
+    h_in = w @ patterns
+    h_out = f(h_in)
+    o_in = v @ h_out
+    o_out = f(o_in)
+    return h_in, h_out, o_in, o_out
+
+def forward_pass_seq(patterns, w, v):
     h_in = w @ patterns
     h_out = f(h_in)
     o_in = v @ h_out
@@ -85,13 +90,39 @@ def backward_pass(v, targets, h_in, o_out, o_in):
 
     return delta_h, delta_o
 
+def backward_pass_seq(v, targets, h_in, o_out, o_in):
+    delta_o = (o_out - targets) * f_prime(o_in)
+    delta_h = np.multiply((v.transpose() @ delta_o), f_prime(h_in))
+    return delta_h, delta_o
 
 def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
     if momentum:
         print("momentum")
         d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
     else:
+        print(inputs.shape)
+        print(delta.shape)
         d = delta @ inputs.transpose()
+
+
+    weights -= np.multiply(d, lr)
+    return weights, d
+
+
+
+def weight_update_seq(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
+    if momentum:
+        print("momentum")
+        d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
+    else:
+        try:
+            inputs = inputs.reshape(3, 1)
+            delta = delta.reshape(3, 1)
+            d = delta @ inputs.transpose()
+        except:
+            inputs = inputs.reshape(3, 1)
+            delta = delta.reshape(1, 1)
+            d = delta @ inputs.transpose()
     weights -= np.multiply(d, lr)
     return weights, d
 
@@ -123,24 +154,24 @@ def plot_errors(MSE_errors, miscl_errors):
 
 
 def plot_train_val(MSE_errors_train, MSE_errors_val):
-    # plt.rcParams["figure.figsize"] = [7.00, 3.50]
-    # plt.rcParams["figure.autolayout"] = True
-    # fig, ax1 = plt.subplots()
-    # mse_line, = ax1.plot(MSE_errors_train, color='red', label='Training MSE')
-    # ax2 = ax1.twinx()
-    # mse_line_val, = ax2.plot(MSE_errors_val, color='blue', label='Validation MSE')
-    # ax2.legend(handles=[mse_line, mse_line_val])
-    # fig.tight_layout()
-    # plt.show()
-
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
-    fig, ax = plt.subplots()
-    mse_line, = ax.plot(MSE_errors_train, color='red', label='Training MSE')
-    mse_line_val, = ax.plot(MSE_errors_val, color='blue', label='Validation MSE')
-    ax.legend(handles=[mse_line, mse_line_val])
+    fig, ax1 = plt.subplots()
+    mse_line, = ax1.plot(MSE_errors_train, color='red', label='Training MSE')
+    ax2 = ax1.twinx()
+    mse_line_val, = ax2.plot(MSE_errors_val, color='blue', label='Validation MSE')
+    ax2.legend(handles=[mse_line, mse_line_val])
     fig.tight_layout()
     plt.show()
+
+    # plt.rcParams["figure.figsize"] = [7.00, 3.50]
+    # plt.rcParams["figure.autolayout"] = True
+    # fig, ax = plt.subplots()
+    # mse_line, = ax.plot(MSE_errors_train, color='red', label='Training MSE')
+    # mse_line_val, = ax.plot(MSE_errors_val, color='blue', label='Validation MSE')
+    # ax.legend(handles=[mse_line, mse_line_val])
+    # fig.tight_layout()
+    # plt.show()
 
 
 def plot_boundary(patterns, targets, w, v):
@@ -178,28 +209,50 @@ def main():
     MSE_errors_val = []
     miscl_errors = []
     miscl_errors_val = []
+    if batch:
+        for i_epoch in range(n_epochs):
+            h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
+            save_errors(o_out, targets, MSE_errors, miscl_errors)
 
-    for i_epoch in range(n_epochs):
-        h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
-        save_errors(o_out, targets, MSE_errors, miscl_errors)
+            if val:
+                _, _, _, o_out_val = forward_pass(patterns_val, w, v)
+                save_errors(o_out_val, targets_val, MSE_errors_val, miscl_errors_val)
+
+            print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
+
+            delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
+            w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
+            v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
         if val:
-            _, _, _, o_out_val = forward_pass(patterns_val, w, v)
-            save_errors(o_out_val, targets_val, MSE_errors_val, miscl_errors_val)
+            patterns = np.concatenate((patterns, patterns_val), axis=1)
+            targets = np.concatenate((targets, targets_val), axis=0)
 
-        print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
+        plot_train_val(MSE_errors, MSE_errors_val)
+        plot_boundary(patterns, targets, w, v)
+        # plot_errors(MSE_errors, miscl_errors)
 
-        delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
-        w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
-        v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
+    else:
+        for i_epoch in range(n_epochs):
+            print(f"EPOCH {i_epoch:4d}")
+            for i in range(patterns.shape[1]):
+                h_in, h_out, o_in, o_out = forward_pass_seq(patterns[:, i], w, v)
 
-    if val:
-        patterns = np.concatenate((patterns, patterns_val), axis=1)
-        targets = np.concatenate((targets, targets_val), axis=0)
 
-    plot_train_val(MSE_errors, MSE_errors_val)
-    plot_boundary(patterns, targets, w, v)
-    # plot_errors(MSE_errors, miscl_errors)
+                # save_errors(o_out, targets, MSE_errors, miscl_errors)
+
+                if val:
+                    _, _, _, o_out_val = forward_pass(patterns_val, w, v)
+                    save_errors(o_out_val, targets_val, MSE_errors_val, miscl_errors_val)
+
+                # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
+
+                delta_h, delta_o = backward_pass_seq(v, targets[i], h_in, o_out, o_in)
+                w, dw = weight_update_seq(w, patterns[:, i], delta_h, lr=learning_rate, momentum=False, d_old=dw)
+                v, dv = weight_update_seq(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
+
+        plot_boundary(patterns, targets, w, v)
+
 
 
 if __name__ == '__main__':
