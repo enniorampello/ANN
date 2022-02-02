@@ -55,12 +55,16 @@ def backward_pass(V, targets, h_in, out_out, out_in):
 
     return delta_h, delta_o
 
-W = normal(0, 1, [hidden_nodes, 3])
-V = normal(0, 1, hidden_nodes)
+
+def MSE(preds, targets):
+    errors = preds - targets
+    return sum(errors ** 2) / len(preds)
+
 
 def main():
     patterns, targets = get_patterns()
-
+    W = normal(0, 1, [hidden_nodes, 3])
+    V = normal(0, 1, hidden_nodes)
     for i_epoch in range(n_epochs):
 
         H = f(np.dot(W, patterns))

@@ -49,7 +49,8 @@ O_star = np.dot(V, H)
 O = f(O_star)
 
 
-
-
+def MSE(preds, targets):
+    errors = preds - targets
+    return sum(errors**2)/len(preds)
 
 
