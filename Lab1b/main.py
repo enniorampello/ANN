@@ -65,7 +65,7 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
         d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
     else:
         d = delta @ inputs.transpose()
-    weights += np.multiply(d, lr)
+    weights -= np.multiply(d, lr)
     return weights, d
 
 def MSE(preds, targets):
