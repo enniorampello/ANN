@@ -13,6 +13,8 @@ sigma_B = 0.3
 
 bias = 1
 
+hidden_nodes = 4
+
 def get_patterns():
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
     # return classes with bias coordinate
@@ -33,5 +35,7 @@ def get_patterns():
 
 
 
-# w_0 = normal(0, 1, )
+W = normal(0, 1, [hidden_nodes, 3])
+V = normal(0, 1, 3)
+
 
