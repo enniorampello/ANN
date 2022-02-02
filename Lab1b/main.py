@@ -85,7 +85,7 @@ def main():
     dv = 0
 
     for i_epoch in range(n_epochs):
-        print('------ EPOCH {i_epoch} ------')
+        print(f'------ EPOCH {i_epoch} ------')
 
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
