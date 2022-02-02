@@ -46,7 +46,14 @@ def forward_pass(patterns, w, v):
 
 
 def backward_pass(v, targets, h_in, o_out, o_in):
+
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
+    v = v.reshape(v.shape[0], 1)
+    print(v.T.shape)
+    print(delta_o.shape)
+    print(f_prime(h_in).shape)
+    delta_o = delta_o.reshape(delta_o.shape[0], 1)
+    print(delta_o.shape)
     delta_h = np.multiply((v.T @ delta_o), f_prime(h_in))
 
     return delta_h, delta_o
