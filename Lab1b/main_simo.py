@@ -39,13 +39,14 @@ def get_patterns():
 
 patterns, targets = get_patterns()
 
-
 W = normal(0, 1, [hidden_nodes, 3])
 V = normal(0, 1, hidden_nodes)
 
-H = f(np.dot(W, patterns))
-O = f(np.dot(V, H))
+H_star = np.dot(W, patterns)
+H = f(H_star)
 
+O_star = np.dot(V, H)
+O = f(O_star)
 
 
 
