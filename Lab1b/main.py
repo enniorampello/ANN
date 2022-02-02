@@ -10,10 +10,10 @@ sigma_A = 0.2
 sigma_B = 0.3
 
 bias = 1
-hidden_nodes = 3
+hidden_nodes = 30
 learning_rate = 0.001
-n_epochs = 200
-np.random.seed(7)
+n_epochs = 1500
+np.random.seed(2)
 
 
 def f(x):
@@ -27,16 +27,16 @@ def f_prime(x):
 def get_patterns():
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
     # return classes with bias coordinate
-    classA_1 = multivariate_normal(m_A, [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
-    classA_2 = multivariate_normal([-m_A[0], -m_A[1]], [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
+    classA_1 = multivariate_normal(m_A, [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
+    classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
 
-    classA = np.concatenate((classA_1,classA_2))
-    classB = multivariate_normal(m_B, [[sigma_B,0],[0, sigma_B]], n)
+    classA = np.concatenate((classA_1, classA_2))
+    classB = multivariate_normal(m_B, [[sigma_B**2, 0], [0, sigma_B**2]], n)
 
     patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
     targets = np.array([1 for x in classA] + [-1 for x in classB])
 
-    return patterns.transpose(), targets
+    return patterns.transpose(), targets, classA, classB
 
 def forward_pass(patterns, w, v):
     h_in = w @ patterns
@@ -94,11 +94,34 @@ def plot_errors(MSE_errors, miscl_errors):
 def plot_train_val(MSE_errors_train, MSE_errors_val):
     pass
 
+def plot_boundary(classA, classB, targets, w, v):
+    x_min = min(min(classA[:, 0]), min(classB[:, 0])) - 1
+    x_max = max(max(classA[:, 0]), max(classB[:, 0])) + 1
+    y_min = min(min(classA[:, 1]), min(classB[:, 1])) - 1
+    y_max = max(max(classA[:, 1]), max(classB[:, 1])) + 1
+
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),
+                         np.arange(y_min, y_max, 0.1))
+
+    input = np.array([[x[0], x[1], bias] for x in np.c_[xx.ravel(), yy.ravel()]])
+    _, _, _, mesh_preds = forward_pass(input.transpose(), w, v)
+    Z = np.where(mesh_preds > 0, 1, -1)[0]
+    Z = Z.reshape(xx.shape)
+    fig, ax = plt.subplots()
+    ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
+    ax.axis('off')
+
+    points = np.concatenate((classA, classB))
+    # Plot also the training points
+    ax.scatter(points[:, 0], points[:, 1], c=targets)
+
+    plt.show()
+
 def main():
-    patterns, targets = get_patterns()
+    patterns, targets, classA, classB = get_patterns()
 
     w = normal(0, 1, [hidden_nodes, 3])
-    v = normal(0, 1, hidden_nodes).reshape(1, 3)
+    v = normal(0, 1, hidden_nodes).reshape(1, hidden_nodes)
 
     dw = 0
     dv = 0
@@ -116,6 +139,7 @@ def main():
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
     plot_errors(MSE_errors, miscl_errors)
+    plot_boundary(classA, classB, targets, w, v)
 
 if __name__ == '__main__':
     main()
