@@ -15,7 +15,7 @@ bias = 1
 hidden_nodes = 3
 
 def f(x):
-    return (2 / (1 + math.exp(-x))) - 1
+    return (2 / (1 + np.exp(-x))) - 1
 
 
 def f_prime(x):
@@ -34,7 +34,6 @@ def get_patterns():
     patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
     targets = np.array([1 for x in classA] + [-1 for x in classB])
 
-
     return patterns.transpose(), targets
 
 
@@ -44,7 +43,12 @@ patterns, targets = get_patterns()
 W = normal(0, 1, [hidden_nodes, 3])
 V = normal(0, 1, hidden_nodes)
 
-H = np.dot(W, patterns)
-print(H)
+H = f(np.dot(W, patterns))
+O = f(np.dot(V, H))
+
+
+
+
+
 
 
