@@ -13,8 +13,8 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
-n_epochs = 200
-val = False
+n_epochs = 600
+val = True
 
 np.random.seed(7)
 
