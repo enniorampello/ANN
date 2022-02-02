@@ -1,8 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
 from numpy.random import multivariate_normal, normal
-import math
+import matplotlib.pyplot as plt
 
 n = 100
 m_A = [1.0, 0.3]
@@ -81,12 +79,15 @@ def main():
 
     w = normal(0, 1, [hidden_nodes, 3])
     v = normal(0, 1, hidden_nodes)
-    
+
+    dw = 0
+    dv = 0
+
     for i_epoch in range(n_epochs):
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
-        w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False)
-        v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False)
+        w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
+        v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
         
 
 if __name__ == '__main__':
