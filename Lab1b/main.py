@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from numpy.random import multivariate_normal
-
+import math
 
 n = 100
 m_A = [1.0, 0.3]
@@ -12,6 +12,15 @@ sigma_A = 0.2
 sigma_B = 0.3
 
 bias = 1
+
+
+def f(x):
+    return (2 / (1 + math.exp(-x))) - 1
+
+
+def f_prime(x):
+    return ((1 + f(x)) * (1 - f(x))) / 2
+
 
 def get_patterns():
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
