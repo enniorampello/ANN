@@ -1,3 +1,4 @@
+from cProfile import label
 import numpy as np
 from numpy.random import multivariate_normal, normal
 import matplotlib.pyplot as plt
@@ -10,9 +11,9 @@ sigma_A = 0.2
 sigma_B = 0.3
 
 bias = 1
-hidden_nodes = 30
+hidden_nodes = 3
 learning_rate = 0.001
-n_epochs = 1100
+n_epochs = 1500
 np.random.seed(2)
 
 
@@ -31,7 +32,7 @@ def get_patterns():
     classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
 
     classA = np.concatenate((classA_1, classA_2))
-    classB = multivariate_normal(m_B, [[sigma_B**2, 0], [0, sigma_B**2]], n)
+    classB = multivariate_normal(m_B, [[sigma_B**2, 0],[0, sigma_B**2]], n)
 
     patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
     targets = np.array([1 for x in classA] + [-1 for x in classB])
@@ -89,11 +90,7 @@ def plot_errors(MSE_errors, miscl_errors):
     miscl_line, = ax2.plot(miscl_errors, color='blue', label='Misclassification rate')
     ax2.legend(handles=[mse_line, miscl_line])
     fig.tight_layout()
-    print(miscl_errors[-1])
     plt.show()
-
-def plot_train_val(MSE_errors_train, MSE_errors_val):
-    pass
 
 def plot_boundary(classA, classB, targets, w, v):
     x_min = min(min(classA[:, 0]), min(classB[:, 0])) - 1
@@ -121,7 +118,7 @@ def main():
     patterns, targets, classA, classB = get_patterns()
 
     w = normal(0, 1, [hidden_nodes, 3])
-    v = normal(0, 1, hidden_nodes).reshape(1, hidden_nodes)
+    v = normal(0, 1, hidden_nodes).reshape(1, 3)
 
     dw = 0
     dv = 0
