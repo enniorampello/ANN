@@ -19,14 +19,14 @@ def f(x):
 
 
 def f_prime(x):
-    return ((1 + f(x)) * (1 - f(x))) / 2
+    return ((1 + f(x)) * (1 - f(x))) * 0.5
 
 
 def get_patterns():
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
     # return classes with bias coordinate
-    classA_1 = multivariate_normal(m_A, [[sigma_A,0],[0, sigma_A]], int(n * 0.5))
-    classA_2 = multivariate_normal([-m_A[0],-m_A[1]], [[sigma_A,0],[0, sigma_A]], int(n * 0.5))
+    classA_1 = multivariate_normal(m_A, [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
+    classA_2 = multivariate_normal([-m_A[0], -m_A[1]], [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
 
     classA = np.concatenate((classA_1,classA_2))
     classB = multivariate_normal(m_B, [[sigma_B,0],[0, sigma_B]], n)
@@ -47,7 +47,6 @@ def forward_pass(patterns, w, v):
 
 def backward_pass(v, targets, h_in, o_out, o_in):
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
-    print(v.T.shape(), delta_o.shape())
     delta_h = np.multiply((v.T @ delta_o), f_prime(h_in))
 
     return delta_h, delta_o
@@ -79,6 +78,7 @@ def main():
 
     w = normal(0, 1, [hidden_nodes, 3])
     v = normal(0, 1, hidden_nodes)
+    #print(w)
 
     dw = 0
     dv = 0
