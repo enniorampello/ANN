@@ -16,6 +16,7 @@ learning_rate = 0.001
 n_epochs = 200
 np.random.seed(2)
 
+momentum = False
 
 def f(x):
     return (2 / (1 + np.exp(-x))) - 1
@@ -131,8 +132,8 @@ def main():
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets,MSE_errors, miscl_errors)
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
-        w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
-        v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
+        w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=momentum, d_old=dw)
+        v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=momentum, d_old=dv)
 
     plot_errors(MSE_errors, miscl_errors)
     print("MSE errors: {}".format(MSE_errors))
