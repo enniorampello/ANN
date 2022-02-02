@@ -12,7 +12,6 @@ sigma_A = 0.2
 sigma_B = 0.3
 
 bias = 1
-
 hidden_nodes = 4
 
 def f(x):
