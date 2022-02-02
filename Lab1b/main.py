@@ -1,4 +1,3 @@
-from cProfile import label
 import numpy as np
 from numpy.random import multivariate_normal, normal
 import matplotlib.pyplot as plt
@@ -92,6 +91,9 @@ def plot_errors(MSE_errors, miscl_errors):
     fig.tight_layout()
     print(miscl_errors[-1])
     plt.show()
+
+def plot_train_val(MSE_errors_train, MSE_errors_val):
+    pass
 
 def plot_boundary(classA, classB, targets, w, v):
     x_min = min(min(classA[:, 0]), min(classB[:, 0])) - 1
