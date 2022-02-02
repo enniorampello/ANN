@@ -62,8 +62,6 @@ def main():
     patterns, targets = get_patterns()
 
     for i_epoch in range(n_epochs):
-        W = normal(0, 1, [hidden_nodes, 3])
-        V = normal(0, 1, hidden_nodes)
 
         H = f(np.dot(W, patterns))
         O = f(np.dot(V, H))
