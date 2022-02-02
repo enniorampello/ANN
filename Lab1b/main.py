@@ -53,7 +53,7 @@ def backward_pass(v, targets, h_in, o_out, o_in):
 
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
     v = v.reshape(1, hidden_nodes)
-    delta_o = delta_o.reshape(1, 200)
+    delta_o = delta_o.reshape(1, delta_o.shape[1])
     delta_h = np.multiply((v.transpose() @ delta_o), f_prime(h_in))
 
     return delta_h, delta_o
@@ -93,7 +93,7 @@ def main():
     miscl_errors = []
 
     for i_epoch in range(n_epochs):
-        print('------ EPOCH {i_epoch} ------')
+        print("------ EPOCH {} ------".format(i_epoch))
 
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets,MSE_errors, miscl_errors)
