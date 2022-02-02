@@ -1,3 +1,4 @@
+from cProfile import label
 import numpy as np
 from numpy.random import multivariate_normal, normal
 import matplotlib.pyplot as plt
@@ -54,19 +55,7 @@ def get_patterns(val, perc_A=0, perc_B=0):
         patterns_val = np.array([[x[0], x[1], bias] for x in classA_val] + [[x[0], x[1], bias] for x in classB_val]).transpose()
         targets_val = np.array([1 for x in classA_val] + [-1 for x in classB_val])
 
-    return patterns, targets, patterns_val, targets_val
-
-def get_patterns_train_val():
-    classA_1 = multivariate_normal(m_A, [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
-    classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
-
-    classA = np.concatenate((classA_1, classA_2))
-    classB = multivariate_normal(m_B, [[sigma_B**2, 0], [0, sigma_B**2]], n)
-
-    patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
-    targets = np.array([1 for x in classA] + [-1 for x in classB])
-
-    return patterns.transpose(), targets, classA, classB
+    return patterns, targets, patterns_val, targets_val, classA, classB
 
 def forward_pass(patterns, w, v):
     h_in = w @ patterns
@@ -91,10 +80,10 @@ def backward_pass(v, targets, h_in, o_out, o_in):
 def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
     if momentum:
         print("momentum")
-        d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
+        d = np.multiply(d_old, alpha) - np.multiply((delta @ inputs.transpose()), (1 - alpha))
     else:
-        d = delta @ inputs.transpose()
-    weights -= np.multiply(d, lr)
+        d = - (delta @ inputs.transpose())
+    weights += np.multiply(d, lr)
     return weights, d
 
 def MSE(preds, targets):
@@ -130,7 +119,6 @@ def plot_train_val(MSE_errors_train, MSE_errors_val):
     # ax2.legend(handles=[mse_line, mse_line_val])
     # fig.tight_layout()
     # plt.show()
-
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
     fig, ax = plt.subplots()
@@ -139,9 +127,26 @@ def plot_train_val(MSE_errors_train, MSE_errors_val):
     ax.legend(handles=[mse_line, mse_line_val])
     fig.tight_layout()
     plt.show()
+    
+def plot_boundary(classA, classB, targets, w, v):
+    x_min = min(min(classA[:, 0]), min(classB[:, 0])) - 1
+    x_max = max(max(classA[:, 0]), max(classB[:, 0])) + 1
+    y_min = min(min(classA[:, 1]), min(classB[:, 1])) - 1
+    y_max = max(max(classA[:, 1]), max(classB[:, 1])) + 1
+
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),
+                         np.arange(y_min, y_max, 0.1))
+
+    ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
+
+    points = np.concatenate((classA, classB))
+    # Plot also the training points
+    ax.scatter(points[:, 0], points[:, 1], c=targets)
+
+    plt.show()
 
 def main():
-    patterns, targets, patterns_val, targets_val = get_patterns(val, perc_A=0.25, perc_B=0.25)
+    patterns, targets, patterns_val, targets_val, classA, classB = get_patterns(val, perc_A=0.25, perc_B=0.25)
     
     print(patterns.shape, targets.shape)
     print(patterns_val.shape, targets_val.shape)
@@ -173,6 +178,10 @@ def main():
 
     plot_train_val(MSE_errors, MSE_errors_val)
     #plot_errors(MSE_errors, miscl_errors)
+    plot_errors(MSE_errors, miscl_errors)
+    print("MSE errors: {}".format(MSE_errors))
+    print("Proportions of mis-classifications: {}".format(miscl_errors))
+    plot_boundary(classA, classB, targets, w, v)
 
 if __name__ == '__main__':
     main()
