@@ -79,6 +79,10 @@ def misclass_rate(o_out, targets):
             error_rate += 1
     return error_rate/len(preds)
 
+def plot_errors(MSE_errors, miscl_errors):
+    print(MSE_errors.shape)
+    plt.plot(np.arange(len(MSE_errors)), MSE_errors)
+    plt.show()
 
 def main():
     patterns, targets = get_patterns()
@@ -101,7 +105,7 @@ def main():
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
-
+    plot_errors(MSE_errors, miscl_errors)
 
 if __name__ == '__main__':
     main()
