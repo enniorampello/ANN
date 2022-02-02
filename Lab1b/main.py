@@ -110,7 +110,6 @@ def plot_boundary(classA, classB, targets, w, v):
     Z = Z.reshape(xx.shape)
     fig, ax = plt.subplots()
     ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
-    ax.axis('on')
 
     points = np.concatenate((classA, classB))
     # Plot also the training points
