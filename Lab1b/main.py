@@ -51,7 +51,8 @@ def get_patterns(val, perc_A=0, perc_B=0):
         
         patterns = np.array([[x[0], x[1], bias] for x in classA_train] + [[x[0], x[1], bias] for x in classB_train]).transpose()
         targets = np.array([1 for x in classA_train] + [-1 for x in classB_train])
-        patterns_val = np.array([[x[0], x[1], bias] for x in classA_val] + [[x[0], x[1], bias] for x in classB_val]).transpose()
+        patterns_val = np.array(
+            [[x[0], x[1], bias] for x in classA_val] + [[x[0], x[1], bias] for x in classB_val]).transpose()
         targets_val = np.array([1 for x in classA_val] + [-1 for x in classB_val])
 
     return patterns, targets, patterns_val, targets_val
@@ -63,18 +64,20 @@ def forward_pass(patterns, w, v):
     o_out = f(o_in)
     return h_in, h_out, o_in, o_out
 
-def save_errors(o_out,targets, MSE_errors, miscl_error):
+
+def save_errors(o_out, targets, MSE_errors, miscl_error):
     MSE_errors.append(MSE(o_out, targets))
     miscl_error.append(misclass_rate(o_out, targets))
 
-def backward_pass(v, targets, h_in, o_out, o_in):
 
+def backward_pass(v, targets, h_in, o_out, o_in):
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
     v = v.reshape(1, hidden_nodes)
     delta_o = delta_o.reshape(1, delta_o.shape[1])
     delta_h = np.multiply((v.transpose() @ delta_o), f_prime(h_in))
 
     return delta_h, delta_o
+
 
 def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
     if momentum:
@@ -85,9 +88,11 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
     weights -= np.multiply(d, lr)
     return weights, d
 
+
 def MSE(preds, targets):
     errors = preds - targets
     return np.sum(errors ** 2) / len(preds)
+
 
 def misclass_rate(o_out, targets):
     error_rate = 0
@@ -95,7 +100,8 @@ def misclass_rate(o_out, targets):
     for i in range(len(preds)):
         if preds[i] != targets[i]:
             error_rate += 1
-    return error_rate/len(preds)
+    return error_rate / len(preds)
+
 
 def plot_errors(MSE_errors, miscl_errors):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
@@ -107,6 +113,7 @@ def plot_errors(MSE_errors, miscl_errors):
     ax2.legend(handles=[mse_line, miscl_line])
     fig.tight_layout()
     plt.show()
+
 
 def plot_train_val(MSE_errors_train, MSE_errors_val):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
@@ -149,6 +156,7 @@ def plot_boundary(patterns, targets, w, v):
 
     plt.show()
 
+
 def main():
     patterns, targets, patterns_val, targets_val = get_patterns(val, perc_A=0.25, perc_B=0.25)
 
@@ -165,7 +173,7 @@ def main():
 
     for i_epoch in range(n_epochs):
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
-        save_errors(o_out, targets,MSE_errors, miscl_errors)
+        save_errors(o_out, targets, MSE_errors, miscl_errors)
 
         if val:
             _, _, _, o_out_val = forward_pass(patterns_val, w, v)
