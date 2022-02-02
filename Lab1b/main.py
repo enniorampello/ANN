@@ -47,8 +47,10 @@ def forward_pass(patterns, w, v):
 
 def backward_pass(v, targets, h_in, o_out, o_in):
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
-    print(v.T.shape(), delta_o.shape())
-    delta_h = np.multiply((v.T @ delta_o), f_prime(h_in))
+    v = v.reshape(1, hidden_nodes)
+    delta_o = delta_o.reshape(1, 200)
+    print(v.shape, delta_o.shape)
+    delta_h = np.multiply((v.transpose() @ delta_o), f_prime(h_in))
 
     return delta_h, delta_o
 
@@ -57,7 +59,7 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
         print("momentum")
         d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
     else:
-        d = delta * np.transpose(inputs)
+        d = np.multiply(delta, inputs)
 
     weights += (d * lr)
     return weights, d
