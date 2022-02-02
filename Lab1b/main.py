@@ -93,6 +93,7 @@ def plot_errors(MSE_errors, miscl_errors):
     plt.show()
 
 def main():
+    np.random.seed(2)
     patterns, targets = get_patterns()
 
     w = normal(0, 1, [hidden_nodes, 3])
