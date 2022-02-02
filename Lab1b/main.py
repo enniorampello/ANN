@@ -13,6 +13,8 @@ sigma_B = 0.3
 
 bias = 1
 hidden_nodes = 3
+learning_rate = 0.001
+n_epochs = 20
 
 def f(x):
     return (2 / (1 + np.exp(-x))) - 1
@@ -37,13 +39,35 @@ def get_patterns():
     return patterns.transpose(), targets
 
 
-patterns, targets = get_patterns()
+def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=None):
+    if momentum:
+        print("momentum")
+        d = (d_old * alpha) - (delta * np.transpose(inputs)) * (1 - alpha)
+    else:
+        d = delta * np.transpose(inputs)
+
+    weights += (d * learning_rate)
+    return weights, d
+
+def backward_pass(V, targets, h_in, out_out, out_in):
+    delta_o = np.multiply(np.subtract(out_out, targets), f_prime(out_in))
+    delta_h = np.multiply((V @ delta_o), h_in)
+
+    return delta_h, delta_o
 
 W = normal(0, 1, [hidden_nodes, 3])
-V = normal(0, 1, hidden_nodes)
+V = normal(0, 1, 3)
 
-H_star = np.dot(W, patterns)
-H = f(H_star)
+def main():
+    patterns, targets = get_patterns()
 
-O_star = np.dot(V, H)
-O = f(O_star)
+    for i_epoch in range(n_epochs):
+        W = normal(0, 1, [hidden_nodes, 3])
+        V = normal(0, 1, hidden_nodes)
+
+        H = f(np.dot(W, patterns))
+        O = f(np.dot(V, H))
+
+
+if __name__ == '__main__':
+    main()
