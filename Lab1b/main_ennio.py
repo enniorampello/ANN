@@ -13,7 +13,7 @@ bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
 n_epochs = 200
-val = False
+val = True
 
 np.random.seed(7)
 
@@ -26,23 +26,47 @@ def f_prime(x):
     return ((1 + f(x)) * (1 - f(x))) * 0.5
 
 
-def get_patterns():
+def get_patterns(val, perc_A=0, perc_B=0):
     # create class A (disjoint) and B, with specified global means and cov (diagonal)
     # return classes with bias coordinate
-    classA_1 = multivariate_normal(m_A, [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
-    classA_2 = multivariate_normal([-m_A[0], -m_A[1]], [[sigma_A, 0], [0, sigma_A]], int(n * 0.5))
+    patterns_val = None
+    targets_val = None
 
+    classA_1 = multivariate_normal(m_A, [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
+    classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
     classA = np.concatenate((classA_1,classA_2))
+    
     classB = multivariate_normal(m_B, [[sigma_B,0],[0, sigma_B]], n)
+    
+    print(classA.shape)
+    if not val:
+        patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB]).transpose()
+        targets = np.array([1 for x in classA] + [-1 for x in classB])
+    else:
+        np.random.shuffle(classA)
+        classA_train = classA[int(perc_A * classA.shape[0]):, :]
+        classA_val = classA[:int(perc_A * classA.shape[0]), :]
+        classB_train = classB[int(perc_B * classB.shape[0]):, :]
+        classB_val = classB[:int(perc_B * classB.shape[0]), :]
+        
+        patterns = np.array([[x[0], x[1], bias] for x in classA_train] + [[x[0], x[1], bias] for x in classB_train]).transpose()
+        targets = np.array([1 for x in classA_train] + [-1 for x in classB_train])
+        patterns_val = np.array([[x[0], x[1], bias] for x in classA_val] + [[x[0], x[1], bias] for x in classB_val]).transpose()
+        targets_val = np.array([1 for x in classA_val] + [-1 for x in classB_val])
+
+    return patterns, targets, patterns_val, targets_val
+
+def get_patterns_train_val():
+    classA_1 = multivariate_normal(m_A, [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
+    classA_2 = multivariate_normal([-m_A[0], m_A[1]], [[sigma_A**2, 0], [0, sigma_A**2]], int(n * 0.5))
+
+    classA = np.concatenate((classA_1, classA_2))
+    classB = multivariate_normal(m_B, [[sigma_B**2, 0], [0, sigma_B**2]], n)
 
     patterns = np.array([[x[0], x[1], bias] for x in classA] + [[x[0], x[1], bias] for x in classB])
     targets = np.array([1 for x in classA] + [-1 for x in classB])
 
-    return patterns.transpose(), targets
-
-def get_patterns_train_val():
-    
-    pass
+    return patterns.transpose(), targets, classA, classB
 
 def forward_pass(patterns, w, v):
     h_in = w @ patterns
@@ -97,13 +121,30 @@ def plot_errors(MSE_errors, miscl_errors):
     plt.show()
 
 def plot_train_val(MSE_errors_train, MSE_errors_val):
-    pass
+    # plt.rcParams["figure.figsize"] = [7.00, 3.50]
+    # plt.rcParams["figure.autolayout"] = True
+    # fig, ax1 = plt.subplots()
+    # mse_line, = ax1.plot(MSE_errors_train, color='red', label='Training MSE')
+    # ax2 = ax1.twinx()
+    # mse_line_val, = ax2.plot(MSE_errors_val, color='blue', label='Validation MSE')
+    # ax2.legend(handles=[mse_line, mse_line_val])
+    # fig.tight_layout()
+    # plt.show()
+
+    plt.rcParams["figure.figsize"] = [7.00, 3.50]
+    plt.rcParams["figure.autolayout"] = True
+    fig, ax = plt.subplots()
+    mse_line, = ax.plot(MSE_errors_train, color='red', label='Training MSE')
+    mse_line_val, = ax.plot(MSE_errors_val, color='blue', label='Validation MSE')
+    ax.legend(handles=[mse_line, mse_line_val])
+    fig.tight_layout()
+    plt.show()
 
 def main():
-    if val:
-        patterns, targets, patterns_val, targets_val = get_patterns_train_val()
-    else:
-        patterns, targets = get_patterns()
+    patterns, targets, patterns_val, targets_val = get_patterns(val, perc_A=0.25, perc_B=0.25)
+    
+    print(patterns.shape, targets.shape)
+    print(patterns_val.shape, targets_val.shape)
 
     w = normal(0, 1, [hidden_nodes, 3])
     v = normal(0, 1, hidden_nodes).reshape(1, 3)
@@ -112,16 +153,25 @@ def main():
     dv = 0
 
     MSE_errors = []
+    MSE_errors_val = []
     miscl_errors = []
+    miscl_errors_val = []
 
     for i_epoch in range(n_epochs):
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets,MSE_errors, miscl_errors)
-        print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f}")
+
+        if val:
+            _, _, _, o_out_val = forward_pass(patterns_val, w, v)
+            save_errors(o_out_val, targets_val, MSE_errors_val, miscl_errors_val)
+        
+        print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
+
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
+    plot_train_val(MSE_errors, MSE_errors_val)
     #plot_errors(MSE_errors, miscl_errors)
 
 if __name__ == '__main__':
