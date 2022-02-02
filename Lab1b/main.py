@@ -14,7 +14,7 @@ bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
 n_epochs = 200
-val = True
+val = False
 
 np.random.seed(7)
 
@@ -47,6 +47,7 @@ def get_patterns(val, perc_A=0, perc_B=0):
         np.random.shuffle(classA)
         classA_train = classA[int(perc_A * classA.shape[0]):, :]
         classA_val = classA[:int(perc_A * classA.shape[0]), :]
+
         classB_train = classB[int(perc_B * classB.shape[0]):, :]
         classB_val = classB[:int(perc_B * classB.shape[0]), :]
         
@@ -137,6 +138,11 @@ def plot_boundary(classA, classB, targets, w, v):
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),
                          np.arange(y_min, y_max, 0.1))
 
+    input = np.array([[x[0], x[1], bias] for x in np.c_[xx.ravel(), yy.ravel()]])
+    _, _, _, mesh_preds = forward_pass(input.transpose(), w, v)
+    Z = np.where(mesh_preds > 0, 1, -1)[0]
+    Z = Z.reshape(xx.shape)
+    fig, ax = plt.subplots()
     ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
 
     points = np.concatenate((classA, classB))
@@ -147,9 +153,6 @@ def plot_boundary(classA, classB, targets, w, v):
 
 def main():
     patterns, targets, patterns_val, targets_val, classA, classB = get_patterns(val, perc_A=0.25, perc_B=0.25)
-    
-    print(patterns.shape, targets.shape)
-    print(patterns_val.shape, targets_val.shape)
 
     w = normal(0, 1, [hidden_nodes, 3])
     v = normal(0, 1, hidden_nodes).reshape(1, 3)
