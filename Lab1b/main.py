@@ -106,7 +106,7 @@ def plot_boundary(classA, classB, targets, w, v):
     Z = np.where(mesh_preds > 0, 1, -1)[0]
     Z = Z.reshape(xx.shape)
     fig, ax = plt.subplots()
-    ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
+    ax.contourf(xx, yy, Z, cmap=plt.cm.cool)
     ax.axis('off')
 
     points = np.concatenate((classA, classB))
