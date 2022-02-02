@@ -12,7 +12,7 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
-n_epochs = 20
+n_epochs = 200
 
 
 
@@ -46,6 +46,7 @@ def forward_pass(patterns, w, v):
     return h_in, h_out, o_in, o_out
 
 def save_errors(o_out,targets, MSE_errors, miscl_error):
+    print(MSE(o_out, targets))
     miscl_error.append(misclass_rate(o_out, targets))
     MSE_errors.append(MSE(o_out, targets))
 
@@ -69,7 +70,7 @@ def weight_update(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_old=N
 
 def MSE(preds, targets):
     errors = preds - targets
-    return sum(errors ** 2) / len(preds)
+    return np.sum(errors ** 2) / len(preds)
 
 def misclass_rate(o_out, targets):
     error_rate = 0
@@ -80,7 +81,6 @@ def misclass_rate(o_out, targets):
     return error_rate/len(preds)
 
 def plot_errors(MSE_errors, miscl_errors):
-    print(MSE_errors.shape)
     plt.plot(np.arange(len(MSE_errors)), MSE_errors)
     plt.show()
 
@@ -106,6 +106,7 @@ def main():
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
     plot_errors(MSE_errors, miscl_errors)
+    plt.show()
 
 if __name__ == '__main__':
     main()
