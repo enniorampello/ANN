@@ -22,5 +22,5 @@ plt.scatter(classB[:,0], classB[:,1])
 
 patterns = np.array([[[x[0], x[1], 1] for x in classA] + [[x[0], x[1], -1] for x in classB]])
 
-print(patterns)
-plt.show()
+
+# plt.show()
