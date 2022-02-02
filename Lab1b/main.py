@@ -1,4 +1,3 @@
-from cProfile import label
 import numpy as np
 from numpy.random import multivariate_normal, normal
 import matplotlib.pyplot as plt
@@ -91,6 +90,9 @@ def plot_errors(MSE_errors, miscl_errors):
     ax2.legend(handles=[mse_line, miscl_line])
     fig.tight_layout()
     plt.show()
+
+def plot_train_val(MSE_errors_train, MSE_errors_val):
+    pass
 
 def main():
     patterns, targets = get_patterns()
