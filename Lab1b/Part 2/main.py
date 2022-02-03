@@ -7,14 +7,16 @@ from keras.layers import Dense
 from keras.callbacks import EarlyStopping
 from keras import optimizers
 
+from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
-HIDDEN_LAYERS = 1
-HIDDEN_NODES = [5]
-EPOCHS = 10000
-LR = 0.01
+
+HIDDEN_NODES = [10, 10]
+EPOCHS = 5000
+LR = 0.05
 
 l2 = 0.01
+ES = False
 
 def mackey_glass_generator(n_samples = 1600, beta=0.2, gamma=0.1, n=10, tau=25):
     x0 = 1.5
@@ -58,20 +60,27 @@ def plot_time_series(x):
     plt.plot(x)
     plt.show()
 
+def preds_accuracy_plot(y_test, preds):
+    mse = mean_squared_error(y_test, preds)
+    plt.title(f'MSE: {mse:.3f} - HN: {HIDDEN_NODES} - LR: {LR} - ES: {ES}')
+    plt.plot(y_test)
+    plt.plot(preds)
+    plt.show()
+
 
 def main():
     x = mackey_glass_generator()
     data, labels = data_from_mackey_glass(x)
-    train, train_labels, val, val_labels, test, test_labels = train_test_val_split(data, labels, 0.8)
+    x_train, y_train, x_val, y_val, x_test, y_test = train_test_val_split(data, labels, 0.8)
 
     # plot_time_series(x)
 
-    BATCH_SIZE = train.shape[0]
+    BATCH_SIZE = int(x_train.shape[0]/5)
 
     model = Sequential()
 
     model.add(tf.keras.Input(shape=(5,)))
-    for i in range(HIDDEN_LAYERS):
+    for i in range(len(HIDDEN_NODES)):
         model.add(Dense(
             HIDDEN_NODES[i],
             activation='sigmoid',
@@ -93,16 +102,24 @@ def main():
         optimizer=optimizer
         )
 
-    es = EarlyStopping(monitor='val_loss', patience=1)
 
-    model.fit(train, train_labels,
-            batch_size=BATCH_SIZE,
-            epochs=EPOCHS,
-            verbose='auto',
-            callbacks=[es],
-            validation_data=(val, val_labels),
-            workers=2)
+    callbacks=[]
+    if ES:
+        es = EarlyStopping(monitor='val_loss', patience=3)
+        callbacks.append(es)
 
+
+    model.fit(x_train, y_train,
+              batch_size=BATCH_SIZE,
+              epochs=EPOCHS,
+              verbose='auto',
+              callbacks=callbacks,
+              validation_data=(x_val, y_val),
+              workers=2)
+
+
+    preds = model.predict(x_test)
+    preds_accuracy_plot(y_test, preds)
     # model.summary()
 
 if __name__ == '__main__':
