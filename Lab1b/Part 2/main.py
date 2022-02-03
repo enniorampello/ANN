@@ -4,10 +4,13 @@ import tensorflow as tf
 from keras import regularizers
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.callbacks import EarlyStopping
+from keras import optimizers
 
 HIDDEN_LAYERS = 1
 HIDDEN_NODES = [5]
 EPOCHS = 10000
+LR = 0.01
 
 l2 = 0.01
 
@@ -57,7 +60,7 @@ def main():
 
     BATCH_SIZE = train.shape[0]
 
-    model = tf.keras.Sequential()
+    model = Sequential()
 
     model.add(tf.keras.Input(shape=(5,)))
     for i in range(HIDDEN_LAYERS):
@@ -75,14 +78,14 @@ def main():
     #     decay_steps=10000,
     #     decay_rate=0.9)
     #
-    # optimizer = tf.keras.optimizers.SGD(learning_rate=lr_schedule)
+    optimizer = optimizers.gradient_descent_v2.SGD(learning_rate=LR)
 
     model.compile(
         loss='mse',
-        optimizer='sgd'
+        optimizer=optimizer
         )
 
-    es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=1)
+    es = EarlyStopping(monitor='val_loss', patience=1)
 
     model.fit(train, train_labels,
             batch_size=BATCH_SIZE,
