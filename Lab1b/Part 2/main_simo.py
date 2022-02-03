@@ -50,13 +50,42 @@ model = tf.keras.Sequential()
 
 hidden_nodes = 5
 
+model.add(tf.keras.layers.Input(shape=(5,)))
 model.add(tf.keras.layers.Dense(hidden_nodes,
-                                activation=tf.keras.activations.sigmoid,
-                                input_shape=(5,)))
+                                activation=tf.keras.activations.sigmoid))
 
-model.add(tf.keras.layers.Dense(1, activation=tf.nn.relu))
+model.add(tf.keras.layers.Dense(1, activation=tf.keras.activations.linear))
 
 
-es = tf.keras.callbacks.EarlyStopping(monitor='val_loss')
-# model.compile(loss=)
-model.summary()
+es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=1)
+
+
+# lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+#     initial_learning_rate=1e-2,
+#     decay_steps=10000,
+#     decay_rate=0.9)
+#
+# optimizer = tf.keras.optimizers.SGD(learning_rate=lr_schedule)
+
+optimizer = tf.keras.optimizers.SGD()
+
+model.compile(loss='mse',
+              optimizer=optimizer,
+              metrics='accuracy')
+
+
+epochs = 1000
+batch_size = train.shape[0]
+workers = 2
+
+
+model.fit(train, train_labels,
+          batch_size=batch_size,
+          epochs=epochs,
+          verbose=1,
+          # callbacks=[es],
+          validation_data=(val, val_labels),
+          workers=workers)
+
+# model.summary()
+
