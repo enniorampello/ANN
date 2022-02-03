@@ -70,11 +70,10 @@ es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=1)
 optimizer = tf.keras.optimizers.SGD()
 
 model.compile(loss='mse',
-              optimizer=optimizer,
-              metrics='accuracy')
+              optimizer=optimizer)
 
 
-epochs = 1000
+epochs = 10000
 batch_size = train.shape[0]
 workers = 2
 
@@ -83,7 +82,7 @@ model.fit(train, train_labels,
           batch_size=batch_size,
           epochs=epochs,
           verbose=1,
-          # callbacks=[es],
+          callbacks=[es],
           validation_data=(val, val_labels),
           workers=workers)
 
