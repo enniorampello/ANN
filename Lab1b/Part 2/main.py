@@ -12,18 +12,21 @@ from keras.callbacks import EarlyStopping
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
+import pandas as pd
+
 
 BIAS = 0.
 
-HIDDEN_NODES = [10, 10]
-EPOCHS = 5000
-LR = 0.05
-
-l2 = 0.01
-ES = False
+HIDDEN_NODES = [3, 6]
+EPOCHS = 10000
+LR = 0.01
+#
+# l2 = 0.01
+ES = True
 
 NOISE = False
 SIGMA = 0.15
+
 
 def mackey_glass_generator(n_samples = 1600, beta=0.2, gamma=0.1, n=10, tau=25):
     x0 = 1.5
@@ -72,15 +75,15 @@ def plot_time_series(x):
     plt.plot(x)
     plt.show()
 
-def preds_accuracy_plot(y_test, preds):
+def preds_accuracy_plot(y_test, preds, l2):
     mse = mean_squared_error(y_test, preds)
-    plt.title(f'MSE: {mse:.3f} - HN: {HIDDEN_NODES} - LR: {LR} - ES: {ES}')
+    plt.title(f'MSE: {mse:.3f} - HN: {HIDDEN_NODES} - LR: {LR} - ES: {ES} - L2 {l2}')
     plt.plot(y_test)
     plt.plot(preds)
     plt.show()
 
 
-def main():
+def main(l2):
     x = mackey_glass_generator()
     if NOISE:
         x = add_noise(x, SIGMA)
@@ -94,6 +97,7 @@ def main():
     BATCH_SIZE = int(x_train.shape[0]/5)
 
     model = Sequential()
+
 
     model.add(Input(shape=(5,)))
     for i in range(len(HIDDEN_NODES)):
@@ -121,9 +125,9 @@ def main():
         )
 
 
-    callbacks=[]
+    callbacks= []
     if ES:
-        es = EarlyStopping(monitor='val_loss', patience=3)
+        es = EarlyStopping(monitor='val_loss', patience=3, min_delta=0.00001)
         callbacks.append(es)
 
 
@@ -137,8 +141,29 @@ def main():
 
 
     preds = model.predict(x_test)
-    preds_accuracy_plot(y_test, preds)
+    mse = mean_squared_error(y_test, preds)
+    preds_accuracy_plot(y_test, preds, l2)
+
+    scores.append([mse, HIDDEN_NODES, LR, l2, ES])
     # model.summary()
 
 if __name__ == '__main__':
-    main()
+    # main()
+
+    # GridSearch
+    # nodes_first = 3
+    # nodes_second = 6
+    # lr = 0.01
+
+
+    l2s = [0.0002]
+    ES = False
+
+    # mse, HIDDEN_NODES, LR, l2, ES
+    scores = []
+
+    for l2 in l2s:
+        main(l2)
+
+    scores_df = pd.DataFrame(scores, columns=['MSE', 'hidden_nodes', 'lr', 'l2', 'es'])
+    print(scores_df)
