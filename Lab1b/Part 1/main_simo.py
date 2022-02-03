@@ -239,7 +239,7 @@ def main():
                 h_in, h_out, o_in, o_out = forward_pass_seq(patterns[:, i], w, v)
 
 
-                # save_errors(o_out, targets, MSE_errors, miscl_errors)
+                save_errors(o_out, targets, MSE_errors, miscl_errors)
 
                 if val:
                     _, _, _, o_out_val = forward_pass(patterns_val, w, v)
