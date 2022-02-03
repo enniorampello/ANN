@@ -1,15 +1,19 @@
 import numpy as np
 import tensorflow as tf
 
-from keras import regularizers
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.callbacks import EarlyStopping
+from keras import initializers
 from keras import optimizers
+from keras import regularizers
+
+from keras.models import Sequential
+from keras.layers import Input, Dense
+from keras.callbacks import EarlyStopping
 
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
+
+BIAS = 0.
 
 HIDDEN_NODES = [10, 10]
 EPOCHS = 5000
@@ -79,12 +83,14 @@ def main():
 
     model = Sequential()
 
-    model.add(tf.keras.Input(shape=(5,)))
+    model.add(Input(shape=(5,)))
     for i in range(len(HIDDEN_NODES)):
         model.add(Dense(
             HIDDEN_NODES[i],
             activation='sigmoid',
             use_bias=True,
+            kernel_initializer=initializers.initializers_v2.RandomNormal(mean=0., stddev=1.),
+            bias_initializer=initializers.initializers_v2.Constant(BIAS),
             kernel_regularizer=regularizers.l2(l2=l2),
             bias_regularizer=regularizers.l2(l2=l2),
             ))
