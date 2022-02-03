@@ -7,6 +7,8 @@ from keras.layers import Dense
 from keras.callbacks import EarlyStopping
 from keras import optimizers
 
+import matplotlib.pyplot as plt
+
 HIDDEN_LAYERS = 1
 HIDDEN_NODES = [5]
 EPOCHS = 10000
@@ -52,11 +54,17 @@ def train_test_val_split(data,labels, train_p):
 
     return train, train_labels, val, val_labels, test, test_labels
 
+def plot_time_series(x):
+    plt.plot(x)
+    plt.show()
+
 
 def main():
     x = mackey_glass_generator()
     data, labels = data_from_mackey_glass(x)
     train, train_labels, val, val_labels, test, test_labels = train_test_val_split(data, labels, 0.8)
+
+    # plot_time_series(x)
 
     BATCH_SIZE = train.shape[0]
 
