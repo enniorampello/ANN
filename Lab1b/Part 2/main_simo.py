@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 
 def mackey_glass_generator(n_samples = 1600, beta=0.2, gamma=0.1, n=10, tau=25):
     x0 = 1.5
@@ -45,3 +46,17 @@ train, train_labels, val, val_labels, test, test_labels = train_test_val_split(d
 
 
 
+model = tf.keras.Sequential()
+
+hidden_nodes = 5
+
+model.add(tf.keras.layers.Dense(hidden_nodes,
+                                activation=tf.keras.activations.sigmoid,
+                                input_shape=(5,)))
+
+model.add(tf.keras.layers.Dense(1, activation=tf.nn.relu))
+
+
+es = tf.keras.callbacks.EarlyStopping(monitor='val_loss')
+# model.compile(loss=)
+model.summary()
