@@ -1,16 +1,19 @@
 import numpy as np
 import tensorflow as tf
 
-from keras import regularizers
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.callbacks import EarlyStopping
+from keras import initializers
 from keras import optimizers
+from keras import regularizers
+
+from keras.models import Sequential
+from keras.layers import Input, Dense
+from keras.callbacks import EarlyStopping
 
 HIDDEN_LAYERS = 1
 HIDDEN_NODES = [5]
 EPOCHS = 10000
 LR = 0.01
+BIAS = 0.
 
 l2 = 0.01
 
@@ -62,12 +65,14 @@ def main():
 
     model = Sequential()
 
-    model.add(tf.keras.Input(shape=(5,)))
+    model.add(Input(shape=(5,)))
     for i in range(HIDDEN_LAYERS):
         model.add(Dense(
             HIDDEN_NODES[i],
             activation='sigmoid',
             use_bias=True,
+            kernel_initializer=initializers.initializers_v2.RandomNormal(mean=0., stddev=1.),
+            bias_initializer=initializers.initializers_v2.Constant(BIAS),
             kernel_regularizer=regularizers.l2(l2=l2),
             bias_regularizer=regularizers.l2(l2=l2),
             ))
