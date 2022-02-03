@@ -1,14 +1,29 @@
 import numpy as np
 import tensorflow as tf
 
+from keras import initializers
+from keras import optimizers
 from keras import regularizers
-from keras.models import Sequential
-from keras.layers import Dense
 
-HIDDEN_LAYERS = 1
-HIDDEN_NODES = [5]
+from keras.models import Sequential
+from keras.layers import Input, Dense
+from keras.callbacks import EarlyStopping
+
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+
+
+BIAS = 0.
+
+HIDDEN_NODES = [10, 10]
+EPOCHS = 5000
+LR = 0.05
 
 l2 = 0.01
+ES = False
+
+NOISE = False
+SIGMA = 0.15
 
 def mackey_glass_generator(n_samples = 1600, beta=0.2, gamma=0.1, n=10, tau=25):
     x0 = 1.5
@@ -48,31 +63,82 @@ def train_test_val_split(data,labels, train_p):
 
     return train, train_labels, val, val_labels, test, test_labels
 
+def add_noise(x, sigma, idx_0=301, idx_final=301+800):
+    for t in range(idx_0,idx_final+1):
+        x[t] += np.random.normal(scale=sigma)
+    return x
+
+def plot_time_series(x):
+    plt.plot(x)
+    plt.show()
+
+def preds_accuracy_plot(y_test, preds):
+    mse = mean_squared_error(y_test, preds)
+    plt.title(f'MSE: {mse:.3f} - HN: {HIDDEN_NODES} - LR: {LR} - ES: {ES}')
+    plt.plot(y_test)
+    plt.plot(preds)
+    plt.show()
+
 
 def main():
     x = mackey_glass_generator()
+    if NOISE:
+        x = add_noise(x, SIGMA)
+    plot_time_series(x)
+
     data, labels = data_from_mackey_glass(x)
-    train, train_labels, val, val_labels, test, test_labels = train_test_val_split(data, labels, 0.8)
+    x_train, y_train, x_val, y_val, x_test, y_test = train_test_val_split(data, labels, 0.8)
+
+    # plot_time_series(x)
+
+    BATCH_SIZE = int(x_train.shape[0]/5)
 
     model = Sequential()
 
-    model.add(tf.keras.Input(shape=(5,)))
-    for i in range(HIDDEN_LAYERS):
+    model.add(Input(shape=(5,)))
+    for i in range(len(HIDDEN_NODES)):
         model.add(Dense(
             HIDDEN_NODES[i],
             activation='sigmoid',
             use_bias=True,
+            kernel_initializer=initializers.initializers_v2.RandomNormal(mean=0., stddev=1.),
+            bias_initializer=initializers.initializers_v2.Constant(BIAS),
             kernel_regularizer=regularizers.l2(l2=l2),
             bias_regularizer=regularizers.l2(l2=l2),
             ))
     model.add(tf.keras.layers.Dense(1, activation='linear'))
 
+    # lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+    #     initial_learning_rate=1e-2,
+    #     decay_steps=10000,
+    #     decay_rate=0.9)
+    #
+    optimizer = optimizers.gradient_descent_v2.SGD(learning_rate=LR)
+
     model.compile(
         loss='mse',
-        optimizer='sgd',
+        optimizer=optimizer
         )
-    model.summary()
 
+
+    callbacks=[]
+    if ES:
+        es = EarlyStopping(monitor='val_loss', patience=3)
+        callbacks.append(es)
+
+
+    model.fit(x_train, y_train,
+              batch_size=BATCH_SIZE,
+              epochs=EPOCHS,
+              verbose='auto',
+              callbacks=callbacks,
+              validation_data=(x_val, y_val),
+              workers=2)
+
+
+    preds = model.predict(x_test)
+    preds_accuracy_plot(y_test, preds)
+    # model.summary()
 
 if __name__ == '__main__':
     main()
