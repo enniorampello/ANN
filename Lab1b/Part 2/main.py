@@ -22,6 +22,9 @@ LR = 0.05
 l2 = 0.01
 ES = False
 
+NOISE = False
+SIGMA = 0.15
+
 def mackey_glass_generator(n_samples = 1600, beta=0.2, gamma=0.1, n=10, tau=25):
     x0 = 1.5
     x_values = [x0]
@@ -60,6 +63,11 @@ def train_test_val_split(data,labels, train_p):
 
     return train, train_labels, val, val_labels, test, test_labels
 
+def add_noise(x, sigma, idx_0=301, idx_final=301+800):
+    for t in range(idx_0,idx_final+1):
+        x[t] += np.random.normal(scale=sigma)
+    return x
+
 def plot_time_series(x):
     plt.plot(x)
     plt.show()
@@ -74,6 +82,10 @@ def preds_accuracy_plot(y_test, preds):
 
 def main():
     x = mackey_glass_generator()
+    if NOISE:
+        x = add_noise(x, SIGMA)
+    plot_time_series(x)
+
     data, labels = data_from_mackey_glass(x)
     x_train, y_train, x_val, y_val, x_test, y_test = train_test_val_split(data, labels, 0.8)
 
