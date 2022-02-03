@@ -14,21 +14,22 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
-
+train_val_p = 0.8
 BIAS = 0.
-
-HIDDEN_NODES = [3, 6]
+BATCH_SIZE = 32
+# HIDDEN_NODES = [3, 6]
 EPOCHS = 10000
-LR = 0.01
-#
-# l2 = 0.01
+# LR = 0.01
+# l2 = 0.0002
 ES = True
 
 NOISE = False
 SIGMA = 0.15
 
+MAX_ITER = 10
 
-def mackey_glass_generator(n_samples = 1600, beta=0.2, gamma=0.1, n=10, tau=25):
+
+def mackey_glass_generator(n_samples=1600, beta=0.2, gamma=0.1, n=10, tau=25):
     x0 = 1.5
     x_values = [x0]
 
@@ -66,8 +67,8 @@ def train_test_val_split(data,labels, train_p):
 
     return train, train_labels, val, val_labels, test, test_labels
 
-def add_noise(x, sigma, idx_0=301, idx_final=301+800):
-    for t in range(idx_0,idx_final+1):
+def add_noise(x, sigma, idx_0=301, idx_final=301+int(1000 * train_val_p)):
+    for t in range(idx_0, idx_final+1):
         x[t] += np.random.normal(scale=sigma)
     return x
 
@@ -75,7 +76,7 @@ def plot_time_series(x):
     plt.plot(x)
     plt.show()
 
-def preds_accuracy_plot(y_test, preds, l2):
+def preds_accuracy_plot(y_test, preds, HIDDEN_NODES):
     mse = mean_squared_error(y_test, preds)
     plt.title(f'MSE: {mse:.3f} - HN: {HIDDEN_NODES} - LR: {LR} - ES: {ES} - L2 {l2}')
     plt.plot(y_test)
@@ -83,87 +84,99 @@ def preds_accuracy_plot(y_test, preds, l2):
     plt.show()
 
 
-def main(l2):
-    x = mackey_glass_generator()
-    if NOISE:
-        x = add_noise(x, SIGMA)
-    plot_time_series(x)
+def main(a, b, LR, l2, my_dicts):
+    HIDDEN_NODES = [a, b]
+    mses = []
+    for iter in range(MAX_ITER):
+        x = mackey_glass_generator()
+        if NOISE:
+            x = add_noise(x, SIGMA)
+        # plot_time_series(x)
 
-    data, labels = data_from_mackey_glass(x)
-    x_train, y_train, x_val, y_val, x_test, y_test = train_test_val_split(data, labels, 0.8)
+        data, labels = data_from_mackey_glass(x)
+        x_train, y_train, x_val, y_val, x_test, y_test = train_test_val_split(data, labels, train_val_p)
 
-    # plot_time_series(x)
-
-    BATCH_SIZE = int(x_train.shape[0]/5)
-
-    model = Sequential()
-
-
-    model.add(Input(shape=(5,)))
-    for i in range(len(HIDDEN_NODES)):
-        model.add(Dense(
-            HIDDEN_NODES[i],
-            activation='sigmoid',
-            use_bias=True,
-            kernel_initializer=initializers.initializers_v2.RandomNormal(mean=0., stddev=1.),
-            bias_initializer=initializers.initializers_v2.Constant(BIAS),
-            kernel_regularizer=regularizers.l2(l2=l2),
-            bias_regularizer=regularizers.l2(l2=l2),
-            ))
-    model.add(tf.keras.layers.Dense(1, activation='linear'))
-
-    # lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-    #     initial_learning_rate=1e-2,
-    #     decay_steps=10000,
-    #     decay_rate=0.9)
-    #
-    optimizer = optimizers.gradient_descent_v2.SGD(learning_rate=LR)
-
-    model.compile(
-        loss='mse',
-        optimizer=optimizer
-        )
+        # plot_time_series(x)
 
 
-    callbacks= []
-    if ES:
-        es = EarlyStopping(monitor='val_loss', patience=3, min_delta=0.00001)
-        callbacks.append(es)
+
+        model = Sequential()
 
 
-    model.fit(x_train, y_train,
-              batch_size=BATCH_SIZE,
-              epochs=EPOCHS,
-              verbose='auto',
-              callbacks=callbacks,
-              validation_data=(x_val, y_val),
-              workers=2)
+        model.add(Input(shape=(5,)))
+        for i in range(len(HIDDEN_NODES)):
+            model.add(Dense(
+                HIDDEN_NODES[i],
+                activation='sigmoid',
+                use_bias=True,
+                kernel_initializer=initializers.initializers_v2.RandomNormal(mean=0., stddev=1.),
+                bias_initializer=initializers.initializers_v2.Constant(BIAS),
+                kernel_regularizer=regularizers.l2(l2=l2),
+                bias_regularizer=regularizers.l2(l2=l2),
+                ))
+        model.add(tf.keras.layers.Dense(1, activation='linear'))
+
+        # lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+        #     initial_learning_rate=1e-2,
+        #     decay_steps=10000,
+        #     decay_rate=0.9)
+
+        optimizer = optimizers.gradient_descent_v2.SGD(learning_rate=LR)
+
+        model.compile(
+            loss='mse',
+            optimizer=optimizer
+            )
 
 
-    preds = model.predict(x_test)
-    mse = mean_squared_error(y_test, preds)
-    preds_accuracy_plot(y_test, preds, l2)
+        callbacks= []
+        if ES:
+            es = EarlyStopping(monitor='val_loss', patience=10, min_delta=0.00001)
+            callbacks.append(es)
 
-    scores.append([mse, HIDDEN_NODES, LR, l2, ES])
-    # model.summary()
+
+        model.fit(x_train, y_train,
+                  batch_size=BATCH_SIZE,
+                  epochs=EPOCHS,
+                  verbose='auto',
+                  callbacks=callbacks,
+                  validation_data=(x_val, y_val),
+                  workers=8)
+
+
+        preds = model.predict(x_test)
+        mse = mean_squared_error(y_test, preds)
+        preds_accuracy_plot(y_test, preds, HIDDEN_NODES)
+
+        mses.append(mse)
+    dic = {'hidden_nodes': HIDDEN_NODES, 'lr': LR, 'l2': l2}
+    dic['mse_mean'] = np.mean(mses)
+    dic['mse_std'] = np.std(mses)
+
+    my_dicts.append(dic)
+
 
 if __name__ == '__main__':
     # main()
 
     # GridSearch
-    # nodes_first = 3
-    # nodes_second = 6
-    # lr = 0.01
 
+    nodes_first = [3, 4, 5]
+    nodes_second = [2, 4, 6]
+    LRs = [0.1, 0.01, 0.05, 0.001]
+    l2s = [0.001, 0.0001, 0.0002, 0.0005]
 
-    l2s = [0.0002]
-    ES = False
 
     # mse, HIDDEN_NODES, LR, l2, ES
-    scores = []
+    my_dicts = []
 
-    for l2 in l2s:
-        main(l2)
+    for a in nodes_first:
+        for b in nodes_second:
+            for LR in LRs:
+                for l2 in l2s:
+                    main(a, b, LR, l2, my_dicts)
 
-    scores_df = pd.DataFrame(scores, columns=['MSE', 'hidden_nodes', 'lr', 'l2', 'es'])
+
+    scores_df = pd.DataFrame(my_dicts)
+    scores_df.to_csv('mse_score.csv')
     print(scores_df)
