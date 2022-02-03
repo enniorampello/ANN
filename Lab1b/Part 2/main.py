@@ -90,7 +90,7 @@ def main():
     model.fit(train, train_labels,
             batch_size=BATCH_SIZE,
             epochs=EPOCHS,
-            verbose=1,
+            verbose='auto',
             callbacks=[es],
             validation_data=(val, val_labels),
             workers=2)
