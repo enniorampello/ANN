@@ -9,6 +9,8 @@ from keras.models import Sequential
 from keras.layers import Input, Dense
 from keras.callbacks import EarlyStopping
 
+import matplotlib.pyplot as plt
+
 HIDDEN_LAYERS = 1
 HIDDEN_NODES = [5]
 EPOCHS = 10000
@@ -55,11 +57,17 @@ def train_test_val_split(data,labels, train_p):
 
     return train, train_labels, val, val_labels, test, test_labels
 
+def plot_time_series(x):
+    plt.plot(x)
+    plt.show()
+
 
 def main():
     x = mackey_glass_generator()
     data, labels = data_from_mackey_glass(x)
     train, train_labels, val, val_labels, test, test_labels = train_test_val_split(data, labels, 0.8)
+
+    # plot_time_series(x)
 
     BATCH_SIZE = train.shape[0]
 
@@ -95,7 +103,7 @@ def main():
     model.fit(train, train_labels,
             batch_size=BATCH_SIZE,
             epochs=EPOCHS,
-            verbose=1,
+            verbose='auto',
             callbacks=[es],
             validation_data=(val, val_labels),
             workers=2)
