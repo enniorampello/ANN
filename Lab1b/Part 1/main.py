@@ -75,7 +75,6 @@ def backward_pass(v, targets, h_in, o_out, o_in, hidden_nodes):
     v = v.reshape(1, hidden_nodes)
     delta_o = delta_o.reshape(1, delta_o.shape[1])
     delta_h = np.multiply((v.transpose() @ delta_o), f_prime(h_in))
-
     return delta_h, delta_o
 
 
@@ -102,7 +101,6 @@ def misclass_rate(o_out, targets):
             error_rate += 1
     return error_rate / len(preds)
 
-
 def plot_errors(MSE_errors, miscl_errors):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
@@ -113,7 +111,6 @@ def plot_errors(MSE_errors, miscl_errors):
     ax2.legend(handles=[mse_line, miscl_line])
     fig.tight_layout()
     plt.show()
-
 
 def plot_train_val(MSE_errors_train, MSE_errors_val):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
@@ -181,7 +178,7 @@ def main():
         
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
-        delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
+        delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in, hidden_nodes)
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 

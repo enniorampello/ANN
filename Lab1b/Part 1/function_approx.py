@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
-HIDDEN_NODES = 4
-EPOCHS = 5000
+HIDDEN_NODES = 25
+EPOCHS = 1000
 LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
@@ -28,13 +28,13 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     x = np.arange(from_xy, to_xy, STEP)
     y = np.arange(from_xy, to_xy, STEP)
     n_samples = len(x)
-    
+
     targets = np.array([[bell_gaussian_func(x_elem, y_elem) for x_elem in x] for y_elem in y])
     targets = targets.reshape((n_samples ** 2,))
-    
+
     [xx, yy] = np.meshgrid(x, y)
     patterns = np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2), np.ones((1, n_samples ** 2))))
-    
+
     return patterns, targets, n_samples
 
 
@@ -96,7 +96,7 @@ def main():
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
     # 3d-plot
-    plot_3d(patterns.transpose(), o_out)
+    plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
 
 
 if __name__ == '__main__':
