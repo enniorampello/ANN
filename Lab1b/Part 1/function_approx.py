@@ -5,7 +5,7 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
 HIDDEN_NODES = 3
-EPOCHS = 300
+EPOCHS = 30
 LEARNING_RATE = 0.001
 N_SAMPLES = 100
 
@@ -58,6 +58,13 @@ def main():
     for i_epoch in range(EPOCHS):
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets, MSE_errors)
+
+        if i_epoch == EPOCHS - 1:
+            # 3d-plot
+
+            plot_3d(patterns.transpose(), o_out)
+
+
 
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
