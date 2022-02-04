@@ -5,7 +5,7 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
 HIDDEN_NODES = 6
-EPOCHS = 100
+EPOCHS = 2000
 LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
@@ -87,6 +87,12 @@ def train_val_split(patterns, targets, val_perc):
 def save_errors(o_out, targets, mse_errors,):
     mse_errors.append(MSE(o_out, targets))
 
+def plot_points(patterns, targets):
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+
+    ax.scatter(patterns[0,:], patterns[1,:], targets)
+    plt.show()
 
 def plot_mse_error(mse_errors, i_epoch):
     plt.title('Learning curve - function approximation - epoch {}'.format(i_epoch))
@@ -98,11 +104,9 @@ def plot_mse_error(mse_errors, i_epoch):
 
 def main():
     patterns, targets, n_samples = generate_2d_gaussian()
-
+    
     if val:
         patterns, targets, val_patterns, val_targets = train_val_split(patterns, targets, val_p)
-
-
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
 

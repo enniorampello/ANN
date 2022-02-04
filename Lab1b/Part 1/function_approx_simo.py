@@ -7,7 +7,6 @@ from main import forward_pass, backward_pass, weight_update, MSE
 HIDDEN_NODES = 25
 EPOCHS = 1000
 LEARNING_RATE = 0.001
-N_SAMPLES = 0
 BIAS = 1
 BATCH_SIZE = 32
 
