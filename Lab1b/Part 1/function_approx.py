@@ -9,6 +9,7 @@ EPOCHS = 300
 LEARNING_RATE = 0.001
 N_SAMPLES = 0
 BIAS = 1
+BATCH_SIZE = 32
 
 # plot constants
 X_MIN = -5
@@ -76,19 +77,27 @@ def main():
     
     MSE_errors = []
     for i_epoch in range(EPOCHS):
+        for i_batch in range(int(patterns.shape[1] / BATCH_SIZE)):
+            idx_start = i_batch * BATCH_SIZE
+            if i_batch * BATCH_SIZE + BATCH_SIZE > patterns.shape[1]:
+                idx_end = patterns.shape[1]
+            else:
+                idx_end = i_batch * BATCH_SIZE + BATCH_SIZE
+            h_in, h_out, o_in, o_out = forward_pass(patterns[:, idx_start:idx_end], w, v)
+            # save_errors(o_out, targets, MSE_errors)
+
+            # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets[idx_start:idx_end]):4.2f} |")
+
+            delta_h, delta_o = backward_pass(v, targets[idx_start:idx_end], h_in, o_out, o_in, HIDDEN_NODES)
+            w, dw = weight_update(w, patterns[:, idx_start:idx_end], delta_h, lr=LEARNING_RATE, momentum=False,
+                                  d_old=dw)
+            v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets, MSE_errors)
-
-        if i_epoch == EPOCHS - 1:
-            # 3d-plot
-            plot_3d(patterns.transpose(), o_out, i_epoch)
-
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
-        delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in, HIDDEN_NODES)
-        w, dw = weight_update(w, patterns, delta_h, lr=LEARNING_RATE, momentum=False, d_old=dw)
-        v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
-
+    # 3d-plot
+    plot_3d(patterns.transpose(), o_out)
 
 
 if __name__ == '__main__':
