@@ -13,7 +13,7 @@ sigma_B = 0.3
 bias = 1
 hidden_nodes = 3
 learning_rate = 0.001
-n_epochs = 1500
+n_epochs = 600
 np.random.seed(2)
 
 momentum = False
