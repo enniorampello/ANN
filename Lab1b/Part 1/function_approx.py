@@ -8,6 +8,7 @@ HIDDEN_NODES = 3
 EPOCHS = 300
 LEARNING_RATE = 0.001
 N_SAMPLES = 0
+BIAS = 1
 
 def fun(x, y):
     return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
@@ -19,9 +20,11 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01, step=0.5, n_samples=N_SAMPLES):
     global N_SAMPLES
     N_SAMPLES = len(x)
     targets = np.array([[fun(x_elem, y_elem) for x_elem in x] for y_elem in y])
-    targets = targets.reshape((N_SAMPLES**2,))
+    targets = targets.reshape((N_SAMPLES ** 2,))
     [xx, yy] = np.meshgrid(x, y)
-    patterns = np.transpose(np.concatenate((xx.reshape(1, N_SAMPLES**2), yy.reshape(1, N_SAMPLES**2))))
+    patterns = np.transpose(np.concatenate((xx.reshape(1, N_SAMPLES ** 2), yy.reshape(1, N_SAMPLES ** 2))))
+    patterns = patterns.transpose()
+    patterns = np.vstack([patterns, [BIAS for _ in range(patterns.shape[1])]])
 
     return patterns, targets
 
