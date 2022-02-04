@@ -5,9 +5,10 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
 HIDDEN_NODES = 3
-EPOCHS = 30
+EPOCHS = 300
 LEARNING_RATE = 0.001
 N_SAMPLES = 0
+BIAS = 1
 
 def fun(x, y):
     return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
@@ -19,9 +20,11 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01, step=0.5, n_samples=N_SAMPLES):
     global N_SAMPLES
     N_SAMPLES = len(x)
     targets = np.array([[fun(x_elem, y_elem) for x_elem in x] for y_elem in y])
-    targets = targets.reshape((N_SAMPLES**2,))
+    targets = targets.reshape((N_SAMPLES ** 2,))
     [xx, yy] = np.meshgrid(x, y)
-    patterns = np.transpose(np.concatenate((xx.reshape(1, N_SAMPLES**2), yy.reshape(1, N_SAMPLES**2))))
+    patterns = np.transpose(np.concatenate((xx.reshape(1, N_SAMPLES ** 2), yy.reshape(1, N_SAMPLES ** 2))))
+    patterns = patterns.transpose()
+    patterns = np.vstack([patterns, [BIAS for _ in range(patterns.shape[1])]])
 
     return patterns, targets
 
@@ -52,8 +55,8 @@ def save_errors(o_out, targets, MSE_errors,):
 
 def main():
     patterns, targets = generate_2d_gaussian()
-    patterns = patterns.transpose()
-    w = normal(0, 1, [HIDDEN_NODES, 2])
+
+    w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
     
     dw = 0
@@ -72,7 +75,7 @@ def main():
 
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
-        delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
+        delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in, HIDDEN_NODES)
         w, dw = weight_update(w, patterns, delta_h, lr=LEARNING_RATE, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
 

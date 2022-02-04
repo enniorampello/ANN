@@ -26,6 +26,8 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     targets = targets.reshape((n_samples ** 2,))
     [xx, yy] = np.meshgrid(x, y)
     patterns = np.transpose(np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2))))
+    patterns = patterns.transpose()
+    patterns = np.vstack([patterns, [BIAS for _ in range(patterns.shape[1])]])
 
     return patterns, targets, n_samples
 
@@ -57,9 +59,8 @@ def save_errors(o_out, targets, MSE_errors):
 
 def main():
     patterns, targets, n_samples = generate_2d_gaussian()
-    patterns = patterns.transpose()
-    patterns = np.vstack([patterns, [BIAS for _ in range(patterns.shape[1])]])
-    print(patterns.shape)
+
+
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
 
@@ -74,7 +75,7 @@ def main():
 
         if i_epoch == EPOCHS - 1:
         # 3d-plot
-            plot_3d(patterns.transpose(), o_out)
+            plot_3d(patterns.transpose(), o_out, n_samples)
 
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
