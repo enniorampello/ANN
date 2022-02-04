@@ -10,7 +10,16 @@ LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
 
-def fun(x, y):
+# plot constants
+X_MIN = -5
+X_MAX = -X_MIN
+Y_MIN = X_MIN
+Y_MAX = X_MAX
+Z_MIN = -0.7
+Z_MAX = -Z_MIN
+
+
+def bell_gaussian_func(x, y):
     return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
 
 
@@ -28,12 +37,14 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     return patterns, targets, n_samples
 
 
-def plot_3d(patterns, targets, n_samples):
+def plot_3d(patterns, targets, n_samples, i_epoch):
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.set_xlim(-5, 5)
-    ax.set_ylim(-5, 5)
-    ax.set_zlim(-0.7, 0.7)
+    plt.title("network approximation of function - epoch {}".format(i_epoch + 1))
+    plt.axis('off')
+    ax = fig.add_subplot(projection='3d')
+    ax.set_xlim(X_MIN, X_MAX)
+    ax.set_ylim(Y_MIN, Y_MAX)
+    ax.set_zlim(Z_MIN, Z_MAX)
     patterns_t = np.transpose(patterns)
     X, Y = patterns_t[0], patterns_t[1]
     X = X.reshape((n_samples, n_samples))
@@ -43,10 +54,11 @@ def plot_3d(patterns, targets, n_samples):
     Z = zs.reshape(X.shape)
     ax.plot_surface(X, Y, Z)
 
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
     plt.show()
+
 
 def save_errors(o_out, targets, MSE_errors,):
     MSE_errors.append(MSE(o_out, targets))
@@ -68,14 +80,13 @@ def main():
 
         if i_epoch == EPOCHS - 1:
             # 3d-plot
-            plot_3d(patterns.transpose(), o_out, n_samples)
+            plot_3d(patterns.transpose(), o_out, n_samples, i_epo)
 
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in, HIDDEN_NODES)
         w, dw = weight_update(w, patterns, delta_h, lr=LEARNING_RATE, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
-
 
 
 if __name__ == '__main__':
