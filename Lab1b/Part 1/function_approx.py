@@ -5,7 +5,7 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
 HIDDEN_NODES = 3
-EPOCHS = 30
+EPOCHS = 300
 LEARNING_RATE = 0.001
 N_SAMPLES = 0
 

@@ -27,6 +27,8 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01, step=0.5, n_samples=N_SAMPLES):
     targets = targets.reshape((N_SAMPLES ** 2,))
     [xx, yy] = np.meshgrid(x, y)
     patterns = np.transpose(np.concatenate((xx.reshape(1, N_SAMPLES ** 2), yy.reshape(1, N_SAMPLES ** 2))))
+    patterns = patterns.transpose()
+    patterns = np.vstack([patterns, [BIAS for _ in range(patterns.shape[1])]])
 
     return patterns, targets
 
@@ -58,8 +60,7 @@ def save_errors(o_out, targets, MSE_errors):
 
 def main():
     patterns, targets = generate_2d_gaussian()
-    patterns = patterns.transpose()
-    patterns = np.vstack([patterns, [BIAS for _ in range(patterns.shape[1])]])
+
 
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
