@@ -10,7 +10,7 @@ LEARNING_RATE = 0.001
 N_SAMPLES = 100
 
 def fun(x, y):
-    return np.exp(-(x**2 + y**2)*0.1) - 0.5
+    return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
 
 
 def generate_2d_gaussian(from_xy=-0.5, to_xy=0.5, n_samples=N_SAMPLES):
@@ -69,4 +69,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
