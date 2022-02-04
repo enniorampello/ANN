@@ -79,7 +79,6 @@ def main():
             # save_errors(o_out, targets, MSE_errors)
 
 
-
             # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets[idx_start:idx_end]):4.2f} |")
 
             delta_h, delta_o = backward_pass(v, targets[idx_start:idx_end], h_in, o_out, o_in, HIDDEN_NODES)
