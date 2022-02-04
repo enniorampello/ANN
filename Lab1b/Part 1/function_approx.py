@@ -7,12 +7,13 @@ from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 HIDDEN_NODES = 6
 EPOCHS = 100
 LEARNING_RATE = 0.001
-STEP = 0.1
+STEP = 0.5
 BIAS = 1
-BATCH_SIZE = 32
+
+BATCH_SIZE = 500
 
 val = True
-val_p = 0.1
+val_p = 0.05
 
 # plot constants
 X_MIN = -5
@@ -111,7 +112,11 @@ def main():
     MSE_errors = []
     MSE_errors_val = []
     for i_epoch in range(EPOCHS):
-        for i_batch in range(int(patterns.shape[1] / BATCH_SIZE)):
+        if int(patterns.shape[1] / BATCH_SIZE) > 1:
+            rounds = int(patterns.shape[1] / BATCH_SIZE)
+        else:
+            rounds = 1
+        for i_batch in range(rounds):
             idx_start = i_batch * BATCH_SIZE
             if i_batch * BATCH_SIZE + BATCH_SIZE > patterns.shape[1]:
                 idx_end = patterns.shape[1]
@@ -138,7 +143,7 @@ def main():
     if val:
         patterns = np.concatenate((patterns, val_patterns), axis=1)
 
-    print(MSE_errors_val[-1])
+
     _, _, _, o_out = forward_pass(patterns, w, v)
 
     # plot approximation of the function
