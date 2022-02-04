@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
-HIDDEN_NODES = 25
-EPOCHS = 300
+HIDDEN_NODES = 120
+EPOCHS = 3000
 LEARNING_RATE = 0.001
 N_SAMPLES = 0
 BIAS = 1
