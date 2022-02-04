@@ -11,7 +11,7 @@ STEP = 0.5
 BIAS = 1
 BATCH_SIZE = 32
 
-# plot constants
+# plotting constants
 X_MIN = -5
 X_MAX = -X_MIN
 Y_MIN = X_MIN
@@ -84,6 +84,7 @@ def main():
     
     MSE_errors = []
     for i_epoch in range(EPOCHS):
+        # mini-batch training
         for i_batch in range(int(patterns.shape[1] / BATCH_SIZE)):
             idx_start = i_batch * BATCH_SIZE
             if i_batch * BATCH_SIZE + BATCH_SIZE > patterns.shape[1]:
@@ -100,8 +101,9 @@ def main():
         save_errors(o_out, targets, MSE_errors)
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
-    # 3d-plot
+    # plot approximation of the function
     plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
+    # plot learning curve
     plot_mse_error(MSE_errors, i_epoch)
 
 
