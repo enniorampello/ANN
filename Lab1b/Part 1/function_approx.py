@@ -35,6 +35,7 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     [xx, yy] = np.meshgrid(x, y)
     patterns = np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2), np.ones((1, n_samples ** 2))))
     
+
     return patterns, targets, n_samples
 
 
@@ -96,7 +97,7 @@ def main():
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
     # 3d-plot
-    plot_3d(patterns.transpose(), o_out)
+    plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
 
 
 if __name__ == '__main__':
