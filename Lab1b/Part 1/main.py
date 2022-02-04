@@ -171,8 +171,7 @@ def main():
     MSE_errors_val = []
     miscl_errors = []
     miscl_errors_val = []
-    print(targets.shape)
-    exit()
+
     for i_epoch in range(n_epochs):
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets, MSE_errors, miscl_errors)
