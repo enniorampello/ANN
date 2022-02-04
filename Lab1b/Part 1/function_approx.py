@@ -61,15 +61,15 @@ def plot_3d(patterns, targets, n_samples, i_epoch):
     plt.show()
 
 
-def save_errors(o_out, targets, MSE_errors,):
-    MSE_errors.append(MSE(o_out, targets))
+def save_errors(o_out, targets, mse_errors,):
+    mse_errors.append(MSE(o_out, targets))
 
 
-def plot_MSE_error(MSE_errors, i_epoch):
-    plt.title('Learning curve - function approximation')
+def plot_mse_error(mse_errors, i_epoch):
+    plt.title('Learning curve - function approximation - epoch {}'.format(i_epoch))
     plt.ylabel('MSE')
     plt.xlabel('epochs')
-    plt.plot(MSE_errors, color='red', label='MSE')
+    plt.plot(mse_errors, color='red', label='MSE')
     plt.show()
     
 
@@ -78,7 +78,7 @@ def main():
 
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
-    print(patterns.shape)
+    #print(patterns.shape)
     dw = 0
     dv = 0
     
@@ -91,9 +91,6 @@ def main():
             else:
                 idx_end = i_batch * BATCH_SIZE + BATCH_SIZE
             h_in, h_out, o_in, o_out = forward_pass(patterns[:, idx_start:idx_end], w, v)
-            # save_errors(o_out, targets, MSE_errors)
-
-            # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets[idx_start:idx_end]):4.2f} |")
 
             delta_h, delta_o = backward_pass(v, targets[idx_start:idx_end], h_in, o_out, o_in, HIDDEN_NODES)
             w, dw = weight_update(w, patterns[:, idx_start:idx_end], delta_h, lr=LEARNING_RATE, momentum=False,
@@ -105,7 +102,7 @@ def main():
 
     # 3d-plot
     plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
-    plot_MSE_error(MSE_errors, i_epoch)
+    plot_mse_error(MSE_errors, i_epoch)
 
 
 if __name__ == '__main__':
