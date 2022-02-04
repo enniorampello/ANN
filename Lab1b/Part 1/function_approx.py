@@ -28,7 +28,7 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     y = np.arange(from_xy, to_xy, STEP)
     n_samples = len(x)
     
-    targets = np.array([[fun(x_elem, y_elem) for x_elem in x] for y_elem in y])
+    targets = np.array([[bell_gaussian_func(x_elem, y_elem) for x_elem in x] for y_elem in y])
     targets = targets.reshape((n_samples ** 2,))
     
     [xx, yy] = np.meshgrid(x, y)
@@ -80,13 +80,14 @@ def main():
 
         if i_epoch == EPOCHS - 1:
             # 3d-plot
-            plot_3d(patterns.transpose(), o_out, n_samples, i_epo)
+            plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
 
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in, HIDDEN_NODES)
         w, dw = weight_update(w, patterns, delta_h, lr=LEARNING_RATE, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
+
 
 
 if __name__ == '__main__':
