@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
-HIDDEN_NODES = 3
+HIDDEN_NODES = 4
 EPOCHS = 5000
 LEARNING_RATE = 0.0001
-N_SAMPLES = 0
+STEP = 0.5
 
 BIAS = -1
 
@@ -18,20 +18,19 @@ def fun(x, y):
     return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
 
 
-def generate_2d_gaussian(from_xy=-5, to_xy=5.01, step=0.5, n_samples=N_SAMPLES):
-    x = np.arange(from_xy, to_xy, step)
-    y = np.arange(from_xy, to_xy, step)
-    global N_SAMPLES
-    N_SAMPLES = len(x)
+def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
+    x = np.arange(from_xy, to_xy, STEP)
+    y = np.arange(from_xy, to_xy, STEP)
+    n_samples = len(x)
     targets = np.array([[fun(x_elem, y_elem) for x_elem in x] for y_elem in y])
-    targets = targets.reshape((N_SAMPLES ** 2,))
+    targets = targets.reshape((n_samples ** 2,))
     [xx, yy] = np.meshgrid(x, y)
-    patterns = np.transpose(np.concatenate((xx.reshape(1, N_SAMPLES ** 2), yy.reshape(1, N_SAMPLES ** 2))))
+    patterns = np.transpose(np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2))))
 
-    return patterns, targets
+    return patterns, targets, n_samples
 
 
-def plot_3d(patterns, targets):
+def plot_3d(patterns, targets, n_samples):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.set_xlim(-5, 5)
@@ -39,8 +38,8 @@ def plot_3d(patterns, targets):
     ax.set_zlim(-0.7, 0.7)
     patterns_t = np.transpose(patterns)
     X, Y = patterns_t[0], patterns_t[1]
-    X = X.reshape((N_SAMPLES, N_SAMPLES))
-    Y = Y.reshape((N_SAMPLES, N_SAMPLES))
+    X = X.reshape((n_samples, n_samples))
+    Y = Y.reshape((n_samples, n_samples))
 
     zs = targets
     Z = zs.reshape(X.shape)
@@ -57,10 +56,10 @@ def save_errors(o_out, targets, MSE_errors):
 
 
 def main():
-    patterns, targets = generate_2d_gaussian()
+    patterns, targets, n_samples = generate_2d_gaussian()
     patterns = patterns.transpose()
     patterns = np.vstack([patterns, [BIAS for _ in range(patterns.shape[1])]])
-
+    print(patterns.shape)
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
 
