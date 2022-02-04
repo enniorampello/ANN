@@ -108,14 +108,15 @@ def main():
 
     dw = 0
     dv = 0
+
+    if int(patterns.shape[1] / BATCH_SIZE) > 1:
+        rounds = int(patterns.shape[1] / BATCH_SIZE)
+    else:
+        rounds = 1
     
     MSE_errors = []
     MSE_errors_val = []
     for i_epoch in range(EPOCHS):
-        if int(patterns.shape[1] / BATCH_SIZE) > 1:
-            rounds = int(patterns.shape[1] / BATCH_SIZE)
-        else:
-            rounds = 1
         for i_batch in range(rounds):
             idx_start = i_batch * BATCH_SIZE
             if i_batch * BATCH_SIZE + BATCH_SIZE > patterns.shape[1]:
