@@ -2,17 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from numpy.random import normal
-from main import forward_pass, backward_pass, weight_update, MSE
+from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
-HIDDEN_NODES = 25
-EPOCHS = 1000
+HIDDEN_NODES = 4
+EPOCHS = 20
 LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
 BATCH_SIZE = 32
 
 val = True
-val_p = 0.2
+val_p = 0.1
 
 # plot constants
 X_MIN = -5
@@ -67,6 +67,7 @@ def train_val_split(patterns, targets, val_p):
     n = patterns.shape[1]
 
     merged = np.vstack([patterns, targets.transpose()]).transpose()
+
     np.random.shuffle(merged)
 
     val = merged[:int(n * val_p)]
@@ -97,7 +98,8 @@ def main():
     patterns, targets, n_samples = generate_2d_gaussian()
 
     if val:
-        train_patterns, train_labels, val_patterns, val_labels = train_val_split(patterns, targets, val_p)
+        patterns, targets, val_patterns, val_targets = train_val_split(patterns, targets, val_p)
+
 
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
@@ -106,6 +108,7 @@ def main():
     dv = 0
     
     MSE_errors = []
+    MSE_errors_val = []
     for i_epoch in range(EPOCHS):
         for i_batch in range(int(patterns.shape[1] / BATCH_SIZE)):
             idx_start = i_batch * BATCH_SIZE
@@ -113,8 +116,8 @@ def main():
                 idx_end = patterns.shape[1]
             else:
                 idx_end = i_batch * BATCH_SIZE + BATCH_SIZE
-            h_in, h_out, o_in, o_out = forward_pass(patterns[:, idx_start:idx_end], w, v)
 
+            h_in, h_out, o_in, o_out = forward_pass(patterns[:, idx_start:idx_end], w, v)
 
             # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets[idx_start:idx_end]):4.2f} |")
 
@@ -124,12 +127,25 @@ def main():
             v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets, MSE_errors)
+
+        if val:
+            _, _, _, o_out_val = forward_pass(val_patterns, w, v)
+            save_errors(o_out_val, val_patterns, MSE_errors_val)
+
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
+
+    if val:
+        patterns = np.concatenate((patterns, val_patterns), axis=1)
+
+    print(MSE_errors_val[-1])
+    _, _, _, o_out = forward_pass(patterns, w, v)
 
     # plot approximation of the function
     plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
+
     # plot learning curve
-    plot_mse_error(MSE_errors, i_epoch)
+    # plot_mse_error(MSE_errors, i_epoch)
+    plot_train_val(MSE_errors, MSE_errors_val)
 
 
 if __name__ == '__main__':
