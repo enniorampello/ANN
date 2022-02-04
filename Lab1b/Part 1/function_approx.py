@@ -11,6 +11,9 @@ STEP = 0.5
 BIAS = 1
 BATCH_SIZE = 32
 
+val = True
+val_p = 0.2
+
 # plot constants
 X_MIN = -5
 X_MAX = -X_MIN
@@ -33,7 +36,7 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     targets = targets.reshape((n_samples ** 2,))
 
     [xx, yy] = np.meshgrid(x, y)
-    patterns = np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2), np.ones((1, n_samples ** 2))))
+    patterns = np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2), BIAS * np.ones((1, n_samples ** 2))))
 
     return patterns, targets, n_samples
 
@@ -60,6 +63,23 @@ def plot_3d(patterns, targets, n_samples, i_epoch):
     ax.set_zlabel('Z')
     plt.show()
 
+def train_val_split(patterns, targets, val_p):
+    n = patterns.shape[1]
+
+    merged = np.vstack([patterns, targets.transpose()]).transpose()
+    np.random.shuffle(merged)
+
+    val = merged[:int(n * val_p)]
+    train = merged[int(n * val_p):]
+
+    train_patterns = train[:, :-1].transpose()
+    train_labels = train[:, -1]
+
+    val_patterns = val[:, :-1].transpose()
+    val_labels = val[:, -1]
+
+    return train_patterns, train_labels, val_patterns, val_labels
+
 
 def save_errors(o_out, targets, MSE_errors,):
     MSE_errors.append(MSE(o_out, targets))
@@ -68,9 +88,12 @@ def save_errors(o_out, targets, MSE_errors,):
 def main():
     patterns, targets, n_samples = generate_2d_gaussian()
 
+    if val:
+        train_patterns, train_labels, val_patterns, val_labels = train_val_split(patterns, targets, val_p)
+
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
-    print(patterns.shape)
+
     dw = 0
     dv = 0
     
@@ -83,7 +106,7 @@ def main():
             else:
                 idx_end = i_batch * BATCH_SIZE + BATCH_SIZE
             h_in, h_out, o_in, o_out = forward_pass(patterns[:, idx_start:idx_end], w, v)
-            # save_errors(o_out, targets, MSE_errors)
+
 
             # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets[idx_start:idx_end]):4.2f} |")
 
