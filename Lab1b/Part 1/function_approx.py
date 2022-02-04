@@ -5,7 +5,7 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
 HIDDEN_NODES = 6
-EPOCHS = 2000
+EPOCHS = 1000
 LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
@@ -13,7 +13,7 @@ BIAS = 1
 BATCH_SIZE = 500
 
 val = True
-val_p = 0.05
+val_p = 0.2
 
 # plot constants
 X_MIN = -5
@@ -104,9 +104,10 @@ def plot_mse_error(mse_errors, i_epoch):
 
 def main():
     patterns, targets, n_samples = generate_2d_gaussian()
-    
+
     if val:
         patterns, targets, val_patterns, val_targets = train_val_split(patterns, targets, val_p)
+
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
 
@@ -114,7 +115,7 @@ def main():
     dv = 0
 
     if int(patterns.shape[1] / BATCH_SIZE) > 1:
-        rounds = int(patterns.shape[1] / BATCH_SIZE)
+        rounds = int(patterns.shape[1] / BATCH_SIZE) + 1
     else:
         rounds = 1
     
@@ -141,7 +142,7 @@ def main():
 
         if val:
             _, _, _, o_out_val = forward_pass(val_patterns, w, v)
-            save_errors(o_out_val, val_patterns, MSE_errors_val)
+            save_errors(o_out_val, val_targets, MSE_errors_val)
 
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
@@ -152,8 +153,8 @@ def main():
     _, _, _, o_out = forward_pass(patterns, w, v)
 
     # plot approximation of the function
-    plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
-
+    # plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
+    plot_points(patterns, o_out)
     # plot learning curve
     # plot_mse_error(MSE_errors, i_epoch)
     plot_train_val(MSE_errors, MSE_errors_val)
