@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
-HIDDEN_NODES = 4
-EPOCHS = 20
+HIDDEN_NODES = 6
+EPOCHS = 100
 LEARNING_RATE = 0.001
-STEP = 0.5
+STEP = 0.1
 BIAS = 1
 BATCH_SIZE = 32
 
