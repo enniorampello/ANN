@@ -63,15 +63,16 @@ def plot_3d(patterns, targets, n_samples, i_epoch):
     ax.set_zlabel('Z')
     plt.show()
 
-def train_val_split(patterns, targets, val_p):
+
+def train_val_split(patterns, targets, val_perc):
     n = patterns.shape[1]
 
     merged = np.vstack([patterns, targets.transpose()]).transpose()
 
     np.random.shuffle(merged)
 
-    val = merged[:int(n * val_p)]
-    train = merged[int(n * val_p):]
+    val = merged[:int(n * val_perc)]
+    train = merged[int(n * val_perc):]
 
     train_patterns = train[:, :-1].transpose()
     train_labels = train[:, -1]
