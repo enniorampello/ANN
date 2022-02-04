@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
-HIDDEN_NODES = 25
+HIDDEN_NODES = 3
 EPOCHS = 300
 LEARNING_RATE = 0.001
 N_SAMPLES = 0
@@ -88,6 +88,7 @@ def main():
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in, HIDDEN_NODES)
         w, dw = weight_update(w, patterns, delta_h, lr=LEARNING_RATE, momentum=False, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
+
 
 
 if __name__ == '__main__':

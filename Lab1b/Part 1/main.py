@@ -73,7 +73,7 @@ def save_errors(o_out, targets, MSE_errors, miscl_error):
 def backward_pass(v, targets, h_in, o_out, o_in, hidden_nodes):
     delta_o = np.multiply(np.subtract(o_out, targets), f_prime(o_in))
     v = v.reshape(1, hidden_nodes)
-    print(delta_o.shape)
+
     delta_o = delta_o.reshape(1, delta_o.shape[1])
     delta_h = np.multiply((v.transpose() @ delta_o), f_prime(h_in))
 
