@@ -5,7 +5,7 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE
 
 HIDDEN_NODES = 25
-EPOCHS = 1000
+EPOCHS = 20
 LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
@@ -63,6 +63,14 @@ def plot_3d(patterns, targets, n_samples, i_epoch):
 
 def save_errors(o_out, targets, MSE_errors,):
     MSE_errors.append(MSE(o_out, targets))
+
+
+def plot_MSE_error(MSE_errors, i_epoch):
+    plt.title('Learning curve - function approximation')
+    plt.ylabel('MSE')
+    plt.xlabel('epochs')
+    plt.plot(MSE_errors, color='red', label='MSE')
+    plt.show()
     
 
 def main():
@@ -94,6 +102,8 @@ def main():
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets, MSE_errors)
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
+        if i_epoch == EPOCHS - 1:
+            plot_MSE_error(MSE_errors, i_epoch)
 
     # 3d-plot
     plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
