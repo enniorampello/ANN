@@ -55,8 +55,8 @@ def save_errors(o_out, targets, MSE_errors,):
 
 def main():
     patterns, targets = generate_2d_gaussian()
-    patterns = patterns.transpose()
-    w = normal(0, 1, [HIDDEN_NODES, 2])
+
+    w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
     
     dw = 0
