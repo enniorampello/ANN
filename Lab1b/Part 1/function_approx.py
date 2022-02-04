@@ -2,14 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from numpy.random import normal
-from main import forward_pass, backward_pass, weight_update, MSE
+from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
 HIDDEN_NODES = 4
-EPOCHS = 5000
+EPOCHS = 20
 LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
 BATCH_SIZE = 32
+
+val = True
+val_p = 0.1
 
 # plot constants
 X_MIN = -5
@@ -28,13 +31,12 @@ def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     x = np.arange(from_xy, to_xy, STEP)
     y = np.arange(from_xy, to_xy, STEP)
     n_samples = len(x)
-    
+
     targets = np.array([[bell_gaussian_func(x_elem, y_elem) for x_elem in x] for y_elem in y])
     targets = targets.reshape((n_samples ** 2,))
-    
+
     [xx, yy] = np.meshgrid(x, y)
-    patterns = np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2), np.ones((1, n_samples ** 2))))
-    
+    patterns = np.concatenate((xx.reshape(1, n_samples ** 2), yy.reshape(1, n_samples ** 2), BIAS * np.ones((1, n_samples ** 2))))
 
     return patterns, targets, n_samples
 
@@ -62,20 +64,52 @@ def plot_3d(patterns, targets, n_samples, i_epoch):
     plt.show()
 
 
-def save_errors(o_out, targets, MSE_errors,):
-    MSE_errors.append(MSE(o_out, targets))
+def train_val_split(patterns, targets, val_perc):
+    n = patterns.shape[1]
+
+    merged = np.vstack([patterns, targets.transpose()]).transpose()
+
+    np.random.shuffle(merged)
+
+    val = merged[:int(n * val_perc)]
+    train = merged[int(n * val_perc):]
+
+    train_patterns = train[:, :-1].transpose()
+    train_labels = train[:, -1]
+
+    val_patterns = val[:, :-1].transpose()
+    val_labels = val[:, -1]
+
+    return train_patterns, train_labels, val_patterns, val_labels
+
+
+def save_errors(o_out, targets, mse_errors,):
+    mse_errors.append(MSE(o_out, targets))
+
+
+def plot_mse_error(mse_errors, i_epoch):
+    plt.title('Learning curve - function approximation - epoch {}'.format(i_epoch))
+    plt.ylabel('MSE')
+    plt.xlabel('epochs')
+    plt.plot(mse_errors, color='red', label='MSE')
+    plt.show()
     
 
 def main():
     patterns, targets, n_samples = generate_2d_gaussian()
 
+    if val:
+        patterns, targets, val_patterns, val_targets = train_val_split(patterns, targets, val_p)
+
+
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
-    print(patterns.shape)
+
     dw = 0
     dv = 0
     
     MSE_errors = []
+    MSE_errors_val = []
     for i_epoch in range(EPOCHS):
         for i_batch in range(int(patterns.shape[1] / BATCH_SIZE)):
             idx_start = i_batch * BATCH_SIZE
@@ -83,8 +117,8 @@ def main():
                 idx_end = patterns.shape[1]
             else:
                 idx_end = i_batch * BATCH_SIZE + BATCH_SIZE
+
             h_in, h_out, o_in, o_out = forward_pass(patterns[:, idx_start:idx_end], w, v)
-            # save_errors(o_out, targets, MSE_errors)
 
             # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets[idx_start:idx_end]):4.2f} |")
 
@@ -94,10 +128,25 @@ def main():
             v, dv = weight_update(v, h_out, delta_o, lr=LEARNING_RATE, momentum=False, d_old=dv)
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets, MSE_errors)
+
+        if val:
+            _, _, _, o_out_val = forward_pass(val_patterns, w, v)
+            save_errors(o_out_val, val_patterns, MSE_errors_val)
+
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
-    # 3d-plot
+    if val:
+        patterns = np.concatenate((patterns, val_patterns), axis=1)
+
+    print(MSE_errors_val[-1])
+    _, _, _, o_out = forward_pass(patterns, w, v)
+
+    # plot approximation of the function
     plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
+
+    # plot learning curve
+    # plot_mse_error(MSE_errors, i_epoch)
+    plot_train_val(MSE_errors, MSE_errors_val)
 
 
 if __name__ == '__main__':
