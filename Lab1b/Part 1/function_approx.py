@@ -81,8 +81,16 @@ def train_val_split(patterns, targets, val_p):
     return train_patterns, train_labels, val_patterns, val_labels
 
 
-def save_errors(o_out, targets, MSE_errors,):
-    MSE_errors.append(MSE(o_out, targets))
+def save_errors(o_out, targets, mse_errors,):
+    mse_errors.append(MSE(o_out, targets))
+
+
+def plot_mse_error(mse_errors, i_epoch):
+    plt.title('Learning curve - function approximation - epoch {}'.format(i_epoch))
+    plt.ylabel('MSE')
+    plt.xlabel('epochs')
+    plt.plot(mse_errors, color='red', label='MSE')
+    plt.show()
     
 
 def main():
@@ -118,8 +126,10 @@ def main():
         save_errors(o_out, targets, MSE_errors)
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
-    # 3d-plot
+    # plot approximation of the function
     plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
+    # plot learning curve
+    plot_mse_error(MSE_errors, i_epoch)
 
 
 if __name__ == '__main__':
