@@ -9,7 +9,6 @@ EPOCHS = 1000
 LEARNING_RATE = 0.001
 N_SAMPLES = 0
 BIAS = 1
-
 BATCH_SIZE = 32
 
 def fun(x, y):
