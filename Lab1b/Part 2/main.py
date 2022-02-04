@@ -161,6 +161,7 @@ if __name__ == '__main__':
 
     # GridSearch
 
+
     nodes_first = [3, 4, 5]
     nodes_second = [2, 4, 6]
     LRs = [0.1, 0.01, 0.05, 0.001]
