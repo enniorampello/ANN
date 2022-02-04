@@ -127,17 +127,14 @@ def main():
     miscl_errors = []
 
     for i_epoch in range(n_epochs):
-        print("------ EPOCH {} ------".format(i_epoch))
-
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets,MSE_errors, miscl_errors)
+        print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
         delta_h, delta_o = backward_pass(v, targets, h_in, o_out, o_in)
         w, dw = weight_update(w, patterns, delta_h, lr=learning_rate, momentum=momentum, d_old=dw)
         v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=momentum, d_old=dv)
 
     plot_errors(MSE_errors, miscl_errors)
-    print("MSE errors: {}".format(MSE_errors))
-    print("Proportions of mis-classifications: {}".format(miscl_errors))
     plot_boundary(classA, classB, targets, w, v)
 
 if __name__ == '__main__':
