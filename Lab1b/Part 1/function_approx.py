@@ -4,16 +4,16 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
-HIDDEN_NODES = 6
+HIDDEN_NODES = 25
 EPOCHS = 1000
 LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
 
-BATCH_SIZE = 500
+BATCH_SIZE = 32
 
 val = True
-val_p = 0.2
+val_p = 0.8
 
 # plot constants
 X_MIN = -5
@@ -26,7 +26,6 @@ Z_MAX = -Z_MIN
 
 def bell_gaussian_func(x, y):
     return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
-
 
 def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     x = np.arange(from_xy, to_xy, STEP)
@@ -141,7 +140,6 @@ def main():
             save_errors(o_out_val, val_targets, MSE_errors_val)
 
         print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
-
     #if val:
     #    patterns = np.concatenate((patterns, val_patterns), axis=1)
 
@@ -149,7 +147,13 @@ def main():
     # plot approximation of the function
     # plot_3d(patterns.transpose(), o_out, n_samples, i_epoch)
     fig = plt.figure()
+
     ax = fig.add_subplot(projection='3d')
+    if val:
+        ax.set_title(f'MSE:{MSE_errors[-1]:.2f} - val prop:{val_p} - mse VAL:{MSE_errors_val[-1]:.2f} - hn:{HIDDEN_NODES} - lr:{LEARNING_RATE} - epochs:{EPOCHS}')
+    else:
+        ax.set_title(f'MSE:{MSE_errors[-1]:.2f} - hn:{HIDDEN_NODES} - lr:{LEARNING_RATE} - epochs:{EPOCHS}')
+
     plot_points(patterns, o_out, ax)
     if val:
         plot_points(val_patterns, o_out_val, ax)

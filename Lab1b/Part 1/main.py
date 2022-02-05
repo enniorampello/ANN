@@ -9,7 +9,7 @@ m_B = [0.0, -0.1]
 sigma_A = 0.2
 sigma_B = 0.3
 
-hidden_nodes = 6
+hidden_nodes = 5
 bias = 1
 learning_rate = 0.001
 n_epochs = 1000
@@ -208,10 +208,10 @@ def plot_boundary(patterns, targets, w, v, MSE, miscl, MSE_val=None, miscl_val=N
     Z = Z.reshape(xx.shape)
     fig, ax = plt.subplots()
     if MSE_val is None:
-        ax.set_title(f'MSE:{MSE:.2f} - miscl:{miscl:.2f} - hn:{hidden_nodes} - lr:{learning_rate} - epochs:{n_epochs}')
+        ax.set_title(f'MSE:{MSE[-1]:.2f} - miscl:{miscl:.2f} - hn:{hidden_nodes} - lr:{learning_rate} - epochs:{n_epochs}')
     else:
         ax.set_title(
-            f'MSE:{MSE:.2f} - miscl:{miscl:.2f} - MSE val:{MSE_val:.2f} - miscl val:{miscl_val:.2f} \nhn:{hidden_nodes} - lr:{learning_rate} - epochs:{n_epochs}')
+            f'MSE:{MSE[-1]:.2f} - miscl:{miscl:.2f} - MSE val:{MSE_val:.2f} - miscl val:{miscl_val:.2f} \nhn:{hidden_nodes} - lr:{learning_rate} - epochs:{n_epochs}')
     ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
 
     # Plot also the training points
