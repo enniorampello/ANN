@@ -9,18 +9,22 @@ m_B = [0.0, -0.1]
 sigma_A = 0.2
 sigma_B = 0.3
 
+hidden_nodes = 6
 bias = 1
-hidden_nodes = 4
 learning_rate = 0.001
-n_epochs = 3000
-val = 2 # set to 1 to remove data according to the percentages or set to 2 for removing data according to the third point in the assignment
+n_epochs = 1000
+# set to 1 to remove data according to the percentages
+# or set to 2 for removing data according to the third point in the assignment
+val = 1
+perc_A = 0.25
+perc_B = 0.25
+
 
 np.random.seed(2)
 
 
 def f(x):
     return (2 / (1 + np.exp(-x))) - 1
-
 
 def f_prime(x):
     return ((1 + f(x)) * (1 - f(x))) * 0.5
@@ -113,7 +117,6 @@ def MSE(preds, targets):
     errors = preds - targets
     return np.sum(errors ** 2) / len(preds)
 
-
 def misclass_rate(o_out, targets):
     error_rate = 0
     preds = np.where(o_out > 0, 1, -1)[0]
@@ -153,7 +156,7 @@ def plot_train_val(MSE_errors_train, MSE_errors_val):
     # fig.tight_layout()
     # plt.show()
 
-def plot_boundary(patterns, targets, w, v):
+def plot_boundary(patterns, targets, w, v, MSE, miscl, MSE_val=None, miscl_val=None):
     x_min = min(patterns[0,:]) - 1
     x_max = max(patterns[0,:]) + 1
     y_min = min(patterns[1,:]) - 1
@@ -167,6 +170,10 @@ def plot_boundary(patterns, targets, w, v):
     Z = np.where(mesh_preds > 0, 1, -1)[0]
     Z = Z.reshape(xx.shape)
     fig, ax = plt.subplots()
+    if MSE_val is None:
+        ax.set_title(f'MSE:{MSE:.2f} - miscl:{miscl:.2f} - hn:{hidden_nodes} - lr:{learning_rate} - epochs:{n_epochs}')
+    else:
+        ax.set_title(f'MSE:{MSE:.2f} - miscl:{miscl:.2f} - MSE val:{MSE_val:.2f} - miscl val:{miscl_val:.2f} \nhn:{hidden_nodes} - lr:{learning_rate} - epochs:{n_epochs}')
     ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
 
     # Plot also the training points
@@ -176,7 +183,7 @@ def plot_boundary(patterns, targets, w, v):
 
 
 def main():
-    patterns, targets, patterns_val, targets_val = get_patterns(val, perc_A=0.25, perc_B=0.25)
+    patterns, targets, patterns_val, targets_val = get_patterns(val, perc_A=perc_A, perc_B=perc_B)
 
     w = normal(0, 1, [hidden_nodes, 3])
     v = normal(0, 1, hidden_nodes).reshape(1, hidden_nodes)
@@ -207,8 +214,11 @@ def main():
     #    patterns = np.concatenate((patterns, patterns_val), axis=1)
     #    targets = np.concatenate((targets, targets_val), axis=0)
 
-    #plot_train_val(MSE_errors, MSE_errors_val)
-    plot_boundary(patterns, targets, w, v)
+    plot_train_val(MSE_errors, MSE_errors_val)
+    if val == 0:
+        plot_boundary(patterns, targets, w, v, MSE_errors[-1], miscl_errors[-1])
+    else:
+        plot_boundary(patterns, targets, w, v, MSE_errors[-1], miscl_errors[-1], MSE_errors_val[-1], miscl_errors_val[-1])
     #plot_errors(MSE_errors, miscl_errors)
 
 if __name__ == '__main__':

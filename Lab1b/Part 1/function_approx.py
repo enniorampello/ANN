@@ -135,6 +135,7 @@ def main():
         h_in, h_out, o_in, o_out = forward_pass(patterns, w, v)
         save_errors(o_out, targets, MSE_errors)
 
+
         if val:
             _, _, _, o_out_val = forward_pass(val_patterns, w, v)
             save_errors(o_out_val, val_targets, MSE_errors_val)
@@ -152,7 +153,7 @@ def main():
     plot_points(patterns, o_out, ax)
     if val:
         plot_points(val_patterns, o_out_val, ax)
-    plt.show
+    plt.show()
     # plot learning curve
     # plot_mse_error(MSE_errors, i_epoch)
     plot_train_val(MSE_errors, MSE_errors_val)
