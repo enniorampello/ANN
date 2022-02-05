@@ -5,15 +5,15 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
 HIDDEN_NODES = 25
-EPOCHS = 1000
-LEARNING_RATE = 0.001
+EPOCHS = 100
+LEARNING_RATE = 0.01
 STEP = 0.5
 BIAS = 1
 
-BATCH_SIZE = 32
+BATCH_SIZE = 1
 
 val = True
-val_p = 0.2
+val_p = 0.6
 
 # plot constants
 X_MIN = -5
@@ -150,7 +150,7 @@ def main():
 
     ax = fig.add_subplot(projection='3d')
     if val:
-        ax.set_title(f'MSE:{MSE_errors[-1]:.2f} - val prop:{val_p} - mse VAL:{MSE_errors_val[-1]:.2f} - hn:{HIDDEN_NODES} - lr:{LEARNING_RATE} - epochs:{EPOCHS}')
+        ax.set_title(f'MSE:{MSE_errors[-1]:.2f} - val prop:{val_p} - MSE val:{MSE_errors_val[-1]:.2f} - hn:{HIDDEN_NODES} - lr:{LEARNING_RATE} - epochs:{EPOCHS}')
     else:
         ax.set_title(f'MSE:{MSE_errors[-1]:.2f} - hn:{HIDDEN_NODES} - lr:{LEARNING_RATE} - epochs:{EPOCHS}')
 
