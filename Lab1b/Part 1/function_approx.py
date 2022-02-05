@@ -13,7 +13,7 @@ BIAS = 1
 BATCH_SIZE = 32
 
 val = True
-val_p = 0.8
+val_p = 0.2
 
 # plot constants
 X_MIN = -5
