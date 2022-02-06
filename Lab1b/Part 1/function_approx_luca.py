@@ -6,15 +6,15 @@ from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
 HIDDEN_NODES = 0
 HIDDEN_NODES_LIST = [7]#[i + 1 for i in range(25)]
-EPOCHS = 1000
+EPOCHS = 200
 LEARNING_RATE = 0.01
 STEP = 0.5
 BIAS = 1
 
 BATCH_SIZE = 500
 
-val = False
-val_p = 0.2
+val = True
+val_p = 0.8
 
 # plot constants
 X_MIN = -5
@@ -159,11 +159,12 @@ def main():
         ax = fig.add_subplot(projection='3d')
         plot_points(patterns, o_out, ax, i_epoch, HIDDEN_NODES)
         if val:
+            print("validation error after {} epochs: {}".format(i_epoch + 1, MSE_errors_val[-1]))
             plot_points(val_patterns, o_out_val, ax, i_epoch, HIDDEN_NODES)
         plt.show()
 
         plot_train_val(MSE_errors, MSE_errors_val)
-
+        print("training error after {} epochs: {}".format(i_epoch + 1, MSE_errors[-1]))
         final_errors_training.append(MSE_errors[-1])
     xi = list(range(len(final_errors_training)))
     #plt.title("learning curves in train and val set with different num of hidden neurons")

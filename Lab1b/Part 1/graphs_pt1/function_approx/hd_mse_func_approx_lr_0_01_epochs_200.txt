@@ -3,3 +3,17 @@ mse with increasing num oof hidden neurons (starting from 1):
 
 num of hidden neurons with decreasing mse: 
 [7, 10, 8, 5, 6, 11, 13, 14, 9, 17, 3, 4, 21, 24, 19, 15, 2, 1, 18, 12, 22, 16, 20, 23, 25]
+
+______punto 2______
+(N.B.: we don't train on the validation set)
+
+best model: 7 hn
+
+val_p, err_train, err_val
+0.2, 0.964, 0.224
+0.3, 0.992, 0.403
+0.4, 0.931, 0.630
+0.5, 0.646, 0.943
+0.6, 0.619, 1.486
+0.7, 0.547, 1.823
+0.8, 0.552, 4.229
