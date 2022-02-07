@@ -27,7 +27,6 @@ Z_MAX = -Z_MIN
 def bell_gaussian_func(x, y):
     return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
 
-
 def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
     x = np.arange(from_xy, to_xy, STEP)
     y = np.arange(from_xy, to_xy, STEP)
