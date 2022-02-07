@@ -14,17 +14,16 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
-train_val_p = 0.8
-BIAS = 0.
+NH1 = 5# wait for simo
+
+TRAIN_P = 0.8
+BIAS = 1.
 BATCH_SIZE = 32
 # HIDDEN_NODES = [3, 6]
-EPOCHS = 10000
-# LR = 0.01
-# l2 = 0.0002
-ES = True
+EPOCHS = 1000
+ES = False
 
-NOISE = False
-SIGMA = 0.15
+NOISE = True
 
 MAX_ITER = 10
 
@@ -67,7 +66,7 @@ def train_test_val_split(data,labels, train_p):
 
     return train, train_labels, val, val_labels, test, test_labels
 
-def add_noise(x, sigma, idx_0=301, idx_final=301+int(1000 * train_val_p)):
+def add_noise(x, sigma, idx_0=301, idx_final=301+int(1000 * TRAIN_P)):
     for t in range(idx_0, idx_final+1):
         x[t] += np.random.normal(scale=sigma)
     return x
@@ -76,37 +75,34 @@ def plot_time_series(x):
     plt.plot(x)
     plt.show()
 
-def preds_accuracy_plot(y_test, preds, HIDDEN_NODES):
+def preds_accuracy_plot(y_test, preds, hidden_nodes, iter, sigma):
     mse = mean_squared_error(y_test, preds)
-    plt.title(f'MSE: {mse:.3f} - HN: {HIDDEN_NODES} - LR: {LR} - ES: {ES} - L2 {l2}')
-    plt.plot(y_test)
-    plt.plot(preds)
-    plt.show()
+    plt.figure()
+    plt.title(f'MSE: {mse:.3f} - HN: {hidden_nodes} - $\sigma$: {sigma}')
+    plt.plot(y_test, label='Target values')
+    plt.plot(preds, label='Predicted values')
+    plt.legend()
+    plt.savefig(f'Lab1b/Part 2/plots/noise_pred_ts_{hidden_nodes[1]}_{sigma}_{iter}.png')
 
 
-def main(a, b, LR, l2, my_dicts):
-    HIDDEN_NODES = [a, b]
+def main(a, b, my_dicts, sigma, l2, lr):
+    hidden_nodes = [a, b]
+    x = mackey_glass_generator()
+    if NOISE:
+        x = add_noise(x, sigma)
+
+    data, labels = data_from_mackey_glass(x)
+    x_train, y_train, x_val, y_val, x_test, y_test = train_test_val_split(data, labels, TRAIN_P)
+
     mses = []
-    for iter in range(MAX_ITER):
-        x = mackey_glass_generator()
-        if NOISE:
-            x = add_noise(x, SIGMA)
-        # plot_time_series(x)
-
-        data, labels = data_from_mackey_glass(x)
-        x_train, y_train, x_val, y_val, x_test, y_test = train_test_val_split(data, labels, train_val_p)
-
-        # plot_time_series(x)
-
-
-
+    weights_means = []
+    weights_stds = []
+    for iter in range(MAX_ITER):      
         model = Sequential()
-
-
         model.add(Input(shape=(5,)))
-        for i in range(len(HIDDEN_NODES)):
+        for i in range(len(hidden_nodes)):
             model.add(Dense(
-                HIDDEN_NODES[i],
+                hidden_nodes[i],
                 activation='sigmoid',
                 use_bias=True,
                 kernel_initializer=initializers.initializers_v2.RandomNormal(mean=0., stddev=1.),
@@ -121,7 +117,7 @@ def main(a, b, LR, l2, my_dicts):
         #     decay_steps=10000,
         #     decay_rate=0.9)
 
-        optimizer = optimizers.gradient_descent_v2.SGD(learning_rate=LR)
+        optimizer = optimizers.gradient_descent_v2.SGD(learning_rate=lr)
 
         model.compile(
             loss='mse',
@@ -136,48 +132,50 @@ def main(a, b, LR, l2, my_dicts):
 
 
         model.fit(x_train, y_train,
-                  batch_size=BATCH_SIZE,
-                  epochs=EPOCHS,
-                  verbose='auto',
-                  callbacks=callbacks,
-                  validation_data=(x_val, y_val),
-                  workers=8)
+                    batch_size=BATCH_SIZE,
+                    epochs=EPOCHS,
+                    verbose='auto',
+                    callbacks=callbacks,
+                    validation_data=(x_val, y_val),
+                    workers=8)
 
+        weights = model.get_weights()
+        for i in range(len(weights)):
+            weights[i] = weights[i].flatten()
+        weights = np.concatenate(weights, axis=0)
+        weights_means.append(weights.mean())
+        weights_stds.append(weights.std())
+
+        preds = model.predict(x_val)
+        mse = mean_squared_error(y_val, preds)
+        mses.append(mse)
 
         preds = model.predict(x_test)
-        mse = mean_squared_error(y_test, preds)
-        preds_accuracy_plot(y_test, preds, HIDDEN_NODES)
+        preds_accuracy_plot(y_test, preds, hidden_nodes, iter, sigma)
 
-        mses.append(mse)
-    dic = {'hidden_nodes': HIDDEN_NODES, 'lr': LR, 'l2': l2}
+    dic = {'hidden_nodes': hidden_nodes, 'sigma': sigma, 'l2': l2, 'lr': lr}
     dic['mse_mean'] = np.mean(mses)
     dic['mse_std'] = np.std(mses)
+    dic['weights_mean'] = np.mean(weights_means)
+    dic['weights_std'] = np.mean(weights_stds)
 
     my_dicts.append(dic)
-
+    print(my_dicts)
 
 if __name__ == '__main__':
-    # main()
-
-    # GridSearch
-
-
     nodes_first = [3, 4, 5]
-    nodes_second = [2, 4, 6]
-    LRs = [0.1, 0.01, 0.05, 0.001]
-    l2s = [0.001, 0.0001, 0.0002, 0.0005]
-
-
-    # mse, HIDDEN_NODES, LR, l2, ES
+    nodes_second = [3, 6, 9]
+    lrs = [0.01, 0.005]
+    l2s = [0.01, 0.001, 0.0002]
+    
     my_dicts = []
-
-    for a in nodes_first:
-        for b in nodes_second:
-            for LR in LRs:
-                for l2 in l2s:
-                    main(a, b, LR, l2, my_dicts)
-
+    a = NH1
+    for b in nodes_second:
+        for sigma in [0.05, 0.15]:
+            for l2 in l2s:
+                for lr in lrs:
+                    main(a, b, my_dicts, sigma, l2, lr)
 
     scores_df = pd.DataFrame(my_dicts)
-    scores_df.to_csv('mse_score.csv')
+    scores_df.to_csv('noise_mse_score.csv')
     print(scores_df)
