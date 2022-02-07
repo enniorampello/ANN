@@ -5,9 +5,9 @@ from numpy.random import normal
 from main import forward_pass, backward_pass, weight_update, MSE, plot_train_val
 
 HIDDEN_NODES = 0
-HIDDEN_NODES_LIST = [7]#[i + 1 for i in range(25)]
-EPOCHS = 200
-LEARNING_RATE = 0.01
+HIDDEN_NODES_LIST = [24]#[i + 1 for i in range(25)]
+EPOCHS = 1000
+LEARNING_RATE = 0.001
 STEP = 0.5
 BIAS = 1
 
