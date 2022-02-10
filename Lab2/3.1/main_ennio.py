@@ -62,52 +62,23 @@ def print_function(f, start=0, stop=2*np.pi):
 
 
 def main():
-    targets = square()
+    targets = sin()
     patterns = np.linspace(0, 2*np.pi, int(2*np.pi/0.1)).reshape(int(2*np.pi/0.1), 1)
     mu = init_means()
     w = init_weights()
     pred = [forward_pass(x, mu, w)[1] for x in patterns]
     
-    # print_function(targets)
-    # plt.ion()
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)   
-    # line, = ax.plot(patterns, pred)
-    # fig.canvas.draw()
-    # plt.show(block=False)
     phi_mat = np.zeros((NUM_NODES, patterns.shape[0]))
     for i in range(NUM_NODES):
         for j in range(patterns.shape[0]):
             phi_mat[i][j] = phi(abs(mu[i] - patterns[j]))
-    for epoch in range(1):
-        '''
-        error = 0
-        for pattern, target in zip(patterns, targets):
-            h_out, _ = forward_pass(pattern, mu, w)
-            w = update_weights(target, h_out, w)
-            error = (target - np.sum(h_out * w))
-        print(f'EPOCH {epoch}\t| error {np.sum(error)}')
-        #w += error
-        '''
-        f = phi_mat.T @ w
-        w = np.linalg.inv(phi_mat @ phi_mat.T) @ phi_mat @ targets
-        pred = [forward_pass(x, mu, w)[1] for x in patterns]
-        plt.figure()
-        plt.plot(patterns, pred)
-        plt.show()
-        continue
-        if epoch % 10 == 0:
-            #clear_output(wait=False)
-            pred = [forward_pass(x, mu, w)[1] for x in patterns]
-            #fig = plt.figure()
-            line.set_xdata(patterns)
-            line.set_ydata(pred)
-            ax.relim() 
-            ax.autoscale_view(True,True,True)
-            fig.canvas.draw()
-            plt.pause(0.01)
-            #plt.show()
-            #plt.close(fig)
+
+    w = np.linalg.inv(phi_mat @ phi_mat.T) @ phi_mat @ targets
+    pred = [forward_pass(x, mu, w)[1] for x in patterns]
+
+    plt.figure()
+    plt.plot(patterns, pred)
+    plt.show()
 
 
 
