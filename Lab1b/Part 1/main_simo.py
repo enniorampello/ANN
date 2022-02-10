@@ -227,7 +227,6 @@ def main():
         val_MSEs = []
         val_miscl = []
     patterns, targets, patterns_val, targets_val = get_patterns(val, perc_A=perc_A, perc_B=perc_B)
-
     min_MSE = 1000
     hn = 0
     it = 0

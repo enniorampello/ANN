@@ -9,17 +9,16 @@ m_B = [0.0, -0.1]
 sigma_A = 0.2
 sigma_B = 0.3
 
-hidden_nodes = 10
+hidden_nodes = 5
 bias = 1
 learning_rate = 0.001
 n_epochs = 1000
-# set to 1 to remove data according to the percentages
-# or set to 2 for removing data according to the third point in the assignment
-val = 0
+
+val = 1 # set to 1 to remove data according to the percentages or set to 2 for removing data according to the third point in the assignment
 perc_A = 0.25
 perc_B = 0.25
 
-batch = False
+batch = True
 np.random.seed(2)
 
 
@@ -135,7 +134,6 @@ def weight_update_seq(weights, inputs, delta, lr, momentum=False, alpha=0.9, d_o
             inputs = inputs.reshape(hidden_nodes, 1)
         except:
             inputs = inputs.reshape(3, 1)
-
         try:
             delta = delta.reshape(hidden_nodes, 1)
         except:
@@ -254,10 +252,6 @@ def main():
             print(f"EPOCH {i_epoch:4d}")
             for i in range(patterns.shape[1]):
                 h_in, h_out, o_in, o_out = forward_pass_seq(patterns[:, i], w, v)
-
-
-
-
                 # print(f"EPOCH {i_epoch:4d} | training_mse = {MSE(o_out, targets):4.2f} |")
 
                 delta_h, delta_o = backward_pass_seq(v, targets[i], h_in, o_out, o_in)
@@ -275,6 +269,7 @@ def main():
     #    targets = np.concatenate((targets, targets_val), axis=0)
 
     plot_train_val(MSE_errors, MSE_errors_val)
+    exit()
     if val == 0:
         plot_boundary(patterns, targets, w, v, MSE_errors[-1], miscl_errors[-1])
     else:
