@@ -13,7 +13,7 @@ from functions import *
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
 
-LR = 0.2
+LR = 0.01
 NUM_NODES = 9
 MAX_EPOCHS = 2
 SIGMA = 0.5
@@ -23,6 +23,11 @@ SINE = True
 NOISE = True
 SIGMA_NOISE = 0.1
 
+# competitive learning constants
+MORE_THAN_ONE_WINNER = False
+NUM_OF_WINNERS = int(NUM_NODES / 3)
+# learning rate for competitive learning part
+LR_CL = 0.2
 
 np.random.seed(5)
 
@@ -41,7 +46,6 @@ def main():
     if NOISE:
         targets = add_noise(targets, SIGMA_NOISE)
 
-
     mu = init_means(NUM_NODES)
 
     # competitive learning
@@ -57,11 +61,17 @@ def main():
             # not sure that the mus are the weight...
             dist_from_rbf_nodes.append(euclidean_distance(selected_pattern, mu[node_idx]))
 
-        # closest RBF unit - winner
-        nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
-        print(nearest_rbf_node_idx)
-        # not sure
-        mu[nearest_rbf_node_idx] += LR * (selected_pattern - mu[nearest_rbf_node_idx])
+        if MORE_THAN_ONE_WINNER:
+            # n closest RBF units - winners
+            nearest_rbf_nodes_idx = np.asarray(dist_from_rbf_nodes).argsort()[:NUM_OF_WINNERS]
+            for winner_idx in nearest_rbf_nodes_idx:
+                # not sure
+                mu[winner_idx] += LR_CL * (selected_pattern - mu[winner_idx])
+        else:
+            # single closest RBF unit - winner
+            nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
+            # not sure
+            mu[nearest_rbf_node_idx] += LR_CL * (selected_pattern - mu[nearest_rbf_node_idx])
 
     w = init_weights(NUM_NODES)
     pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
