@@ -13,10 +13,10 @@ from functions import *
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
 
-LR = 0.001
-NUM_NODES = 12
+LR = 0.01
+NUM_NODES = 9
 MAX_EPOCHS = 500
-SIGMA = 1
+SIGMA = 0.5
 
 SINE = True
 
