@@ -13,6 +13,9 @@ def sin(patterns, start=0, stop=2*np.pi):
     """
     return np.sin(2*patterns).reshape(len(patterns), 1)
 
+def sin_prime(patterns):
+    return 2 * np.cos(2 * patterns).reshape(len(patterns), 1)
+
 def square(patterns, start=0, stop=2*np.pi):
     return np.array([1 if np.sin(2*x) >= 0 else -1 for x in patterns]).reshape(int(stop/0.1), 1)
 

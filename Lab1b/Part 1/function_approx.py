@@ -25,7 +25,7 @@ Z_MAX = -Z_MIN
 
 
 def bell_gaussian_func(x, y):
-    return np.exp(- (x ** 2 + y ** 2) * 0.1) - 0.5
+    return np.exp(-(x ** 2 + y ** 2) * 0.1) - 0.5
 
 
 def generate_2d_gaussian(from_xy=-5, to_xy=5.01):
@@ -106,6 +106,9 @@ def main():
 
     if val:
         patterns, targets, val_patterns, val_targets = train_val_split(patterns, targets, val_p)
+
+    print(targets.shape)
+    exit()
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
 
