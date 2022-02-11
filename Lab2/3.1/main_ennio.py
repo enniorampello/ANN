@@ -31,26 +31,24 @@ def main():
     else:
         targets = square()
     patterns = np.linspace(0, 2*np.pi, int(2*np.pi/0.1)).reshape(int(2*np.pi/0.1), 1)
-    mu = init_means(NUM_NODES)
-    w = init_weights(NUM_NODES)
-    pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
-
+    mu = init_means()
+    w = init_weights()
+    pred = [forward_pass(x, mu, w)[1] for x in patterns]
+    
     phi_mat = np.zeros((NUM_NODES, patterns.shape[0]))
     for i in range(NUM_NODES):
         for j in range(patterns.shape[0]):
-            phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
+            phi_mat[i][j] = phi(abs(mu[i] - patterns[j]))
 
     w = np.linalg.inv(phi_mat @ phi_mat.T) @ phi_mat @ targets
-
-    if SINE:
-        pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
-    else:
-        pred = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
+    pred = [forward_pass(x, mu, w)[1] for x in patterns]
 
     plt.figure()
-    plt.plot(patterns, targets)
     plt.plot(patterns, pred)
     plt.show()
+
+
+
 
 
 if __name__ == '__main__':
