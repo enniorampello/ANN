@@ -14,19 +14,19 @@ from functions_MLP import *
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
 
-LR = 0.01
+LR = 0.001
 NUM_NODES = 20
-MAX_EPOCHS = 100
+MAX_EPOCHS = 1000
 SIGMA = 0.5
 
-SINE = False
+SINE = True
 
 NOISE = False
 SIGMA_NOISE = 0.1
 
 BATCH = False
-ES = True
-PATIENCE = 10
+ES = False
+PATIENCE = 50
 
 PLOT = True
 

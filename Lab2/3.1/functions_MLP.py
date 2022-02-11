@@ -84,7 +84,8 @@ def MLP(patterns, targets, val_patterns, val_targets, max_epochs, hidden_nodes, 
     _, _, _, preds = forward_pass_MLP(patterns, w, v)
     plt.plot(np.arange(len(train_errors)), train_errors)
     plt.plot(np.arange(len(val_errors)), val_errors)
+    plt.title('Error curves')
     plt.show()
-    exit()
+
     return v, w, preds
 
