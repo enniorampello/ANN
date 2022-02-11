@@ -32,7 +32,7 @@ PLOT = True
 
 # MLP params
 MLP_ = True
-VAL = False
+ES = False
 
 np.random.seed(5)
 

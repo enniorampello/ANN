@@ -17,7 +17,7 @@ def sin_prime(patterns):
     return 2 * np.cos(2 * patterns).reshape(len(patterns), 1)
 
 def square(patterns, start=0, stop=2*np.pi):
-    return np.array([1 if np.sin(2*x) >= 0 else -1 for x in patterns]).reshape(int(stop/0.1), 1)
+    return np.array([1 if np.sin(2*x) >= 0 else -1 for x in patterns]).reshape(len(patterns), 1)
 
 def phi(r, sigma):
     return np.exp(-(r**2)/(2*sigma**2))
@@ -58,14 +58,14 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
             error += abs(target - np.sum(h_out * w))
         error /= patterns.shape[0]
 
+        val_error = 0
+        for pattern, target in zip(val_patterns, val_targets):
+            h_out, val_pred = forward_pass(pattern, mu, w, sigma)
+            val_error += abs(target - np.sum(h_out * w))
+        val_error /= val_patterns.shape[0]
+        val_errors.append(val_error)
 
         if ES:
-            val_error = 0
-            for pattern, target in zip(val_patterns, val_targets):
-                h_out, val_pred = forward_pass(pattern, mu, w, sigma)
-                val_error += abs(target - np.sum(h_out * w))
-            val_error /= val_patterns.shape[0]
-            val_errors.append(val_error)
             if epoch > 1 and val_errors[-1][0] > val_errors[-2][0]:
                 patience_counter += 1
             else:

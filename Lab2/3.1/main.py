@@ -16,10 +16,10 @@ from functions_MLP import *
 
 LR = 0.01
 NUM_NODES = 20
-MAX_EPOCHS = 10000
+MAX_EPOCHS = 100
 SIGMA = 0.5
 
-SINE = True
+SINE = False
 
 NOISE = False
 SIGMA_NOISE = 0.1
@@ -32,7 +32,7 @@ PLOT = True
 
 # MLP params
 MLP_ = True
-VAL = False
+
 
 np.random.seed(5)
 
@@ -41,8 +41,6 @@ def main():
     patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
     val_patterns = np.linspace(0.05, np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
     test_patterns = np.linspace(np.pi + 0.05, 2 * np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
-
-
 
     if SINE:
         targets = sin(patterns)
@@ -58,7 +56,7 @@ def main():
         val_targets = add_noise(val_targets, SIGMA_NOISE)
         test_patterns = add_noise(test_patterns, SIGMA_NOISE)
 
-    targets = targets.reshape(targets.shape[0])
+
 
     mu = init_means(NUM_NODES)
     w = init_weights(NUM_NODES)
@@ -69,13 +67,14 @@ def main():
             phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
 
     if MLP_:
-        v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets,
-                                  np.transpose(val_patterns), val_targets,
-                                  MAX_EPOCHS, NUM_NODES, LR, VAL )
+        v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
+                                  np.transpose(val_patterns), val_targets.reshape(val_targets.shape[0]),
+                                  MAX_EPOCHS, NUM_NODES, LR, ES, PATIENCE)
 
         plt.plot(patterns, np.transpose(preds))
         plt.plot(patterns, targets)
-
+        plt.show()
+        exit()
     if BATCH:
         w = train_batch(phi_mat, targets)
     else:
@@ -85,9 +84,9 @@ def main():
 
 
     if SINE:
-        pred = [forward_pass(x, mu, w)[1] for x in patterns]
+        pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
     else:
-        pred = [1 if forward_pass(x, mu, w)[1] >= 0 else -1 for x in patterns]
+        pred = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
 
     plt.figure()
     plt.plot(patterns, targets)
