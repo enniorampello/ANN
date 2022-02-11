@@ -14,13 +14,13 @@ from functions import *
 '''
 
 LR = 0.001
-NUM_NODES = 7
+NUM_NODES = 12
 MAX_EPOCHS = 500
 SIGMA = 1
 
 SINE = True
 
-np.random.seed(3)
+np.random.seed(5)
 
 
 
@@ -40,7 +40,32 @@ def main():
         for j in range(patterns.shape[0]):
             phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
 
-    w = np.linalg.inv(phi_mat @ phi_mat.T) @ phi_mat @ targets
+
+    plt.ion()
+    fig = plt.figure()
+    ax = fig.add_subplot(111)   
+    line, = ax.plot(patterns, pred)
+    fig.canvas.draw()
+    plt.show(block=False)
+    for epoch in range(MAX_EPOCHS):
+        error = 0
+        for pattern, target in zip(patterns, targets):
+            h_out, _ = forward_pass(pattern, mu, w, SIGMA)
+            w = update_weights(target, h_out, w, LR)
+            error += abs(target - np.sum(h_out * w))
+        error /= patterns.shape[0]
+        print(f'EPOCH {epoch}\t| error {np.sum(error)}')
+
+        if epoch % 10 == 0:
+            #clear_output(wait=False)
+            pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
+            #fig = plt.figure()
+            line.set_xdata(patterns)
+            line.set_ydata(pred)
+            ax.relim() 
+            ax.autoscale_view(True,True,True)
+            fig.canvas.draw()
+            plt.pause(0.01)
 
     if SINE:
         pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
