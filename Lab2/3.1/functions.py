@@ -53,8 +53,6 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
         for pattern, target in zip(patterns, targets):
             h_out, _ = forward_pass(pattern, mu, w, sigma)
             w = update_weights(target, h_out, w, lr)
-
-
             error += abs(target - np.sum(h_out * w))
         error /= patterns.shape[0]
 

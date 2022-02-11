@@ -107,8 +107,7 @@ def main():
     if val:
         patterns, targets, val_patterns, val_targets = train_val_split(patterns, targets, val_p)
 
-    print(targets.shape)
-    exit()
+
     w = normal(0, 1, [HIDDEN_NODES, 3])
     v = normal(0, 1, HIDDEN_NODES).reshape(1, HIDDEN_NODES)
 
