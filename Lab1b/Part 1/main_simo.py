@@ -9,7 +9,7 @@ m_B = [0.0, -0.1]
 sigma_A = 0.2
 sigma_B = 0.3
 
-HIDDEN_NODES_LIST = [7]#[i+2 for i in range(20)]
+HIDDEN_NODES_LIST = [i+2 for i in range(20)]
 bias = 1
 learning_rate = 0.001
 n_epochs = 1000
@@ -226,6 +226,7 @@ def main():
     if val > 0:
         val_MSEs = []
         val_miscl = []
+
     patterns, targets, patterns_val, targets_val = get_patterns(val, perc_A=perc_A, perc_B=perc_B)
     min_MSE = 1000
     hn = 0
@@ -296,17 +297,31 @@ def main():
         if val > 0:
             val_MSEs.append(np.mean(np.array(partial_val_MSE)))
             val_miscl.append(np.mean(partial_val_miscl))
-    print(MSEs)
-    print(miscls)
-    print(val_MSEs)
-    print(val_miscl)
+    # print(hidden_nodes)
+    # print(MSEs)
+    # print(miscls)
+    # print(val_MSEs)
+    # print(val_miscl)
+
+    plt.figure()
+    plt.title(f'MSE and miscl. rate given the number of nodes (80/20% - 0%)')
+    plt.xlabel('Number of nodes')
+    plt.ylabel('MSE and miscl. rate')
+    plt.xticks(np.arange(2, 23))
+    # plt.plot(np.arange(2, len(MSEs)+2), MSEs, label='MSE')
+    plt.plot(np.arange(2, len(MSEs)+2), miscls, label='Miscl. rate %')
+    # plt.plot(np.arange(2, len(MSEs) + 2), val_MSEs, label='val MSE')
+    plt.plot(np.arange(2, len(MSEs) + 2), val_miscl, label='val Miscl. rate %')
+    plt.legend()
+    plt.show()
+
     # plt.figure()
-    # plt.title('MSE and miscl. rate given the number of nodes in the hidden layer')
+    # plt.title(f'MSE and miscl. rate given the number of nodes (80/20% - 0%)')
     # plt.xlabel('Number of nodes')
     # plt.ylabel('MSE and miscl. rate')
     # plt.xticks(np.arange(2, 23))
-    # plt.plot(np.arange(2, len(MSEs)+2), MSEs, label='MSE')
-    # plt.plot(np.arange(2, len(MSEs)+2), miscls, label='Miscl. rate %')
+    # plt.plot(np.arange(2, len(MSEs) + 2), val_MSEs, label='val MSE')
+    # plt.plot(np.arange(2, len(MSEs) + 2), val_miscl, label='val Miscl. rate %')
     # plt.legend()
     # plt.show()
 

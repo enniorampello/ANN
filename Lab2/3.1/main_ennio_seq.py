@@ -20,17 +20,25 @@ SIGMA = 0.5
 
 SINE = True
 
+NOISE = True
+SIGMA_NOISE = 0.1
+
+
 np.random.seed(5)
 
-
-
-
 def main():
+
+    patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
+
     if SINE:
-        targets = sin()
+        targets = sin(patterns)
     else:
-        targets = square()
-    patterns = np.linspace(0, 2*np.pi, int(2*np.pi/0.1)).reshape(int(2*np.pi/0.1), 1)
+        targets = square(patterns)
+
+    if NOISE:
+        targets = add_noise(targets, SIGMA_NOISE)
+
+
     mu = init_means(NUM_NODES)
     w = init_weights(NUM_NODES)
     pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
@@ -39,7 +47,6 @@ def main():
     for i in range(NUM_NODES):
         for j in range(patterns.shape[0]):
             phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
-
 
     plt.ion()
     fig = plt.figure()
