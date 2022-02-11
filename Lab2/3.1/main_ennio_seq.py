@@ -40,7 +40,6 @@ def main():
         for j in range(patterns.shape[0]):
             phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
 
-
     plt.ion()
     fig = plt.figure()
     ax = fig.add_subplot(111)   
