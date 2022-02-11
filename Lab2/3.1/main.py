@@ -69,7 +69,9 @@ def main():
             phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
 
     if MLP_:
-        v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets, np.transpose(val_patterns), val_targets, MAX_EPOCHS, NUM_NODES, LR, VAL )
+        v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets,
+                                  np.transpose(val_patterns), val_targets,
+                                  MAX_EPOCHS, NUM_NODES, LR, VAL )
 
         plt.plot(patterns, np.transpose(preds))
         plt.plot(patterns, targets)
@@ -77,7 +79,8 @@ def main():
     if BATCH:
         w = train_batch(phi_mat, targets)
     else:
-        w = train_seq(patterns, targets, w, MAX_EPOCHS, SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE)
+        w = train_seq(patterns, targets, w, MAX_EPOCHS,
+                      SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE)
 
 
 
