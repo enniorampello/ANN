@@ -82,10 +82,11 @@ def MLP(patterns, targets, val_patterns, val_targets, max_epochs, hidden_nodes, 
             v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
     _, _, _, preds = forward_pass_MLP(patterns, w, v)
-    plt.plot(np.arange(len(train_errors)), train_errors)
-    plt.plot(np.arange(len(val_errors)), val_errors)
-    plt.title('Error curves')
-    plt.show()
+
+    # plt.plot(np.arange(len(train_errors)), train_errors)
+    # plt.plot(np.arange(len(val_errors)), val_errors)
+    # plt.title('Error curves')
+    # plt.show()
 
     return v, w, preds
 

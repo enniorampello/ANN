@@ -74,7 +74,7 @@ def main():
         plt.plot(patterns, np.transpose(preds))
         plt.plot(patterns, targets)
         plt.show()
-        exit()
+
     if BATCH:
         w = train_batch(phi_mat, targets)
     else:
