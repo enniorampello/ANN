@@ -138,11 +138,15 @@ def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1
                 mu[nearest_rbf_node_idx] += get_update_of_mean(lr_cl, selected_pattern,
                                                                mu[nearest_rbf_node_idx])
 def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
-         batch=False, cl=False, lr_cl=None, es=False,
-         patience=None, MLP=False):
+         batch=False, cl=False, es=False, patience=None, MLP=False,
+         lr_cl=None, epochs_cl=None, more_winners=False):
     plt.figure()
     plt.plot(patterns, targets, label='True values')
     plt.plot(patterns, preds, label='Predictions')
+    plt.legend()
+
+    plt.xlabel('x')
+    plt.ylabel('y')
 
     # title builder
     title = f''
@@ -153,7 +157,7 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
             title += 'RBF batch mode'
         else:
             if cl:
-                title += 'RBF competitive - lr_cl {lr_cl}'
+                title += f'RBF competitive'
             else:
                 title += 'RBF seq mode'
 
@@ -161,6 +165,7 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
 
     if es:
         title += f' - es {es} - patience {patience}'
-
+    if cl:
+        title += f'\nlr_cl {lr_cl} - epochs_cl {epochs_cl} - more_winner {more_winners}'
     plt.title(title)
     plt.show()
