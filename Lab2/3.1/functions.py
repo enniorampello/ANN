@@ -69,8 +69,7 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES,
     for epoch in range(max_epochs):
         error = 0
         for pattern, target in zip(patterns, targets):
-            h_out, x = forward_pass(pattern, mu, w, sigma)
-
+            h_out, _ = forward_pass(pattern, mu, w, sigma)
             w = update_weights(target, h_out, w, lr)
             error += abs(target - np.sum(h_out * w))
         error /= patterns.shape[0]
@@ -124,8 +123,8 @@ def forward_pass(pattern, mu, w, sigma):
 
 
 def update_weights(target, h_out, w, lr):
-    w += lr * (target - np.sum(h_out * w)) * h_out
 
+    w += lr * (target - np.sum(h_out * w, axis=0)) * h_out
     return w
 
 

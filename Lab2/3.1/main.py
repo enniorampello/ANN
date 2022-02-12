@@ -14,9 +14,9 @@ from functions_MLP import *
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
 
-LR = 0.01
-NUM_NODES = 10
-MAX_EPOCHS = 100
+LR = 0.1
+NUM_NODES = 6
+MAX_EPOCHS = 500
 SIGMA = 0.5
 
 SINE = True
@@ -91,6 +91,7 @@ def main():
     for i in range(NUM_NODES):
         for j in range(patterns.shape[0]):
             phi_mat[i][j] = phi(euclidean_distance(mu[i], patterns[j]), SIGMA)
+
 
     if MLP_:
         v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
