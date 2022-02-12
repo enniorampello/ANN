@@ -15,7 +15,7 @@ from functions_MLP import *
 '''
 
 LR = 0.001
-NUM_NODES = 20
+NUM_NODES = 5
 MAX_EPOCHS = 100
 SIGMA = 0.5
 
@@ -28,7 +28,7 @@ BATCH = False
 ES = False
 PATIENCE = 50
 
-PLOT = True
+PLOT = False
 
 # MLP params
 MLP_ = False
@@ -42,38 +42,54 @@ NUM_OF_WINNERS = int(NUM_NODES / 3)
 # learning rate for competitive learning part
 LR_CL = 0.2
 
-
+import_data = True
+val_p = 0.2
 np.random.seed(5)
 
 def main():
+    if import_data:
+        train_data = np.genfromtxt('data/ballist.dat')
+        test_data = np.genfromtxt('data/balltest.dat')
 
-    patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
-    val_patterns = np.linspace(0.05, np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
-    test_patterns = np.linspace(np.pi + 0.05, 2 * np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
+        col_of_separation_patterns_targets = 2
 
-    if SINE:
-        # sine function
-        targets = sin(patterns)
-        val_targets = sin(val_patterns)
-        test_targets = sin(test_patterns)
+        patterns, targets, val_patterns, val_targets = train_val_split(train_data, val_p,
+                                                                       col_of_separation_patterns_targets)
+        test_patterns = test_data[:, :col_of_separation_patterns_targets]
+        test_targets = test_data[:, col_of_separation_patterns_targets:]
+
+        mu = init_means(NUM_NODES, import_data, patterns)
+        w = init_weights(NUM_NODES, import_data)
     else:
-        # square function
-        targets = square(patterns)
-        val_targets = square(val_patterns)
-        test_targets = square(test_patterns)
+        patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
+        val_patterns = np.linspace(0.05, np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
+        test_patterns = np.linspace(np.pi + 0.05, 2 * np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
 
-    if NOISE:
-        targets = add_noise(targets, SIGMA_NOISE)
-        val_targets = add_noise(val_targets, SIGMA_NOISE)
-        test_patterns = add_noise(test_patterns, SIGMA_NOISE)
+        if SINE:
+            # sine function
+            targets = sin(patterns)
+            val_targets = sin(val_patterns)
+            test_targets = sin(test_patterns)
+        else:
+            # square function
+            targets = square(patterns)
+            val_targets = square(val_patterns)
+            test_targets = square(test_patterns)
 
-    mu = init_means(NUM_NODES)
-    w = init_weights(NUM_NODES)
+        if NOISE:
+            targets = add_noise(targets, SIGMA_NOISE)
+            val_targets = add_noise(val_targets, SIGMA_NOISE)
+            test_patterns = add_noise(test_patterns, SIGMA_NOISE)
+
+        mu = init_means(NUM_NODES)
+        w = init_weights(NUM_NODES)
 
     phi_mat = np.zeros((NUM_NODES, patterns.shape[0]))
+
     for i in range(NUM_NODES):
         for j in range(patterns.shape[0]):
-            phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
+            phi_mat[i][j] = phi(euclidean_distance(mu[i], patterns[j]), SIGMA)
+
 
     if MLP_:
         v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
@@ -103,9 +119,8 @@ def main():
 
     if PLOT:
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
-            batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE,
-             epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER)
-
+            batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
+             more_winners=MORE_THAN_ONE_WINNER)
 
 
 if __name__ == '__main__':

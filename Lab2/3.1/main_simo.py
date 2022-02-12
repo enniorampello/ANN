@@ -28,7 +28,7 @@ BATCH = False
 ES = False
 PATIENCE = 50
 
-PLOT = True
+PLOT = False
 
 # MLP params
 MLP_ = False
@@ -51,9 +51,12 @@ def main():
         train_data = np.genfromtxt('data/ballist.dat')
         test_data = np.genfromtxt('data/balltest.dat')
 
-        patterns, targets, val_patterns, val_targets = train_val_split(train_data, val_p)
-        test_patterns = test_data[:, :2]
-        test_targets = test_data[:, 2:4]
+        col_of_separation_patterns_targets = 2
+
+        patterns, targets, val_patterns, val_targets = train_val_split(train_data, val_p,
+                                                                       col_of_separation_patterns_targets)
+        test_patterns = test_data[:, :col_of_separation_patterns_targets]
+        test_targets = test_data[:, col_of_separation_patterns_targets:]
 
         mu = init_means(NUM_NODES, import_data, patterns)
         w = init_weights(NUM_NODES, import_data)
@@ -82,9 +85,11 @@ def main():
         w = init_weights(NUM_NODES)
 
     phi_mat = np.zeros((NUM_NODES, patterns.shape[0]))
+
     for i in range(NUM_NODES):
         for j in range(patterns.shape[0]):
-            phi_mat[i][j] = phi(abs(mu[i] - patterns[j]), SIGMA)
+            phi_mat[i][j] = phi(euclidean_distance(mu[i], patterns[j]), SIGMA)
+
 
     if MLP_:
         v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
