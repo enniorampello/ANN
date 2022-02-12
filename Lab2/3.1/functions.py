@@ -137,6 +137,7 @@ def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1
                 nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
                 mu[nearest_rbf_node_idx] += get_update_of_mean(lr_cl, selected_pattern,
                                                                mu[nearest_rbf_node_idx])
+
 def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
          batch=False, cl=False, es=False, patience=None, MLP=False,
          lr_cl=None, epochs_cl=None, more_winners=False):
@@ -169,3 +170,9 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
         title += f'\nlr_cl {lr_cl} - epochs_cl {epochs_cl} - more_winner {more_winners}'
     plt.title(title)
     plt.show()
+
+def train_val_split(data, val_p):
+    np.random.shuffle(data)
+    val = data[:int(val_p * data.shape[0]), :]
+    train = data[int(val_p * data.shape[0]):, :]
+    return train[:, :2], train[:, 2:], val[:, :2], val[:, 2:]
