@@ -101,3 +101,6 @@ def print_function(f, start=0, stop=2*np.pi):
     plt.figure()
     plt.plot(x, f)
     plt.show()
+
+def euclidean_distance(a, b):
+    return np.linalg.norm(a - b)
