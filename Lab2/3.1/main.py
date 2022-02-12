@@ -14,9 +14,9 @@ from functions_MLP import *
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
 
-LR = 0.001
-NUM_NODES = 5
-MAX_EPOCHS = 1000
+LR = 0.01
+NUM_NODES = 10
+MAX_EPOCHS = 100
 SIGMA = 0.5
 
 SINE = True
@@ -38,7 +38,7 @@ MAX_EPOCHS_CL = 10
 COMPETITIVE = True
 # strategy to avoid dead units
 MORE_THAN_ONE_WINNER = True
-NUM_OF_WINNERS = int(NUM_NODES / 3)
+NUM_OF_WINNERS = int(NUM_NODES / 4)
 # learning rate for competitive learning part
 LR_CL = 0.2
 

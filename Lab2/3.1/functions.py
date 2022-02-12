@@ -125,6 +125,7 @@ def forward_pass(pattern, mu, w, sigma):
 
 def update_weights(target, h_out, w, lr):
     w += lr * (target - np.sum(h_out * w)) * h_out
+
     return w
 
 
