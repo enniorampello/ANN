@@ -56,6 +56,7 @@ def main():
         test_targets = test_data[:, 2:4]
 
         mu = init_means(NUM_NODES, import_data, patterns)
+        w = init_weights(NUM_NODES, import_data)
     else:
         patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
         val_patterns = np.linspace(0.05, np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
@@ -78,7 +79,7 @@ def main():
             test_patterns = add_noise(test_patterns, SIGMA_NOISE)
 
         mu = init_means(NUM_NODES)
-    w = init_weights(NUM_NODES)
+        w = init_weights(NUM_NODES)
 
     phi_mat = np.zeros((NUM_NODES, patterns.shape[0]))
     for i in range(NUM_NODES):

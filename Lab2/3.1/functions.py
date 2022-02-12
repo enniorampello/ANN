@@ -30,8 +30,13 @@ def init_means(num_nodes, import_data=False, patterns=None):
     else:
         return np.linspace(0, 2*np.pi, num_nodes).reshape(num_nodes, 1)
 
-def init_weights(num_nodes):
-    return np.random.normal(0, scale=1, size=(num_nodes, 1))
+def init_weights(num_nodes, import_data=False):
+    if import_data:
+        kmeans = KMeans(n_clusters=num_nodes, random_state=0).fit(patterns)
+        return kmeans.cluster_centers_
+    else:
+        return np.random.normal(0, scale=1, size=(num_nodes, 1))
+
 
 def add_noise(points, sigma):
     noise = np.random.normal(0, scale=sigma, size=(len(points), 1))
