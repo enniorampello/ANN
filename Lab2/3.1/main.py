@@ -48,6 +48,7 @@ np.random.seed(5)
 
 def main():
     if import_data:
+        # data -> ballistic experiments
         train_data = np.genfromtxt('data/ballist.dat')
         test_data = np.genfromtxt('data/balltest.dat')
 
@@ -62,6 +63,7 @@ def main():
         mu = init_means(NUM_NODES, import_data, patterns)
         w = init_weights(NUM_NODES, import_data)
     else:
+        # data -> sine or square functions
         patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
         val_patterns = np.linspace(0.05, np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
         test_patterns = np.linspace(np.pi + 0.05, 2 * np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
@@ -91,7 +93,6 @@ def main():
         for j in range(patterns.shape[0]):
             phi_mat[i][j] = phi(euclidean_distance(mu[i], patterns[j]), SIGMA)
 
-
     if MLP_:
         v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
                                   np.transpose(val_patterns), val_targets.reshape(val_targets.shape[0]),
@@ -118,9 +119,11 @@ def main():
     elif SINE:
         # sine function
         preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
+        test_preds = [forward_pass(x, mu, w, SIGMA)[1] for x in test_patterns]
     else:
         # square function
         preds = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
+        test_preds = [forward_pass(x, mu, w, SIGMA)[1] for x in test_patterns]
 
     if PLOT:
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,

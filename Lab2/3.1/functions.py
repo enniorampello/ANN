@@ -219,7 +219,7 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
             title += 'RBF batch mode'
         else:
             if cl:
-                title += f'RBF competitive'
+                title += f'RBF seq competitive'
             else:
                 title += 'RBF seq mode'
 
@@ -239,3 +239,18 @@ def train_val_split(data, val_p, col_of_separation_patterns_targets):
     train = data[int(val_p * data.shape[0]):, :]
     return train[:, :col_of_separation_patterns_targets], train[:, col_of_separation_patterns_targets:], \
            val[:, :col_of_separation_patterns_targets], val[:, col_of_separation_patterns_targets:]
+
+
+def plot_test_results(test_patterns, test_targets, test_preds):
+    # currently, it works only for sine and square function
+    plt.figure()
+    plt.title('test set')
+    plt.plot(test_patterns, test_targets, label='True values - test set')
+    plt.plot(test_patterns, test_preds, label='Predictions - test set')
+    plt.legend()
+    plt.show()
+
+
+def mse(preds, targets):
+    errors = preds - targets
+    return np.sum(errors ** 2) / len(preds)
