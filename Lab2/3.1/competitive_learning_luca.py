@@ -15,7 +15,7 @@ from functions import *
 
 LR = 0.01
 NUM_NODES = 9
-MAX_EPOCHS = 2
+MAX_EPOCHS = 1000
 SIGMA = 0.5
 
 SINE = True
@@ -47,31 +47,31 @@ def main():
         targets = add_noise(targets, SIGMA_NOISE)
 
     mu = init_means(NUM_NODES)
+    for epoch_idx in range(MAX_EPOCHS):
+        # competitive learning
+        patterns_idx = [i for i in range(patterns.shape[0])]
+        # shuffle pattern indexes
+        np.random.shuffle(patterns_idx)
+        for i in range(patterns.shape[0]):
+            # at each iteration of CL a training vector is randomly selected from the data
+            selected_pattern = patterns[patterns_idx[i]]
+            # find the closest RBF unit
+            dist_from_rbf_nodes = []
+            for node_idx in range(NUM_NODES):
+                # not sure that the mus are the weight...
+                dist_from_rbf_nodes.append(euclidean_distance(selected_pattern, mu[node_idx]))
 
-    # competitive learning
-    patterns_idx = [i for i in range(patterns.shape[0])]
-    # shuffle pattern indexes
-    np.random.shuffle(patterns_idx)
-    for i in range(patterns.shape[0]):
-        # at each iteration of CL a training vector is randomly selected from the data
-        selected_pattern = patterns[patterns_idx[i]]
-        # find the closest RBF unit
-        dist_from_rbf_nodes = []
-        for node_idx in range(NUM_NODES):
-            # not sure that the mus are the weight...
-            dist_from_rbf_nodes.append(euclidean_distance(selected_pattern, mu[node_idx]))
-
-        if MORE_THAN_ONE_WINNER:
-            # n closest RBF units - winners
-            nearest_rbf_nodes_idx = np.asarray(dist_from_rbf_nodes).argsort()[:NUM_OF_WINNERS]
-            for winner_idx in nearest_rbf_nodes_idx:
+            if MORE_THAN_ONE_WINNER:
+                # n closest RBF units - winners
+                nearest_rbf_nodes_idx = np.asarray(dist_from_rbf_nodes).argsort()[:NUM_OF_WINNERS]
+                for winner_idx in nearest_rbf_nodes_idx:
+                    # not sure
+                    mu[winner_idx] += LR_CL * (selected_pattern - mu[winner_idx])
+            else:
+                # single closest RBF unit - winner
+                nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
                 # not sure
-                mu[winner_idx] += LR_CL * (selected_pattern - mu[winner_idx])
-        else:
-            # single closest RBF unit - winner
-            nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
-            # not sure
-            mu[nearest_rbf_node_idx] += LR_CL * (selected_pattern - mu[nearest_rbf_node_idx])
+                mu[nearest_rbf_node_idx] += LR_CL * (selected_pattern - mu[nearest_rbf_node_idx])
 
     w = init_weights(NUM_NODES)
     pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
