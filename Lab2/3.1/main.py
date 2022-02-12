@@ -14,9 +14,9 @@ from functions_MLP import *
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
 
-LR = 0.001
+LR = 0.01
 NUM_NODES = 20
-MAX_EPOCHS = 100
+MAX_EPOCHS = 10
 SIGMA = 0.5
 
 SINE = True
@@ -36,6 +36,7 @@ MLP_ = False
 # competitive learning constants
 MAX_EPOCHS_CL = 10
 COMPETITIVE = True
+# strategy to avoid dead units
 MORE_THAN_ONE_WINNER = True
 NUM_OF_WINNERS = int(NUM_NODES / 3)
 # learning rate for competitive learning part
@@ -51,10 +52,12 @@ def main():
     test_patterns = np.linspace(np.pi + 0.05, 2 * np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
 
     if SINE:
+        # sine function
         targets = sin(patterns)
         val_targets = sin(val_patterns)
         test_targets = sin(test_patterns)
     else:
+        # square function
         targets = square(patterns)
         val_targets = square(val_patterns)
         test_targets = square(test_patterns)
@@ -63,8 +66,6 @@ def main():
         targets = add_noise(targets, SIGMA_NOISE)
         val_targets = add_noise(val_targets, SIGMA_NOISE)
         test_patterns = add_noise(test_patterns, SIGMA_NOISE)
-
-
 
     mu = init_means(NUM_NODES)
     w = init_weights(NUM_NODES)
@@ -89,36 +90,16 @@ def main():
         # sequential - on-line
         if COMPETITIVE:
             # competitive learning
-            for _ in range(MAX_EPOCHS_CL):
-                patterns_idx = [i for i in range(patterns.shape[0])]
-                # shuffle pattern indexes
-                np.random.shuffle(patterns_idx)
-                for i in range(patterns.shape[0]):
-                    # at each iteration of CL a training vector is randomly selected from the data
-                    selected_pattern = patterns[patterns_idx[i]]
-                    # find the closest RBF unit
-                    dist_from_rbf_nodes = []
-                    for node_idx in range(NUM_NODES):
-                        # not sure that the mus are the weight...
-                        dist_from_rbf_nodes.append(euclidean_distance(selected_pattern, mu[node_idx]))
+            competitive_learning(patterns, mu, LR_CL, NUM_NODES, MORE_THAN_ONE_WINNER, NUM_OF_WINNERS, MAX_EPOCHS_CL)
 
-                    if MORE_THAN_ONE_WINNER:
-                        # n closest RBF units - winners
-                        nearest_rbf_nodes_idx = np.asarray(dist_from_rbf_nodes).argsort()[:NUM_OF_WINNERS]
-                        for winner_idx in nearest_rbf_nodes_idx:
-                            # not sure
-                            mu[winner_idx] += LR_CL * (selected_pattern - mu[winner_idx])
-                    else:
-                        # single closest RBF unit - winner
-                        nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
-                        # not sure
-                        mu[nearest_rbf_node_idx] += LR_CL * (selected_pattern - mu[nearest_rbf_node_idx])
         w = train_seq(patterns, targets, w, MAX_EPOCHS,
                       SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE)
 
     if SINE:
+        # sine function
         pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
     else:
+        # square function
         pred = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
 
     plt.figure()
