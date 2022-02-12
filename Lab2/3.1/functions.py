@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-def sin(patterns, start=0, stop=2*np.pi):
+
+def sin(patterns, start=0, stop=2 * np.pi):
     """
 
     Args:
@@ -12,16 +13,19 @@ def sin(patterns, start=0, stop=2*np.pi):
     Returns:
         np.array: array containing the sequence of points
     """
-    return np.sin(2*patterns).reshape(len(patterns), 1)
+    return np.sin(2 * patterns).reshape(len(patterns), 1)
+
 
 def sin_prime(patterns):
     return 2 * np.cos(2 * patterns).reshape(len(patterns), 1)
 
-def square(patterns, start=0, stop=2*np.pi):
-    return np.array([1 if np.sin(2*x) >= 0 else -1 for x in patterns]).reshape(len(patterns), 1)
+
+def square(patterns, start=0, stop=2 * np.pi):
+    return np.array([1 if np.sin(2 * x) >= 0 else -1 for x in patterns]).reshape(len(patterns), 1)
+
 
 def phi(r, sigma):
-    return np.exp(-(r**2)/(2*sigma**2))
+    return np.exp(-(r ** 2) / (2 * sigma ** 2))
 
 def init_means(num_nodes, import_data=False, patterns=None):
     if import_data:
@@ -41,8 +45,10 @@ def add_noise(points, sigma):
     noise = np.random.normal(0, scale=sigma, size=(len(points), 1))
     return points + noise
 
+
 def train_batch(phi_mat, targets):
     return np.linalg.inv(phi_mat @ phi_mat.T) @ phi_mat @ targets
+
 
 def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_patterns, val_targets, patience):
 
@@ -84,16 +90,17 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
         print(f'EPOCH {epoch}\t| error {error[0]} | val error {val_errors[-1][0]}')
 
         if epoch % 10 == 0 and plot:
-            #clear_output(wait=False)
+            # clear_output(wait=False)
             pred = [forward_pass(x, mu, w, sigma)[1] for x in patterns]
-            #fig = plt.figure()
+            # fig = plt.figure()
             line.set_xdata(patterns)
             line.set_ydata(pred)
             ax.relim()
-            ax.autoscale_view(True,True,True)
+            ax.autoscale_view(True, True, True)
             fig.canvas.draw()
             plt.pause(0.01)
     return w
+
 
 def forward_pass(pattern, mu, w, sigma):
     h_in = np.abs(mu - pattern)
@@ -101,27 +108,34 @@ def forward_pass(pattern, mu, w, sigma):
     o_out = np.sum(w * h_out)
     return h_out, o_out
 
+
 def update_weights(target, h_out, w, lr):
     w += lr * (target - np.sum(h_out * w)) * h_out
     return w
 
-def print_function(f, start=0, stop=2*np.pi):
-    x = np.linspace(start, start+stop, int(stop/0.1))
+
+def print_function(f, start=0, stop=2 * np.pi):
+    x = np.linspace(start, start + stop, int(stop / 0.1))
     plt.figure()
     plt.plot(x, f)
     plt.show()
 
+
 def euclidean_distance(a, b):
     return np.linalg.norm(a - b)
+
 
 def get_patterns_indexes(patterns):
     return [i for i in range(patterns.shape[0])]
 
+
 def get_first_n_argmins(list, n):
     return np.asarray(list).argsort()[:n]
 
+
 def get_update_of_mean(lr, single_pattern, mu):
     return lr * (single_pattern - mu)
+
 
 def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1, max_epochs=10):
     for _ in range(max_epochs):
@@ -146,6 +160,7 @@ def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1
                 nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
                 mu[nearest_rbf_node_idx] += get_update_of_mean(lr_cl, selected_pattern,
                                                                mu[nearest_rbf_node_idx])
+
 
 def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
          batch=False, cl=False, es=False, patience=None, MLP=False,
@@ -180,8 +195,10 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
     plt.title(title)
     plt.show()
 
-def train_val_split(data, val_p):
+
+def train_val_split(data, val_p, col_of_separation_patterns_targets):
     np.random.shuffle(data)
     val = data[:int(val_p * data.shape[0]), :]
     train = data[int(val_p * data.shape[0]):, :]
-    return train[:, :2], train[:, 2:], val[:, :2], val[:, 2:]
+    return train[:, :col_of_separation_patterns_targets], train[:, col_of_separation_patterns_targets:], \
+           val[:, :col_of_separation_patterns_targets], val[:, col_of_separation_patterns_targets:]
