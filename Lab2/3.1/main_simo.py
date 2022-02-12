@@ -28,7 +28,7 @@ BATCH = False
 ES = False
 PATIENCE = 50
 
-PLOT = False
+PLOT = True
 
 # MLP params
 MLP_ = False
@@ -120,7 +120,7 @@ def main():
     if PLOT:
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE,
-             epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER)
+             epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER, import_data=import_data)
 
 
 

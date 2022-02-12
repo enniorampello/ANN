@@ -28,7 +28,7 @@ BATCH = False
 ES = False
 PATIENCE = 50
 
-PLOT = False
+PLOT = True
 
 # MLP params
 MLP_ = False
@@ -42,7 +42,7 @@ NUM_OF_WINNERS = int(NUM_NODES / 3)
 # learning rate for competitive learning part
 LR_CL = 0.2
 
-import_data = True
+import_data = False
 val_p = 0.2
 np.random.seed(5)
 
@@ -55,6 +55,7 @@ def main():
 
         patterns, targets, val_patterns, val_targets = train_val_split(train_data, val_p,
                                                                        col_of_separation_patterns_targets)
+
         test_patterns = test_data[:, :col_of_separation_patterns_targets]
         test_targets = test_data[:, col_of_separation_patterns_targets:]
 
@@ -108,9 +109,13 @@ def main():
             competitive_learning(patterns, mu, LR_CL, NUM_NODES, MORE_THAN_ONE_WINNER, NUM_OF_WINNERS, MAX_EPOCHS_CL)
 
         w = train_seq(patterns, targets, w, MAX_EPOCHS,
-                      SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE)
+                      SIGMA, mu, LR, PLOT, ES, val_patterns,
+                      val_targets, PATIENCE, import_data)
 
-    if SINE:
+    if import_data:
+        preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
+
+    elif SINE:
         # sine function
         preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
     else:
@@ -120,7 +125,7 @@ def main():
     if PLOT:
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=import_data)
 
 
 if __name__ == '__main__':

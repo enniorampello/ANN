@@ -50,9 +50,10 @@ def train_batch(phi_mat, targets):
     return np.linalg.inv(phi_mat @ phi_mat.T) @ phi_mat @ targets
 
 
-def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_patterns, val_targets, patience):
+def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES,
+              val_patterns, val_targets, patience, import_data):
 
-    if plot:
+    if plot and not import_data:
         pred = [forward_pass(x, mu, w, sigma)[1] for x in patterns]
         plt.ion()
         fig = plt.figure()
@@ -66,7 +67,8 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
     for epoch in range(max_epochs):
         error = 0
         for pattern, target in zip(patterns, targets):
-            h_out, _ = forward_pass(pattern, mu, w, sigma)
+            h_out, x = forward_pass(pattern, mu, w, sigma)
+
             w = update_weights(target, h_out, w, lr)
             error += abs(target - np.sum(h_out * w))
         error /= patterns.shape[0]
@@ -89,7 +91,7 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
 
         print(f'EPOCH {epoch}\t| error {error[0]} | val error {val_errors[-1][0]}')
 
-        if epoch % 10 == 0 and plot:
+        if epoch % 10 == 0 and plot and not import_data:
             # clear_output(wait=False)
             pred = [forward_pass(x, mu, w, sigma)[1] for x in patterns]
             # fig = plt.figure()
@@ -103,9 +105,19 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
 
 
 def forward_pass(pattern, mu, w, sigma):
+
     h_in = np.abs(mu - pattern)
+
+    if h_in.shape[1] != 1:
+        new_h_in = np.zeros((h_in.shape[0], 1))
+        for row in range(h_in.shape[0]):
+            for col in range(h_in.shape[1]):
+                new_h_in[row] = np.sqrt(np.sum(h_in[row]**2))
+        h_in = new_h_in
+
     h_out = phi(h_in, sigma)
-    o_out = np.sum(w * h_out)
+    o_out = np.sum(w * h_out, axis=0)
+
     return h_out, o_out
 
 
@@ -164,10 +176,40 @@ def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1
 
 def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
          batch=False, cl=False, es=False, patience=None, MLP=False,
-         lr_cl=None, epochs_cl=None, more_winners=False):
-    plt.figure()
-    plt.plot(patterns, targets, label='True values')
-    plt.plot(patterns, preds, label='Predictions')
+         lr_cl=None, epochs_cl=None, more_winners=False,
+         import_data=False, val_patterns=None, val_targets=None,
+         test_patterns=None, test_targets=None, centroids=None):
+
+    patterns = np.array(patterns)
+    targets = np.array(targets)
+    preds = np.array(preds)
+
+
+    if import_data:
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        # ax.scatter(patterns[:, 0], patterns[:, 1], preds[:, 0], cmap='Greens')
+        # ax.scatter(patterns[:, 0], patterns[:, 1], preds[:, 0], cmap='Greens')
+
+        fig = plt.figure()
+        plt.axis('off')
+        ax = fig.add_subplot(projection='3d')
+        X, Y, Z = patterns[:, 0], patterns[:, 1], preds[:, 0]
+
+        ax.plot_surface(X, Y, Z)
+
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        plt.show()
+        exit()
+
+    else:
+        plt.figure()
+        plt.plot(patterns, targets, label='True values')
+        plt.plot(patterns, preds, label='Predictions')
+
+
     plt.legend()
 
     plt.xlabel('x')
