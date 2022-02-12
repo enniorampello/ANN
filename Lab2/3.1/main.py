@@ -33,7 +33,7 @@ PLOT = True
 # MLP params
 MLP_ = False
 
-# competitive learning constants
+# competitive learning constants - only if BATCH = False
 MAX_EPOCHS_CL = 10
 COMPETITIVE = True
 # strategy to avoid dead units
@@ -42,12 +42,12 @@ NUM_OF_WINNERS = int(NUM_NODES / 4)
 # learning rate for competitive learning part
 LR_CL = 0.2
 
-import_data = True
+ballistic_data = True
 val_p = 0.2
 np.random.seed(5)
 
 def main():
-    if import_data:
+    if ballistic_data:
         # data -> ballistic experiments
         train_data = np.genfromtxt('data/ballist.dat')
         test_data = np.genfromtxt('data/balltest.dat')
@@ -56,12 +56,11 @@ def main():
 
         patterns, targets, val_patterns, val_targets = train_val_split(train_data, val_p,
                                                                        col_of_separation_patterns_targets)
-
         test_patterns = test_data[:, :col_of_separation_patterns_targets]
         test_targets = test_data[:, col_of_separation_patterns_targets:]
 
-        mu = init_means(NUM_NODES, import_data, patterns)
-        w = init_weights(NUM_NODES, import_data)
+        mu = init_means(NUM_NODES, ballistic_data, patterns)
+        w = init_weights(NUM_NODES, ballistic_data)
     else:
         # data -> sine or square functions
         patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
@@ -110,25 +109,30 @@ def main():
             competitive_learning(patterns, mu, LR_CL, NUM_NODES, MORE_THAN_ONE_WINNER, NUM_OF_WINNERS, MAX_EPOCHS_CL)
 
         w = train_seq(patterns, targets, w, MAX_EPOCHS,
-                      SIGMA, mu, LR, PLOT, ES, val_patterns,
-                      val_targets, PATIENCE, import_data)
-
-    if import_data:
+                      SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE, ballistic_data)
+    if ballistic_data:
         preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
-
-    elif SINE:
-        # sine function
-        preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
-        test_preds = [forward_pass(x, mu, w, SIGMA)[1] for x in test_patterns]
     else:
-        # square function
-        preds = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
+        # sine or square function
+        if SINE:
+            # sine function
+            preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
+        else:
+            # square function
+            preds = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
+
         test_preds = [forward_pass(x, mu, w, SIGMA)[1] for x in test_patterns]
+
+        mse_test_set = mse(test_preds, test_targets)
+        print("mse test set: {}".format(mse_test_set))
 
     if PLOT:
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=import_data)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data)
+
+        # currently, plot_test_results works only for sine or square function, not for ballistic data
+        plot_test_results(test_patterns, test_targets, test_preds)
 
 
 if __name__ == '__main__':
