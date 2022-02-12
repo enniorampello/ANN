@@ -32,8 +32,7 @@ def init_means(num_nodes, import_data=False, patterns=None):
 
 def init_weights(num_nodes, import_data=False):
     if import_data:
-        kmeans = KMeans(n_clusters=num_nodes, random_state=0).fit(patterns)
-        return kmeans.cluster_centers_
+        return np.random.normal(0, scale=1, size=(num_nodes, 2))
     else:
         return np.random.normal(0, scale=1, size=(num_nodes, 1))
 
