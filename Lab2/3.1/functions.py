@@ -105,6 +105,38 @@ def print_function(f, start=0, stop=2*np.pi):
 def euclidean_distance(a, b):
     return np.linalg.norm(a - b)
 
+def get_patterns_indexes(patterns):
+    return [i for i in range(patterns.shape[0])]
+
+def get_first_n_argmins(list, n):
+    return np.asarray(list).argsort()[:n]
+
+def get_update_of_mean(lr, single_pattern, mu):
+    return lr * (single_pattern - mu)
+
+def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1, max_epochs=10):
+    for _ in range(max_epochs):
+        patterns_idx = get_patterns_indexes(patterns)
+        # shuffle pattern indexes
+        np.random.shuffle(patterns_idx)
+        for i in range(patterns.shape[0]):
+            # at each iteration of CL a training vector is randomly selected from the data
+            selected_pattern = patterns[patterns_idx[i]]
+            # find the closest RBF unit
+            dist_from_rbf_nodes = []
+            for node_idx in range(n_nodes):
+                dist_from_rbf_nodes.append(euclidean_distance(selected_pattern, mu[node_idx]))
+
+            if more_winners:
+                # n closest RBF units - winners
+                nearest_rbf_nodes_idx = get_first_n_argmins(dist_from_rbf_nodes, n_winners)
+                for winner_idx in nearest_rbf_nodes_idx:
+                    mu[winner_idx] += get_update_of_mean(lr_cl, selected_pattern, mu[winner_idx])
+            else:
+                # single closest RBF unit - winner
+                nearest_rbf_node_idx = np.argmin(dist_from_rbf_nodes)
+                mu[nearest_rbf_node_idx] += get_update_of_mean(lr_cl, selected_pattern,
+                                                               mu[nearest_rbf_node_idx])
 def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
          batch=False, cl=False, lr_cl=None, es=False,
          patience=None, MLP=False):
