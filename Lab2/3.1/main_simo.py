@@ -15,7 +15,7 @@ from functions_MLP import *
 '''
 
 LR = 0.001
-NUM_NODES = 20
+NUM_NODES = 5
 MAX_EPOCHS = 100
 SIGMA = 0.5
 
@@ -55,6 +55,7 @@ def main():
         test_patterns = test_data[:, :2]
         test_targets = test_data[:, 2:4]
 
+        mu = init_means(NUM_NODES, import_data, patterns)
     else:
         patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
         val_patterns = np.linspace(0.05, np.pi, int(np.pi / 0.1)).reshape(int(np.pi / 0.1), 1)
@@ -76,7 +77,7 @@ def main():
             val_targets = add_noise(val_targets, SIGMA_NOISE)
             test_patterns = add_noise(test_patterns, SIGMA_NOISE)
 
-    mu = init_means(NUM_NODES)
+        mu = init_means(NUM_NODES)
     w = init_weights(NUM_NODES)
 
     phi_mat = np.zeros((NUM_NODES, patterns.shape[0]))
