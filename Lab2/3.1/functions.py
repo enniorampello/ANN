@@ -253,3 +253,11 @@ def plot_test_results(test_patterns, test_targets, test_preds):
 def mse(preds, targets):
     errors = preds - targets
     return np.sum(errors ** 2) / len(preds)
+
+
+def get_continuous_predictions(mu, w, sigma, patterns):
+    return [forward_pass(x, mu, w, sigma)[1] for x in patterns]
+
+
+def get_discrete_predictions(mu, w, sigma, patterns):
+    return [1 if forward_pass(x, mu, w, sigma)[1] >= 0 else -1 for x in patterns]

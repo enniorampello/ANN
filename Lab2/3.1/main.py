@@ -112,17 +112,17 @@ def main():
         w = train_seq(patterns, targets, w, MAX_EPOCHS,
                       SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE, ballistic_data)
     if ballistic_data:
-        preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
+        preds = get_continuous_predictions(mu, w, SIGMA, patterns)
     else:
         # sine or square function
         if SINE:
             # sine function
-            preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
+            preds = get_continuous_predictions(mu, w, SIGMA, patterns)
         else:
             # square function
-            preds = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
+            preds = get_discrete_predictions(mu, w, SIGMA, patterns)
 
-        test_preds = [forward_pass(x, mu, w, SIGMA)[1] for x in test_patterns]
+        test_preds = get_continuous_predictions(mu, w, SIGMA, patterns)
 
         mse_test_set = mse(test_preds, test_targets)
         print("mse test set: {}".format(mse_test_set))
