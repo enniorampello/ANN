@@ -164,9 +164,9 @@ def plot_errors(MSE_errors, miscl_errors):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
     fig, ax1 = plt.subplots()
-    mse_line, = ax1.plot(MSE_errors, color='red', label='MSE')
+    mse_line, = ax1.plot(MSE_errors,,
     ax2 = ax1.twinx()
-    miscl_line, = ax2.plot(miscl_errors, color='blue', label='Misclassification rate')
+    miscl_line, = ax2.plot(miscl_errors,,
     ax2.legend(handles=[mse_line, miscl_line])
     fig.tight_layout()
     plt.show()
@@ -176,9 +176,9 @@ def plot_train_val(MSE_errors_train, MSE_errors_val):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
     fig, ax1 = plt.subplots()
-    mse_line, = ax1.plot(MSE_errors_train, color='red', label='Training MSE')
+    mse_line, = ax1.plot(MSE_errors_train,,
     ax2 = ax1.twinx()
-    mse_line_val, = ax2.plot(MSE_errors_val, color='blue', label='Validation MSE')
+    mse_line_val, = ax2.plot(MSE_errors_val,,
     ax2.legend(handles=[mse_line, mse_line_val])
     fig.tight_layout()
     plt.show()

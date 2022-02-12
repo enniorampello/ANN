@@ -104,3 +104,31 @@ def print_function(f, start=0, stop=2*np.pi):
 
 def euclidean_distance(a, b):
     return np.linalg.norm(a - b)
+
+def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
+         batch=False, cl=False, lr_cl=None, es=False,
+         patience=None, MLP=False):
+    plt.figure()
+    plt.plot(patterns, targets, label='True values')
+    plt.plot(patterns, preds, label='Predictions')
+
+    # title builder
+    title = f''
+    if MLP:
+        title += 'MLP'
+    else:
+        if batch:
+            title += 'RBF batch mode'
+        else:
+            if cl:
+                title += 'RBF competitive - lr_cl {lr_cl}'
+            else:
+                title += 'RBF seq mode'
+
+    title += f' - hn {num_nodes} - epochs {max_epochs} - lr {lr}'
+
+    if es:
+        title += f' - es {es} - patience {patience}'
+
+    plt.title(title)
+    plt.show()

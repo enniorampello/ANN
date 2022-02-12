@@ -78,10 +78,9 @@ def main():
         v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
                                   np.transpose(val_patterns), val_targets.reshape(val_targets.shape[0]),
                                   MAX_EPOCHS, NUM_NODES, LR, ES, PATIENCE)
-
-        plt.plot(patterns, np.transpose(preds))
-        plt.plot(patterns, targets)
-        plt.show()
+        if PLOT:
+            plot(patterns, targets, np.transpose(preds), LR, NUM_NODES, MAX_EPOCHS,
+                 MLP=True, es=ES, patience=PATIENCE)
 
     if BATCH:
         w = train_batch(phi_mat, targets)
@@ -117,14 +116,14 @@ def main():
                       SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE)
 
     if SINE:
-        pred = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
+        preds = [forward_pass(x, mu, w, SIGMA)[1] for x in patterns]
     else:
-        pred = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
+        preds = [1 if forward_pass(x, mu, w, SIGMA)[1] >= 0 else -1 for x in patterns]
 
-    plt.figure()
-    plt.plot(patterns, targets)
-    plt.plot(patterns, pred)
-    plt.show()
+    if PLOT:
+        plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
+            batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE)
+
 
 
 if __name__ == '__main__':

@@ -51,7 +51,7 @@ def main():
     plt.ion()
     fig = plt.figure()
     ax = fig.add_subplot(111)   
-    line, = ax.plot(patterns, pred)
+    line, = ax.plot(patterns, pred,,
     fig.canvas.draw()
     plt.show(block=False)
     for epoch in range(MAX_EPOCHS):

@@ -85,9 +85,9 @@ def plot_errors(MSE_errors, miscl_errors):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
     fig, ax1 = plt.subplots()
-    mse_line, = ax1.plot(MSE_errors, color='red', label='MSE')
+    mse_line, = ax1.plot(MSE_errors,,
     ax2 = ax1.twinx()
-    miscl_line, = ax2.plot(miscl_errors, color='blue', label='Misclassification rate')
+    miscl_line, = ax2.plot(miscl_errors,,
     ax2.legend(handles=[mse_line, miscl_line])
     fig.tight_layout()
     plt.show()
