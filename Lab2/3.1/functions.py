@@ -188,22 +188,14 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
 
 
     if import_data:
-        fig = plt.figure()
-        ax = fig.add_subplot(projection='3d')
-        # ax.scatter(patterns[:, 0], patterns[:, 1], preds[:, 0], cmap='Greens')
-        # ax.scatter(patterns[:, 0], patterns[:, 1], preds[:, 0], cmap='Greens')
+        for c in range(targets.shape[1]):
+            fig = plt.figure()
+            ax = fig.add_subplot(projection='3d')
+            ax.scatter(patterns[:, 0], patterns[:, 1], preds[:, c], label='preds')
+            ax.scatter(patterns[:, 0], patterns[:, 1], targets[:, c], label='True')
+            plt.legend()
+            plt.show()
 
-        fig = plt.figure()
-        plt.axis('off')
-        ax = fig.add_subplot(projection='3d')
-        X, Y, Z = patterns[:, 0], patterns[:, 1], preds[:, 0]
-
-        ax.plot_surface(X, Y, Z)
-
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        plt.show()
 
 
     else:
@@ -237,7 +229,7 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
     if cl:
         title += f'\nlr_cl {lr_cl} - epochs_cl {epochs_cl} - more_winner {more_winners}'
     plt.title(title)
-    plt.show()
+    # plt.show()
 
 
 def train_val_split(data, val_p, col_of_separation_patterns_targets):

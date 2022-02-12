@@ -16,7 +16,7 @@ from functions_MLP import *
 
 LR = 0.001
 NUM_NODES = 5
-MAX_EPOCHS = 100
+MAX_EPOCHS = 1000
 SIGMA = 0.5
 
 SINE = True
