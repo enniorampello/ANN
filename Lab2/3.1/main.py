@@ -42,7 +42,7 @@ NUM_OF_WINNERS = int(NUM_NODES / 3)
 # learning rate for competitive learning part
 LR_CL = 0.2
 
-import_data = False
+import_data = True
 val_p = 0.2
 np.random.seed(5)
 

@@ -27,12 +27,14 @@ def square(patterns, start=0, stop=2 * np.pi):
 def phi(r, sigma):
     return np.exp(-(r ** 2) / (2 * sigma ** 2))
 
+
 def init_means(num_nodes, import_data=False, patterns=None):
     if import_data:
         kmeans = KMeans(n_clusters=num_nodes, random_state=0).fit(patterns)
         return kmeans.cluster_centers_
     else:
         return np.linspace(0, 2*np.pi, num_nodes).reshape(num_nodes, 1)
+
 
 def init_weights(num_nodes, import_data=False):
     if import_data:
@@ -202,7 +204,7 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         plt.show()
-        exit()
+
 
     else:
         plt.figure()
