@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
-NH1 = 5# wait for simo
+NH1 = 5  # wait for simo
 
 TRAIN_P = 0.8
 BIAS = 1.
@@ -42,16 +42,18 @@ def mackey_glass_generator(n_samples=1600, beta=0.2, gamma=0.1, n=10, tau=25):
 
     return x_values
 
+
 def data_from_mackey_glass(x, idx_0=301, idx_final=1500):
     data = []
     labels = []
     for t in range(idx_0, idx_final + 1):
-        data.append([x[t-20], x[t-15], x[t-10], x[t-5], x[t]])
-        labels.append(x[t+5])
+        data.append([x[t - 20], x[t - 15], x[t - 10], x[t - 5], x[t]])
+        labels.append(x[t + 5])
 
     return np.array(data), np.array(labels)
 
-def train_test_val_split(data,labels, train_p):
+
+def train_test_val_split(data, labels, train_p):
     '''
     Last 200 for test, then we choose train/validation proportion
     '''
@@ -66,14 +68,17 @@ def train_test_val_split(data,labels, train_p):
 
     return train, train_labels, val, val_labels, test, test_labels
 
-def add_noise(x, sigma, idx_0=301, idx_final=301+int(1000 * TRAIN_P)):
-    for t in range(idx_0, idx_final+1):
+
+def add_noise(x, sigma, idx_0=301, idx_final=301 + int(1000 * TRAIN_P)):
+    for t in range(idx_0, idx_final + 1):
         x[t] += np.random.normal(scale=sigma)
     return x
+
 
 def plot_time_series(x):
     plt.plot(x)
     plt.show()
+
 
 def preds_accuracy_plot(y_test, preds, hidden_nodes, iter, sigma):
     mse = mean_squared_error(y_test, preds)
@@ -97,7 +102,7 @@ def main(a, b, my_dicts, sigma, l2, lr):
     mses = []
     weights_means = []
     weights_stds = []
-    for iter in range(MAX_ITER):      
+    for iter in range(MAX_ITER):
         model = Sequential()
         model.add(Input(shape=(5,)))
         for i in range(len(hidden_nodes)):
@@ -109,7 +114,7 @@ def main(a, b, my_dicts, sigma, l2, lr):
                 bias_initializer=initializers.initializers_v2.Constant(BIAS),
                 kernel_regularizer=regularizers.l2(l2=l2),
                 bias_regularizer=regularizers.l2(l2=l2),
-                ))
+            ))
         model.add(tf.keras.layers.Dense(1, activation='linear'))
 
         # lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
@@ -122,22 +127,20 @@ def main(a, b, my_dicts, sigma, l2, lr):
         model.compile(
             loss='mse',
             optimizer=optimizer
-            )
+        )
 
-
-        callbacks= []
+        callbacks = []
         if ES:
             es = EarlyStopping(monitor='val_loss', patience=10, min_delta=0.00001)
             callbacks.append(es)
 
-
         model.fit(x_train, y_train,
-                    batch_size=BATCH_SIZE,
-                    epochs=EPOCHS,
-                    verbose='auto',
-                    callbacks=callbacks,
-                    validation_data=(x_val, y_val),
-                    workers=8)
+                  batch_size=BATCH_SIZE,
+                  epochs=EPOCHS,
+                  verbose='auto',
+                  callbacks=callbacks,
+                  validation_data=(x_val, y_val),
+                  workers=8)
 
         weights = model.get_weights()
         for i in range(len(weights)):
@@ -162,12 +165,13 @@ def main(a, b, my_dicts, sigma, l2, lr):
     my_dicts.append(dic)
     print(my_dicts)
 
+
 if __name__ == '__main__':
     nodes_first = [3, 4, 5]
     nodes_second = [3, 6, 9]
     lrs = [0.01, 0.005]
     l2s = [0.01, 0.001, 0.0002]
-    
+
     my_dicts = []
     a = NH1
     for b in nodes_second:
