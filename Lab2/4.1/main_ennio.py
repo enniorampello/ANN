@@ -43,7 +43,12 @@ def euclidean_distance(a, b):
 
 
 def main():
-    w = init_weights()
+    ANIMALS = True
+
+    if ANIMALS:
+        w = init_weights()
+    else:
+        w = init_weights(size=(10, 2))
 
 
 
