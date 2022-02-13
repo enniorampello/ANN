@@ -3,16 +3,6 @@ import matplotlib.pyplot as plt
 from IPython.display import clear_output
 from functions import *
 
-'''
-1. Choose a number of nodes for the hidden layer.
-2. Initialise the means of the Gaussians for the hidden nodes (mu).
-3. Initialise the output weights. (normal distribution?) (w)
-3. Start training the network:
-    a. Feed the training set X into the network.
-    b. For each node, compute phi(x(t) - w[i]).
-    c. Compute the output as a weighted sum of the outputs of the hidden nodes.
-'''
-
 LR = 0.001
 NUM_NODES = 7
 MAX_EPOCHS = 500
@@ -21,8 +11,6 @@ SIGMA = 1
 SINE = True
 
 np.random.seed(3)
-
-
 
 
 def main():
@@ -46,9 +34,6 @@ def main():
     plt.figure()
     plt.plot(patterns, pred)
     plt.show()
-
-
-
 
 
 if __name__ == '__main__':
