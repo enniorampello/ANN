@@ -1,5 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from IPython.display import clear_output
 from functions import *
 from functions_MLP import *
