@@ -35,7 +35,7 @@ MLP_ = False
 
 # competitive learning constants - only if BATCH = False
 MAX_EPOCHS_CL = 10
-COMPETITIVE = False
+COMPETITIVE = True
 # strategy to avoid dead units
 MORE_THAN_ONE_WINNER = True
 NUM_OF_WINNERS = int(NUM_NODES / 4)
@@ -125,17 +125,27 @@ def main():
             # square function
             preds = get_discrete_predictions(mu, w, SIGMA, patterns)
 
-        test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
+    test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
+    val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
 
-        mse_test_set = mse(test_preds, test_targets)
-        print("mse test set: {}".format(mse_test_set))
+    mse_test_set = mse(test_preds, test_targets)
+    print("MSE test set: {}".format(mse_test_set))
 
     if PLOT:
+        # training set
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu)
 
-        plot_test_results(test_patterns, test_targets, test_preds)
+        # test set
+        plot(test_patterns, test_targets, test_preds, LR, NUM_NODES, MAX_EPOCHS,
+             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
+             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu, test=True)
+
+        # validation set
+        plot(val_patterns, val_targets, val_preds, LR, NUM_NODES, MAX_EPOCHS,
+             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
+             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu, validation=True)
 
 
 if __name__ == '__main__':

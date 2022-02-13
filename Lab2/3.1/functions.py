@@ -178,42 +178,18 @@ def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1
                 mu[nearest_rbf_node_idx] += get_update_of_mean(lr_cl, selected_pattern,
                                                                mu[nearest_rbf_node_idx])
 
-
-def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
-         batch=False, cl=False, es=False, patience=None, MLP=False,
-         lr_cl=None, epochs_cl=None, more_winners=False,
-         import_data=False, val_patterns=None, val_targets=None,
-         test_patterns=None, test_targets=None, centroids=None):
-
-    patterns = np.array(patterns)
-    targets = np.array(targets)
-    preds = np.array(preds)
-
-
-    if import_data:
-        for c in range(targets.shape[1]):
-            fig = plt.figure()
-            ax = fig.add_subplot(projection='3d')
-            ax.scatter(patterns[:, 0], patterns[:, 1], preds[:, c], label='preds')
-            ax.scatter(patterns[:, 0], patterns[:, 1], targets[:, c], label='True')
-            plt.legend()
-            plt.show()
-
-
-
-    else:
-        plt.figure()
-        plt.plot(patterns, targets, label='True values')
-        plt.plot(patterns, preds, label='Predictions')
-
-
-    plt.legend()
-
-    plt.xlabel('x')
-    plt.ylabel('y')
-
+def title_builder(MLP, batch, cl, num_nodes, max_epochs, lr,
+                  es, patience, lr_cl, epochs_cl, more_winners, test, validation):
     # title builder
     title = f''
+
+    if test:
+        title += 'Test - '
+    elif validation:
+        title += 'Validation - '
+    else:
+        title += 'Training - '
+
     if MLP:
         title += 'MLP'
     else:
@@ -230,18 +206,8 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
     if es:
         title += f' - es {es} - patience {patience}'
     if cl:
-        title += f'\nlr_cl {lr_cl} - epochs_cl {epochs_cl} - more_winner {more_winners}'
-    plt.title(title)
-    # plt.show()
-
-
-def train_val_split(data, val_p, col_of_separation_patterns_targets):
-    np.random.shuffle(data)
-    val = data[:int(val_p * data.shape[0]), :]
-    train = data[int(val_p * data.shape[0]):, :]
-    return train[:, :col_of_separation_patterns_targets], train[:, col_of_separation_patterns_targets:], \
-           val[:, :col_of_separation_patterns_targets], val[:, col_of_separation_patterns_targets:]
-
+        title += f'\nlr cl {lr_cl} - epochs cl {epochs_cl} - more winners {more_winners}'
+    return title
 
 def plot_test_results(test_patterns, test_targets, test_preds):
     # currently, it works only for sine and square function
@@ -251,6 +217,66 @@ def plot_test_results(test_patterns, test_targets, test_preds):
     plt.plot(test_patterns, test_preds, label='Predictions - test set')
     plt.legend()
     plt.show()
+
+def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
+         batch=False, cl=False, es=False, patience=None, MLP=False,
+         lr_cl=None, epochs_cl=None, more_winners=False,
+         import_data=False, val_patterns=None, val_preds=None,
+         centroids=None, test=False, validation=False):
+
+    patterns = np.array(patterns)
+    targets = np.array(targets)
+    preds = np.array(preds)
+
+    val_patterns = np.array(val_patterns)
+    val_preds = np.array(val_preds)
+
+    # angle, velocity
+    # distance, height
+
+    if import_data:
+        for c in range(targets.shape[1]):
+            fig = plt.figure()
+            ax = fig.add_subplot(projection='3d')
+            ax.set_xlabel('Angle')
+            ax.set_ylabel('Velocity')
+
+            if c == 0:
+                ax.set_zlabel('Distance')
+            else:
+                ax.set_zlabel('Height')
+
+            ax.scatter(patterns[:, 0], patterns[:, 1], preds[:, c], label='Preds', c='k')
+            ax.scatter(patterns[:, 0], patterns[:, 1], targets[:, c], label='True')
+            ax.scatter(centroids[:, 0], centroids[:, 1], 0, s=100, marker='x', c='r')
+            # if val_patterns is not None:
+            #     ax.scatter(val_patterns[:, 0], val_patterns[:, 1], val_preds[:, c], label='Validation')
+            plt.title(title_builder(MLP, batch, cl, num_nodes, max_epochs, lr,
+                        es, patience, lr_cl, epochs_cl, more_winners, test, validation))
+            plt.legend()
+            plt.show()
+
+
+    else:
+        plt.figure()
+        plt.plot(patterns, targets, label='True values')
+        plt.plot(patterns, preds, label='Predictions')
+        # if val_patterns is not None:
+        #     plt.plot(val_patterns, val_preds, label='Validation')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.legend()
+        plt.title(title_builder(MLP, batch, cl, num_nodes, max_epochs, lr,
+                                es, patience, lr_cl, epochs_cl, more_winners, test, validation))
+        plt.show()
+
+
+def train_val_split(data, val_p, col_of_separation_patterns_targets):
+    np.random.shuffle(data)
+    val = data[:int(val_p * data.shape[0]), :]
+    train = data[int(val_p * data.shape[0]):, :]
+    return train[:, :col_of_separation_patterns_targets], train[:, col_of_separation_patterns_targets:], \
+           val[:, :col_of_separation_patterns_targets], val[:, col_of_separation_patterns_targets:]
 
 
 def mse(preds, targets):
