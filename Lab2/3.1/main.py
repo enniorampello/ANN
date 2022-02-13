@@ -16,7 +16,7 @@ from functions_MLP import *
 
 LR = 0.1
 NUM_NODES = 6
-MAX_EPOCHS = 500
+MAX_EPOCHS = 10
 SIGMA = 0.5
 
 SINE = True
@@ -122,18 +122,27 @@ def main():
             # square function
             preds = get_discrete_predictions(mu, w, SIGMA, patterns)
 
-        test_preds = get_continuous_predictions(mu, w, SIGMA, patterns)
+    test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
+    val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
 
-        mse_test_set = mse(test_preds, test_targets)
-        print("mse test set: {}".format(mse_test_set))
+    mse_test_set = mse(test_preds, test_targets)
+    print("MSE test set: {}".format(mse_test_set))
 
     if PLOT:
+        # training set
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu)
 
-        # currently, plot_test_results works only for sine or square function, not for ballistic data
-        plot_test_results(test_patterns, test_targets, test_preds)
+        # test set
+        plot(test_patterns, test_targets, test_preds, LR, NUM_NODES, MAX_EPOCHS,
+             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
+             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu, test=True)
+
+        # validation set
+        plot(val_patterns, val_targets, val_preds, LR, NUM_NODES, MAX_EPOCHS,
+             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
+             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu, validation=True)
 
 
 if __name__ == '__main__':
