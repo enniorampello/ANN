@@ -44,8 +44,14 @@ def euclidean_distance(a, b):
 
 def main():
     ANIMALS = True
+    SALESMAN =
+    PARTY = False
 
     if ANIMALS:
+        data = np.genfromtxt('data/animals.dat', delimiter=',')
+        names = np.loadtxt('data/animalnames.txt', dtype=str)
+        for i in range(len(names)):
+            names[i] = names[i].replace("'", '')
         w = init_weights()
     else:
         w = init_weights(size=(10, 2))
