@@ -179,7 +179,7 @@ def competitive_learning(patterns, mu, lr_cl, n_nodes, more_winners, n_winners=1
                                                                mu[nearest_rbf_node_idx])
 
 def title_builder(MLP, batch, cl, num_nodes, max_epochs, lr,
-                  es, patience, lr_cl, epochs_cl, more_winners, test, validation):
+                  es, patience, lr_cl, epochs_cl, more_winners, test, validation, learning_curves=False):
     # title builder
     title = f''
 
@@ -187,6 +187,8 @@ def title_builder(MLP, batch, cl, num_nodes, max_epochs, lr,
         title += 'Test - '
     elif validation:
         title += 'Validation - '
+    elif learning_curves:
+        title += 'Learning curves - '
     else:
         title += 'Training - '
 
@@ -292,7 +294,11 @@ def get_discrete_predictions(mu, w, sigma, patterns):
     return [1 if forward_pass(x, mu, w, sigma)[1] >= 0 else -1 for x in patterns]
 
 
-def plot_train_val(mse_errors_train, mse_errors_val, ballistic_data):
+def plot_train_val(mse_errors_train, mse_errors_val, ballistic_data, lr, num_nodes, max_epochs,
+         batch=False, cl=False, es=False, patience=None, MLP=False,
+         lr_cl=None, epochs_cl=None, more_winners=False,
+         import_data=False, val_patterns=None, val_preds=None,
+         centroids=None, test=False, validation=False):
     if ballistic_data:
         mse_errors_train = np.mean(mse_errors_train, axis=1)
         mse_errors_val = np.mean(mse_errors_val, axis=1)
@@ -300,6 +306,8 @@ def plot_train_val(mse_errors_train, mse_errors_val, ballistic_data):
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
     fig, ax1 = plt.subplots()
+    plt.title(title_builder(MLP, batch, cl, num_nodes, max_epochs, lr, es, patience, lr_cl, epochs_cl, more_winners,
+                            test, validation, learning_curves=True))
     mse_line, = ax1.plot(mse_errors_train, color='red', label='Training MSE')
     ax2 = ax1.twinx()
     mse_line_val, = ax2.plot(mse_errors_val, color='blue', label='Validation MSE')

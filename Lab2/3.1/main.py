@@ -113,7 +113,11 @@ def main():
         w, train_errors, val_errors = train_seq(patterns, targets, w, MAX_EPOCHS, SIGMA, mu, LR, PLOT, ES, val_patterns,
                                                 val_targets, PATIENCE, BALLISTIC_DATA)
         # plot learning curves
-        plot_train_val(train_errors, val_errors, ballistic_data=BALLISTIC_DATA)
+        plot_train_val(train_errors, val_errors, ballistic_data=BALLISTIC_DATA, lr=LR, num_nodes=NUM_NODES, max_epochs=MAX_EPOCHS,
+                       batch=False, cl=COMPETITIVE, es=ES, patience=PATIENCE, MLP=False,
+                       lr_cl=LR_CL, epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER,
+                       import_data=BALLISTIC_DATA)
+        #plot_train_val(train_errors, val_errors, ballistic_data=BALLISTIC_DATA)
     if BALLISTIC_DATA:
         preds = get_continuous_predictions(mu, w, SIGMA, patterns)
     else:
@@ -135,17 +139,17 @@ def main():
         # training set
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu)
 
         # test set
         plot(test_patterns, test_targets, test_preds, LR, NUM_NODES, MAX_EPOCHS,
              batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu, test=True)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu, test=True)
 
         # validation set
         plot(val_patterns, val_targets, val_preds, LR, NUM_NODES, MAX_EPOCHS,
              batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data, centroids=mu, validation=True)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu, validation=True)
 
 
 if __name__ == '__main__':
