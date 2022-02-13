@@ -117,7 +117,6 @@ def main():
                        batch=False, cl=COMPETITIVE, es=ES, patience=PATIENCE, MLP=False,
                        lr_cl=LR_CL, epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER,
                        import_data=BALLISTIC_DATA)
-        #plot_train_val(train_errors, val_errors, ballistic_data=BALLISTIC_DATA)
     if BALLISTIC_DATA:
         preds = get_continuous_predictions(mu, w, SIGMA, patterns)
     else:
