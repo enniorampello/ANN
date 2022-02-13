@@ -1,4 +1,5 @@
 import numpy as np
+from functions import *
 
 LR = 0.2
 
@@ -43,8 +44,8 @@ def euclidean_distance(a, b):
 
 
 def main():
-    ANIMALS = True
-    SALESMAN =
+    ANIMALS = False
+    SALESMAN = True
     PARTY = False
 
     if ANIMALS:
@@ -52,9 +53,24 @@ def main():
         names = np.loadtxt('data/animalnames.txt', dtype=str)
         for i in range(len(names)):
             names[i] = names[i].replace("'", '')
-        w = init_weights()
-    else:
+
+        w = init_weights(size=(100, 84))
+
+    if SALESMAN:
+        data = get_city_matrix()
+
         w = init_weights(size=(10, 2))
+
+    if PARTY:
+        data = np.genfromtxt('data/votes.dat', delimiter=',')
+        sex = np.genfromtxt('data/mpsex.dat', comments="%")
+        party = np.genfromtxt('data/mpparty.dat', comments="%")
+        districts = np.genfromtxt('data/mpdistrict.dat', comments="%")
+        names = np.loadtxt('data/mpnames.txt', dtype=str, delimiter='\n')
+
+
+        for i in range(len(names)):
+            names[i] = names[i].replace("'", '')
 
 
 if __name__ == '__main__':
