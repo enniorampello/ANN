@@ -35,19 +35,20 @@ MLP_ = False
 
 # competitive learning constants - only if BATCH = False
 MAX_EPOCHS_CL = 10
-COMPETITIVE = True
+COMPETITIVE = False
 # strategy to avoid dead units
 MORE_THAN_ONE_WINNER = True
 NUM_OF_WINNERS = int(NUM_NODES / 4)
 # learning rate for competitive learning part
 LR_CL = 0.2
 
-ballistic_data = True
+BALLISTIC_DATA = True
+# percentage of val set -> only if BALLISTIC_DATA = True
 val_p = 0.2
 np.random.seed(5)
 
 def main():
-    if ballistic_data:
+    if BALLISTIC_DATA:
         # data -> ballistic experiments
         train_data = np.genfromtxt('data/ballist.dat')
         test_data = np.genfromtxt('data/balltest.dat')
@@ -59,8 +60,8 @@ def main():
         test_patterns = test_data[:, :col_of_separation_patterns_targets]
         test_targets = test_data[:, col_of_separation_patterns_targets:]
 
-        mu = init_means(NUM_NODES, ballistic_data, patterns)
-        w = init_weights(NUM_NODES, ballistic_data)
+        mu = init_means(NUM_NODES, BALLISTIC_DATA, patterns)
+        w = init_weights(NUM_NODES, BALLISTIC_DATA)
     else:
         # data -> sine or square functions
         patterns = np.linspace(0, 2 * np.pi, int(2 * np.pi / 0.1)).reshape(int(2 * np.pi / 0.1), 1)
@@ -109,9 +110,11 @@ def main():
             # competitive learning
             competitive_learning(patterns, mu, LR_CL, NUM_NODES, MORE_THAN_ONE_WINNER, NUM_OF_WINNERS, MAX_EPOCHS_CL)
 
-        w = train_seq(patterns, targets, w, MAX_EPOCHS,
-                      SIGMA, mu, LR, PLOT, ES, val_patterns, val_targets, PATIENCE, ballistic_data)
-    if ballistic_data:
+        w, train_errors, val_errors = train_seq(patterns, targets, w, MAX_EPOCHS, SIGMA, mu, LR, PLOT, ES, val_patterns,
+                                                val_targets, PATIENCE, BALLISTIC_DATA)
+        # plot learning curves
+        plot_train_val(train_errors, val_errors, ballistic_data=BALLISTIC_DATA)
+    if BALLISTIC_DATA:
         preds = get_continuous_predictions(mu, w, SIGMA, patterns)
     else:
         # sine or square function
@@ -122,7 +125,7 @@ def main():
             # square function
             preds = get_discrete_predictions(mu, w, SIGMA, patterns)
 
-        test_preds = get_continuous_predictions(mu, w, SIGMA, patterns)
+        test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
 
         mse_test_set = mse(test_preds, test_targets)
         print("mse test set: {}".format(mse_test_set))
@@ -130,9 +133,8 @@ def main():
     if PLOT:
         plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=ballistic_data)
+             more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA)
 
-        # currently, plot_test_results works only for sine or square function, not for ballistic data
         plot_test_results(test_patterns, test_targets, test_preds)
 
 
