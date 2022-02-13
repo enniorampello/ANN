@@ -16,8 +16,16 @@ def update_weights(pattern, w, neigh_size):
             min_dist = dist
             idx = i
     neighbors_idxs = get_neighbors_idxs(idx, neigh_size, w.shape[0])
-    
 
+
+def neighbourhood_kernel(t, winner, loser, sigma_0, tau):
+    sigma = sigma_0 * np.exp(-t**2/tau)
+    h = np.exp(-(np.power(euclidean_distance(winner, loser), 2))/(2 * np.power(sigma, 2)))
+    return h
+
+
+def learning_rate_decay(t, lr_0, tau):
+    return lr_0 * np.exp(-t/tau)
     
 def get_neighbors_idxs(winner_idx, neigh_size, num_nodes):
     idxs = []
@@ -35,7 +43,12 @@ def euclidean_distance(a, b):
 
 
 def main():
-    w = init_weights()
+    ANIMALS = True
+
+    if ANIMALS:
+        w = init_weights()
+    else:
+        w = init_weights(size=(10, 2))
 
 
 
