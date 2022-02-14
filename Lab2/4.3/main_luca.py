@@ -16,7 +16,7 @@ def main():
     # load data
     # 0 = no-vote; 1 = yes-vote; 0.5 = missing vote
     # each row -is one mp; each col is one vote
-    votes = get_votes(VOTES_PATH, VOTES_SHAPE)
+    votes = get_votes(path=VOTES_PATH, shape=VOTES_SHAPE)
     # each elem of parties, genders, names is the party, gender, name of the correspondent mp
 
     # 0=no party, 1='m', 2='fp', 3='s', 4='v', 5='mp', 6='kd', 7='c'
