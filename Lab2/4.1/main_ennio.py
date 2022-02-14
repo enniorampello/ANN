@@ -1,14 +1,12 @@
-from lib2to3.pygram import pattern_symbols
-from tkinter.font import names
 import numpy as np
 
 
 LR = 0.2
 MAX_EPOCHS = 20
 
+
 def get_patterns():
     patterns_str = str(np.loadtxt('Lab2/4.1/data/animals.dat', dtype=str))
-    patterns = np.zeros((32, 84), dtype=int)
     patterns = np.array(patterns_str.split(','), dtype=int).reshape((32, 84))
     return patterns
 
@@ -63,7 +61,6 @@ def euclidean_distance(a, b):
     return np.linalg.norm(a - b)
 
 
-
 def main():
     patterns = get_patterns()
     names = get_names()
@@ -80,7 +77,6 @@ def main():
         result[names[i]] = winning_idx
     result = dict(sorted(result.items(), key=lambda item: item[1]))
     print(result)
-
 
 
 
