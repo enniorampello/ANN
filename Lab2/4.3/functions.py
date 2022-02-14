@@ -27,7 +27,7 @@ def get_districts(path):
 
 
 def get_names(path):
-    names = np.loadtxt(path, dtype=str, delimiter='\n')
+    names = np.loadtxt(path, dtype=str, delimiter='\n', encoding='latin-1')
     for i in range(len(names)):
         names[i] = names[i].replace("'", '')
     return names
