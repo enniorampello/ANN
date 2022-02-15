@@ -14,7 +14,7 @@ from functions_MLP import *
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
 
-LR = 0.1
+LR = 0.01
 NUM_NODES = 6
 MAX_EPOCHS = 500
 SIGMA = 0.5
@@ -24,25 +24,25 @@ SINE = True
 NOISE = False
 SIGMA_NOISE = 0.1
 
-BATCH = False
+BATCH = True
 ES = False
 PATIENCE = 50
 
-PLOT = True
+PLOT = False
 
 # MLP params
 MLP_ = False
 
 # competitive learning constants - only if BATCH = False
 MAX_EPOCHS_CL = 10
-COMPETITIVE = True
+COMPETITIVE = False
 # strategy to avoid dead units
 MORE_THAN_ONE_WINNER = True
 NUM_OF_WINNERS = int(NUM_NODES / 4)
 # learning rate for competitive learning part
 LR_CL = 0.2
 
-BALLISTIC_DATA = True
+BALLISTIC_DATA = False
 # percentage of val set -> only if BALLISTIC_DATA = True
 val_p = 0.2
 np.random.seed(5)
@@ -102,7 +102,7 @@ def main():
             plot(patterns, targets, np.transpose(preds), LR, NUM_NODES, MAX_EPOCHS,
                  MLP=True, es=ES, patience=PATIENCE)
 
-    if BATCH:
+    elif BATCH:
         w = train_batch(phi_mat, targets)
     else:
         # sequential - on-line
@@ -117,6 +117,7 @@ def main():
                        batch=False, cl=COMPETITIVE, es=ES, patience=PATIENCE, MLP=False,
                        lr_cl=LR_CL, epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER,
                        import_data=BALLISTIC_DATA)
+
     if BALLISTIC_DATA:
         preds = get_continuous_predictions(mu, w, SIGMA, patterns)
     else:
@@ -131,6 +132,7 @@ def main():
     test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
     val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
 
+    resid_error_test_set = residual_error(test_preds, test_targets)
     mse_test_set = mse(test_preds, test_targets)
     print("MSE test set: {}".format(mse_test_set))
 

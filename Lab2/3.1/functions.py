@@ -52,6 +52,9 @@ def train_batch(phi_mat, targets):
     return np.linalg.inv(phi_mat @ phi_mat.T) @ phi_mat @ targets
 
 
+def residual_error(test_preds, test_targets):
+    return sum(abs(test_preds-test_targets)) / test_preds.shape[0]
+
 def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_patterns, val_targets, patience,
               import_data):
 

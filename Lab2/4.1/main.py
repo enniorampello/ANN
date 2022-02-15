@@ -6,13 +6,13 @@ MAX_EPOCHS = 20
 
 
 def get_patterns():
-    patterns_str = str(np.loadtxt('Lab2/4.1/data/animals.dat', dtype=str))
+    patterns_str = str(np.loadtxt('data/animals.dat', dtype=str))
     patterns = np.array(patterns_str.split(','), dtype=int).reshape((32, 84))
     return patterns
 
 
 def get_names():
-    names = np.loadtxt('Lab2/4.1/data/animalnames.txt', dtype=str)
+    names = np.loadtxt('data/animalnames.txt', dtype=str)
     for i in range(len(names)):
         names[i] = names[i].replace("'", '')
     return names
@@ -50,7 +50,7 @@ def learning_rate_decay(t, lr_0, tau):
 def get_neighbors_idxs(winner_idx, neigh_size, num_nodes):
     idxs = []
     for i in range(num_nodes):
-        if abs(i - winner_idx) <= int(neigh_size/2): # or \
+        if abs(i - winner_idx) <= round(neigh_size/2): # or \
             # num_nodes - i + winner_idx <= int(neigh_size/2) or \
             #     num_nodes + 1 - winner_idx <= int(neigh_size/2):
             idxs.append(i)
