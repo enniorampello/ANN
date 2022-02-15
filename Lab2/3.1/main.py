@@ -134,6 +134,7 @@ def main():
 
     resid_error_test_set = residual_error(test_preds, test_targets)
     mse_test_set = mse(test_preds, test_targets)
+    print("Residual test set: {}".format(resid_error_test_set))
     print("MSE test set: {}".format(mse_test_set))
 
     if PLOT:
