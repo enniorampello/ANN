@@ -1,5 +1,6 @@
 import numpy as np
 import fileinput
+import matplotlib
 import matplotlib.pyplot as plt
 from functions import *
 from tabulate import tabulate
@@ -15,6 +16,8 @@ PARTIES_PATH = "Lab2/4.1/data/mpparty.dat"
 GENDERS_PATH = "Lab2/4.1/data/mpsex.dat"
 DISTRICTS_PATH = "Lab2/4.1/data/mpdistrict.dat"
 NAMES_PATH = "Lab2/4.1/data/mpnames.txt"
+
+parties_names = {-1: '', 0: 'np', 1: 'm', 2: 'fp', 3: 's', 4: 'v', 5: 'mp', 6: 'kd', 7: 'c'}
 
 
 def init_weights(size=(100, 84)):
@@ -99,8 +102,9 @@ def main():
             if len(grid[i][j]) > 0:
                 grid[i][j] = most_common(grid[i][j])
             else:
-                grid[i][j] = ''
+                grid[i][j] = -1
     print(tabulate(grid, tablefmt='fancy_grid'))
+    heatmap(grid)
 
 
 if __name__ == '__main__':
