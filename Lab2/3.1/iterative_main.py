@@ -15,11 +15,11 @@ from functions_MLP import *
 '''
 
 LR = 0.01
-NUM_NODES = 8
+
 MAX_EPOCHS = 500
 SIGMA = 0.5
 
-SINE = True
+SINE = False
 
 NOISE = False
 SIGMA_NOISE = 0.1
@@ -28,7 +28,7 @@ BATCH = True
 ES = False
 PATIENCE = 50
 
-PLOT = False
+PLOT = True
 
 # MLP params
 MLP_ = False
@@ -38,16 +38,16 @@ MAX_EPOCHS_CL = 10
 COMPETITIVE = False
 # strategy to avoid dead units
 MORE_THAN_ONE_WINNER = True
-NUM_OF_WINNERS = int(NUM_NODES / 4)
+# NUM_OF_WINNERS = int(NUM_NODES / 4)
 # learning rate for competitive learning part
 LR_CL = 0.2
 
 BALLISTIC_DATA = False
 # percentage of val set -> only if BALLISTIC_DATA = True
 val_p = 0.2
-np.random.seed(5)
 
-def main():
+
+def main(NUM_NODES):
     if BALLISTIC_DATA:
         # data -> ballistic experiments
         train_data = np.genfromtxt('data/ballist.dat')
@@ -120,23 +120,28 @@ def main():
 
     if BALLISTIC_DATA:
         preds = get_continuous_predictions(mu, w, SIGMA, patterns)
+        test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
+        val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
     else:
         # sine or square function
         if SINE:
             # sine function
             preds = get_continuous_predictions(mu, w, SIGMA, patterns)
+            test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
+            val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
         else:
             # square function
             preds = get_discrete_predictions(mu, w, SIGMA, patterns)
+            test_preds = get_discrete_predictions(mu, w, SIGMA, test_patterns)
+            val_preds = get_discrete_predictions(mu, w, SIGMA, val_patterns)
 
-    test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
-    val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
+
 
     resid_error_test_set = residual_error(test_preds, test_targets)
     mse_test_set = mse(test_preds, test_targets)
 
-    print("Residual test set: {}".format(resid_error_test_set))
-    print("MSE test set: {}".format(mse_test_set))
+    # print("Residual test set: {}".format(resid_error_test_set))
+    # print("MSE test set: {}".format(mse_test_set))
 
     if PLOT:
         # training set
@@ -149,11 +154,18 @@ def main():
              batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
              more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu, test=True)
 
-        # validation set
+        # # validation set
         plot(val_patterns, val_targets, val_preds, LR, NUM_NODES, MAX_EPOCHS,
              batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
              more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu, validation=True)
 
+    return resid_error_test_set
 
 if __name__ == '__main__':
-    main()
+
+    np.random.seed(5)
+
+    NUM_NODES_LIST = [x for x in np.arange(1, 20)]
+
+    for NUM_NODES in NUM_NODES_LIST:
+        print(NUM_NODES, main(NUM_NODES))
