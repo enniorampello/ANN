@@ -28,7 +28,7 @@ BATCH = True
 ES = False
 PATIENCE = 50
 
-PLOT = True
+PLOT = False
 
 # MLP params
 MLP_ = False
@@ -165,7 +165,7 @@ if __name__ == '__main__':
 
     np.random.seed(5)
 
-    NUM_NODES_LIST = [x for x in np.arange(1, 20)]
+    NUM_NODES_LIST = [x for x in np.arange(1, 30)]
 
     for NUM_NODES in NUM_NODES_LIST:
         print(NUM_NODES, main(NUM_NODES))

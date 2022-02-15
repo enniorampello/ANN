@@ -120,17 +120,22 @@ def main():
 
     if BALLISTIC_DATA:
         preds = get_continuous_predictions(mu, w, SIGMA, patterns)
+        test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
+        val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
+
     else:
         # sine or square function
         if SINE:
             # sine function
             preds = get_continuous_predictions(mu, w, SIGMA, patterns)
+            test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
+            val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
+
         else:
             # square function
             preds = get_discrete_predictions(mu, w, SIGMA, patterns)
-
-    test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
-    val_preds = get_continuous_predictions(mu, w, SIGMA, val_patterns)
+            test_preds = get_discrete_predictions(mu, w, SIGMA, test_patterns)
+            val_preds = get_discrete_predictions(mu, w, SIGMA, val_patterns)
 
     resid_error_test_set = residual_error(test_preds, test_targets)
     mse_test_set = mse(test_preds, test_targets)
