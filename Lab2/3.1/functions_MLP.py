@@ -39,12 +39,16 @@ def MSE(preds, targets):
     errors = errors[0]
     return np.sum(errors ** 2) / len(preds)
 
-def MLP(patterns, targets, val_patterns, val_targets, max_epochs, hidden_nodes, learning_rate, es, patience):
+def MLP(patterns, targets, val_patterns, val_targets, max_epochs, hidden_nodes, learning_rate, es, patience,
+        test_patterns):
     bias = np.ones(patterns.shape)
     patterns = np.concatenate((patterns, bias))
 
     val_bias = np.ones(val_patterns.shape)
     val_patterns = np.concatenate((val_patterns, val_bias))
+
+    test_bias = np.ones(test_patterns.shape)
+    test_patterns = np.concatenate((test_patterns, test_bias))
 
     w = normal(0, 1, [hidden_nodes, patterns.shape[0]])
     v = normal(0, 1, hidden_nodes).reshape(1, hidden_nodes)
@@ -60,6 +64,7 @@ def MLP(patterns, targets, val_patterns, val_targets, max_epochs, hidden_nodes, 
     for epoch in range(max_epochs):
             h_in, h_out, o_in, o_out = forward_pass_MLP(patterns, w, v)
             # e = np.sum(np.abs(o_out-targets))/len(targets)
+
             e = MSE(o_out, targets)
             train_errors.append(e)
 
@@ -73,7 +78,8 @@ def MLP(patterns, targets, val_patterns, val_targets, max_epochs, hidden_nodes, 
                 if patience_counter >= patience:
                     print('Early stopping!!')
                     _, _, _, preds = forward_pass_MLP(patterns, w, v)
-                    return v, w, preds
+                    _, _, _, test_preds = forward_pass_MLP(test_patterns, w, v)
+                    return v, w, preds, test_preds
 
             print(f"EPOCH {epoch:4d} | training MSE = {e:.3f} | val MSE = {val_errors[-1]:.3f} ")
             delta_h, delta_o = backward_pass_MLP(v, targets, h_in, o_out, o_in, hidden_nodes)
@@ -82,11 +88,12 @@ def MLP(patterns, targets, val_patterns, val_targets, max_epochs, hidden_nodes, 
             v, dv = weight_update(v, h_out, delta_o, lr=learning_rate, momentum=False, d_old=dv)
 
     _, _, _, preds = forward_pass_MLP(patterns, w, v)
+    _, _, _, test_preds = forward_pass_MLP(test_patterns, w, v)
 
     # plt.plot(np.arange(len(train_errors)), train_errors)
     # plt.plot(np.arange(len(val_errors)), val_errors)
     # plt.title('Error curves')
     # plt.show()
 
-    return v, w, preds
+    return v, w, preds, test_preds
 

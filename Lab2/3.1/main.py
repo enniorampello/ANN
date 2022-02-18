@@ -15,7 +15,7 @@ from functions_MLP import *
 '''
 
 LR = 0.01
-NUM_NODES = 8
+NUM_NODES = 30
 MAX_EPOCHS = 500
 SIGMA = 0.5
 
@@ -28,7 +28,7 @@ BATCH = True
 ES = False
 PATIENCE = 50
 
-PLOT = False
+PLOT = True
 
 # MLP params
 MLP_ = False
@@ -137,9 +137,11 @@ def main():
             test_preds = get_discrete_predictions(mu, w, SIGMA, test_patterns)
             val_preds = get_discrete_predictions(mu, w, SIGMA, val_patterns)
 
+
     resid_error_test_set = residual_error(test_preds, test_targets)
     mse_test_set = mse(test_preds, test_targets)
 
+    print(residual_error(preds, targets))
     print("Residual test set: {}".format(resid_error_test_set))
     print("MSE test set: {}".format(mse_test_set))
 

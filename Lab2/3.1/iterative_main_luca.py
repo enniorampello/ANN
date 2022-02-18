@@ -15,21 +15,15 @@ from functions_MLP import *
 '''
 
 LR = 0.01
-
-MAX_EPOCHS = 500
+MAX_EPOCHS = 10000
 SIGMA = 0.5  # 0.5
-
 SINE = True
-
 NOISE = False
 SIGMA_NOISE = 0.1
-
 BATCH = False
-ES = False
-PATIENCE = 50
-
+ES = True
+PATIENCE = 1
 PLOT = False
-
 # MLP params
 MLP_ = False
 
@@ -182,7 +176,7 @@ if __name__ == '__main__':
 
     #np.random.seed(2)
 
-    NUM_NODES_LIST = [20]#, 4, 6, 8, 13, 20]
+    NUM_NODES_LIST = [24]#, 4, 6, 8, 13, 20]
     NUM_TRIALS = 10
 
     for NUM_NODES in NUM_NODES_LIST:

@@ -13,27 +13,18 @@ from functions_MLP import *
     b. For each node, compute phi(x(t) - w[i]).
     c. Compute the output as a weighted sum of the outputs of the hidden nodes.
 '''
-
+np.random.seed(5)
 LR = 0.01
-
-MAX_EPOCHS = 500
-SIGMA = 0.5
-
+MAX_EPOCHS = 10000
 SINE = False
-
 NOISE = False
 SIGMA_NOISE = 0.1
-
-BATCH = True
 ES = False
 PATIENCE = 50
-
-PLOT = False
-
-# MLP params
+PLOT = True
 MLP_ = False
+RANDOM_INIT = False
 
-# competitive learning constants - only if BATCH = False
 MAX_EPOCHS_CL = 10
 COMPETITIVE = False
 # strategy to avoid dead units
@@ -47,7 +38,8 @@ BALLISTIC_DATA = False
 val_p = 0.2
 
 
-def main(NUM_NODES):
+
+def main(NUM_NODES, BATCH, SIGMA):
     if BALLISTIC_DATA:
         # data -> ballistic experiments
         train_data = np.genfromtxt('data/ballist.dat')
@@ -82,9 +74,9 @@ def main(NUM_NODES):
         if NOISE:
             targets = add_noise(targets, SIGMA_NOISE)
             val_targets = add_noise(val_targets, SIGMA_NOISE)
-            test_patterns = add_noise(test_patterns, SIGMA_NOISE)
+            test_targets = add_noise(test_targets, SIGMA_NOISE)
 
-        mu = init_means(NUM_NODES)
+        mu = init_means(NUM_NODES, random=RANDOM_INIT)
         w = init_weights(NUM_NODES)
 
     phi_mat = np.zeros((NUM_NODES, patterns.shape[0]))
@@ -95,12 +87,24 @@ def main(NUM_NODES):
 
 
     if MLP_:
-        v_MLP, w_MLP, preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
+        v_MLP, w_MLP, preds, test_preds = MLP(np.transpose(patterns), targets.reshape(targets.shape[0]),
                                   np.transpose(val_patterns), val_targets.reshape(val_targets.shape[0]),
-                                  MAX_EPOCHS, NUM_NODES, LR, ES, PATIENCE)
+                                  MAX_EPOCHS, NUM_NODES, LR, ES, PATIENCE,
+                                  np.transpose(test_patterns))
+
         if PLOT:
-            plot(patterns, targets, np.transpose(preds), LR, NUM_NODES, MAX_EPOCHS,
-                 MLP=True, es=ES, patience=PATIENCE)
+            # plot(patterns, targets, np.transpose(preds), LR, NUM_NODES, MAX_EPOCHS,
+            #      MLP=True, es=ES, patience=PATIENCE)
+            plot(test_patterns, test_targets, np.transpose(test_preds), LR, NUM_NODES, MAX_EPOCHS,
+                 MLP=True, es=ES, patience=PATIENCE, test=True)
+
+        test_preds = test_preds.reshape(test_targets.shape[0], 1)
+
+
+        resid_error_test_set = residual_error(test_preds, test_targets)
+        mse_test_set = mse(test_preds, test_targets)
+
+        return resid_error_test_set, mse_test_set
 
     elif BATCH:
         w = train_batch(phi_mat, targets)
@@ -113,10 +117,10 @@ def main(NUM_NODES):
         w, train_errors, val_errors = train_seq(patterns, targets, w, MAX_EPOCHS, SIGMA, mu, LR, PLOT, ES, val_patterns,
                                                 val_targets, PATIENCE, BALLISTIC_DATA)
         # plot learning curves
-        plot_train_val(train_errors, val_errors, ballistic_data=BALLISTIC_DATA, lr=LR, num_nodes=NUM_NODES, max_epochs=MAX_EPOCHS,
-                       batch=False, cl=COMPETITIVE, es=ES, patience=PATIENCE, MLP=False,
-                       lr_cl=LR_CL, epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER,
-                       import_data=BALLISTIC_DATA)
+        # plot_train_val(train_errors, val_errors, ballistic_data=BALLISTIC_DATA, lr=LR, num_nodes=NUM_NODES, max_epochs=MAX_EPOCHS,
+        #                batch=False, cl=COMPETITIVE, es=ES, patience=PATIENCE, MLP=False,
+        #                lr_cl=LR_CL, epochs_cl=MAX_EPOCHS_CL, more_winners=MORE_THAN_ONE_WINNER,
+        #                import_data=BALLISTIC_DATA)
 
     if BALLISTIC_DATA:
         preds = get_continuous_predictions(mu, w, SIGMA, patterns)
@@ -132,9 +136,8 @@ def main(NUM_NODES):
         else:
             # square function
             preds = get_discrete_predictions(mu, w, SIGMA, patterns)
-            test_preds = get_discrete_predictions(mu, w, SIGMA, test_patterns)
+            test_preds = get_continuous_predictions(mu, w, SIGMA, test_patterns)
             val_preds = get_discrete_predictions(mu, w, SIGMA, val_patterns)
-
 
 
     resid_error_test_set = residual_error(test_preds, test_targets)
@@ -145,9 +148,9 @@ def main(NUM_NODES):
 
     if PLOT:
         # training set
-        plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
-            batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu)
+        # plot(patterns, targets, preds, LR, NUM_NODES, MAX_EPOCHS,
+        #     batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
+        #      more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu)
 
         # test set
         plot(test_patterns, test_targets, test_preds, LR, NUM_NODES, MAX_EPOCHS,
@@ -155,17 +158,35 @@ def main(NUM_NODES):
              more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu, test=True)
 
         # # validation set
-        plot(val_patterns, val_targets, val_preds, LR, NUM_NODES, MAX_EPOCHS,
-             batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
-             more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu, validation=True)
+        # plot(val_patterns, val_targets, val_preds, LR, NUM_NODES, MAX_EPOCHS,
+        #      batch=BATCH, cl=COMPETITIVE, lr_cl=LR_CL, es=ES, patience=PATIENCE, epochs_cl=MAX_EPOCHS_CL,
+        #      more_winners=MORE_THAN_ONE_WINNER, import_data=BALLISTIC_DATA, centroids=mu, validation=True)
 
-    return resid_error_test_set
+    return resid_error_test_set, mse_test_set
 
 if __name__ == '__main__':
-
-    np.random.seed(5)
-
     NUM_NODES_LIST = [x for x in np.arange(1, 30)]
+    BATCH = [True, False]
+    SIGMA = [0.25, 0.5, 1]
 
-    for NUM_NODES in NUM_NODES_LIST:
-        print(NUM_NODES, main(NUM_NODES))
+    # NUM_NODES_LIST = [x for x in np.arange(10, 30)]
+    NUM_NODES_LIST = [22]
+    BATCH = [True]
+    SIGMA = [0.5]
+
+
+
+    for b in BATCH:
+        for NUM_NODES in NUM_NODES_LIST:
+            for s in SIGMA:
+                all_errors = []
+                # for i in range(10):
+                #     print(i)
+                #     res, ms = main(NUM_NODES, b, s)
+                #     all_errors.append(res)
+                # print(NUM_NODES, b, s, np.mean(all_errors))
+
+                res, ms = main(NUM_NODES, b, s)
+                print(NUM_NODES, b, s, res)
+
+

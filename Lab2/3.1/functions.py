@@ -28,12 +28,15 @@ def phi(r, sigma):
     return np.exp(-(r ** 2) / (2 * sigma ** 2))
 
 
-def init_means(num_nodes, import_data=False, patterns=None):
+def init_means(num_nodes, import_data=False, patterns=None, random=False):
     if import_data:
         kmeans = KMeans(n_clusters=num_nodes, random_state=0).fit(patterns)
         return kmeans.cluster_centers_
     else:
-        return np.linspace(0, 2*np.pi, num_nodes).reshape(num_nodes, 1)
+        if random:
+            return np.random.choice(np.linspace(0, 2*np.pi, int(2 * np.pi / 0.1)), size=num_nodes, replace=False).reshape(num_nodes, 1)
+        else:
+            return np.linspace(0, 2*np.pi, num_nodes).reshape(num_nodes, 1)
 
 
 def init_weights(num_nodes, import_data=False):
@@ -44,6 +47,7 @@ def init_weights(num_nodes, import_data=False):
 
 
 def add_noise(points, sigma):
+    np.random.seed(1)
     noise = np.random.normal(0, scale=sigma, size=(len(points), 1))
     return points + noise
 
@@ -66,7 +70,7 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
         ax = fig.add_subplot(111)
         line, = ax.plot(patterns, pred)
         fig.canvas.draw()
-        plt.show(block=False)
+        # plt.show(block=False)
 
     val_errors = []
     train_errors = []
@@ -93,10 +97,10 @@ def train_seq(patterns, targets, w, max_epochs, sigma, mu, lr, plot, ES, val_pat
             else:
                 patience_counter = 0
             if patience_counter >= patience:
-                print('Early stopping!!')
-                return w
+                # print('Early stopping!!')
+                return w, train_errors, val_errors
 
-        print(f'EPOCH {epoch}\t| error {error[0]} | val error {val_errors[-1][0]}')
+        # print(f'EPOCH {epoch}\t| error {error[0]} | val error {val_errors[-1][0]}')
 
         if epoch % 10 == 0 and plot and not import_data:
             # clear_output(wait=False)
@@ -138,7 +142,7 @@ def print_function(f, start=0, stop=2 * np.pi):
     x = np.linspace(start, start + stop, int(stop / 0.1))
     plt.figure()
     plt.plot(x, f)
-    plt.show()
+    # plt.show()
 
 
 def euclidean_distance(a, b):
@@ -207,10 +211,12 @@ def title_builder(MLP, batch, cl, num_nodes, max_epochs, lr,
             else:
                 title += 'RBF seq mode'
 
-    title += f' - hn {num_nodes} - epochs {max_epochs} - lr {lr}'
+    title += f' - hn {num_nodes} '
+    if not batch:
+        title += f' - epochs {max_epochs} - lr {lr}'
 
-    if es:
-        title += f' - es {es} - patience {patience}'
+    if es and not batch:
+        title += f' - es {es}'
     if cl:
         title += f'\nlr cl {lr_cl} - epochs cl {epochs_cl} - more winners {more_winners}'
     return title
@@ -222,7 +228,7 @@ def plot_test_results(test_patterns, test_targets, test_preds):
     plt.plot(test_patterns, test_targets, label='True values - test set')
     plt.plot(test_patterns, test_preds, label='Predictions - test set')
     plt.legend()
-    plt.show()
+    # plt.show()
 
 def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
          batch=False, cl=False, es=False, patience=None, MLP=False,
@@ -265,8 +271,10 @@ def plot(patterns, targets, preds, lr, num_nodes, max_epochs,
 
     else:
         plt.figure()
+        plt.ylim([-1.5,1.5])
         plt.plot(patterns, targets, label='True values')
         plt.plot(patterns, preds, label='Predictions')
+        plt.scatter(centroids, [0 for x in range(len(centroids))], marker='.')
         # if val_patterns is not None:
         #     plt.plot(val_patterns, val_preds, label='Validation')
         plt.xlabel('x')
@@ -295,7 +303,7 @@ def get_continuous_predictions(mu, w, sigma, patterns):
 
 
 def get_discrete_predictions(mu, w, sigma, patterns):
-    return [1 if forward_pass(x, mu, w, sigma)[1] >= 0 else -1 for x in patterns]
+    return np.array([[1] if forward_pass(x, mu, w, sigma)[1] >= 0 else [-1] for x in patterns])
 
 
 def plot_train_val(mse_errors_train, mse_errors_val, ballistic_data, lr, num_nodes, max_epochs,
@@ -317,4 +325,4 @@ def plot_train_val(mse_errors_train, mse_errors_val, ballistic_data, lr, num_nod
     mse_line_val, = ax2.plot(mse_errors_val, color='blue', label='Validation MSE')
     ax2.legend(handles=[mse_line, mse_line_val])
     fig.tight_layout()
-    plt.show()
+    # plt.show()
