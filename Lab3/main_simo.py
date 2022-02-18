@@ -1,4 +1,5 @@
 from functions import *
+import itertools
 import numpy as np
 import itertools
 import matplotlib.pyplot as plt
