@@ -1,5 +1,6 @@
 from functions import *
 import numpy as np
+import itertools
 
 def synch_update(x_input, w):
     old_input = x_input
@@ -23,4 +24,12 @@ w = patterns.T @ patterns
 
 
 x = synch_update(x3d, w)
-print(x)
+
+combs = list(itertools.product([-1, 1], 8))
+tot = 0
+for c in combs:
+    print(c)
+    for perm in list(itertools.combinations_with_replacement(c,8)):
+        pass
+print(tot)
+
