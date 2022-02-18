@@ -32,7 +32,9 @@ patterns = np.delete(patterns, (9, 10), 0)
 # for this part only store first 3 patterns
 patterns = patterns[:3, :]
 w = patterns.T @ patterns
-w = gen_random_weights(patterns.shape[0])
+# random initialization
+# w = gen_random_weights(patterns.shape[1])
+w = get_symmetric_weights(patterns.shape[1])
 
 # check that they are all stable points
 # for pattern in patterns:
@@ -41,5 +43,5 @@ w = gen_random_weights(patterns.shape[0])
 # print_pattern(p11)
 
 # x = synch_update(p11, w, plot=True)
-x = asynch_update(p11, w, plot=False, energy=True)
+x = asynch_update(p11, w, plot=True, energy=True)
 

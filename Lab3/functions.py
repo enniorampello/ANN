@@ -66,3 +66,7 @@ def get_energy(pattern, w):
 
 def gen_random_weights(patterns_shape):
     return np.random.normal(0, scale=1, size=(patterns_shape, patterns_shape))
+
+def get_symmetric_weights(patterns_shape):
+    w = np.random.normal(0, scale=1, size=(patterns_shape, patterns_shape))
+    return 0.5 * (w + np.transpose(w))
