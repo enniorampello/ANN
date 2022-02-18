@@ -8,17 +8,48 @@ def synch_update(x_input, w):
     new_input = np.sign(old_input @ w)
     while (old_input != new_input).any():
         old_input = new_input
-        new_input = np.sign(old_input @ w)
+        new_input = np.array([1 if x >= 0 else -1 for x in old_input @ w])
+
     return new_input
 
-def print_pattern(pattern):
+def asynch_update(x_input, w, plot=False):
+    all_pixels = np.arange(x_input.shape[0])
+    old_input = x_input
+    new_input = old_input
+
+    it = 1
+    while True:
+        np.random.shuffle(all_pixels)
+
+        for pixel in all_pixels:
+            new_input[pixel] = 1 if new_input @ w[pixel] >= 0 else -1
+
+            if it % 100 == 0:
+                print_pattern(new_input, it=it)
+            it += 1
+
+        if (old_input == new_input).all():
+            print_pattern(new_input, it=it)
+            return new_input
+
+
+
+        old_input = new_input
+
+
+
+def print_pattern(pattern, it=None):
     pattern = pattern.reshape((32, 32))
 
     # creating a plot
     plt.figure()
 
     # customizing plot
-    plt.title("pixel_plot")
+    title = "pixel_plot"
+    if it is not None:
+        title += f' - it: {it}'
+
+    plt.title(title)
     plt.imshow(pattern)
 
     # save a plot
@@ -57,8 +88,10 @@ patterns = patterns[:3, :]
 w = patterns.T @ patterns
 
 # check that they are all stable points
-for pattern in patterns:
-    print((pattern == np.sign(pattern @ w)).all())
+# for pattern in patterns:
+#     print((pattern == np.sign(pattern @ w)).all())
 
-print_pattern(p11)
-print_pattern(synch_update(p11, w))
+# print_pattern(p11)
+# print_pattern(synch_update(p11, w))
+
+x = asynch_update(p11, w, plot=True)
