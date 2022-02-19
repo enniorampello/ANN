@@ -80,7 +80,6 @@ if ITERATIVE_W:
         print(f'{c} / {i+1} patterns are fixed points ')
 else:
     w = patterns.T @ patterns
-
     # random initialization
     # w = gen_random_weights(patterns.shape[1])
     # w = get_symmetric_weights(patterns.shape[1])
