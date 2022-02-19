@@ -1,11 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def get_weights(patterns, remove_self):
-    w = patterns.T @ patterns
+def get_weights(patterns, average_activity=None, remove_self=False, sparse=False):
+    if sparse:
+        w = (patterns - average_activity).T @ (patterns - average_activity)
+    else:
+        w = patterns.T @ patterns
     if remove_self:
         np.fill_diagonal(w, 0)
-    return w
+    return w / patterns.shape[1]
 
 def synch_update(x_input, w, plot=False):
     old_input = x_input
@@ -17,6 +20,9 @@ def synch_update(x_input, w, plot=False):
     if plot:
         print_pattern(new_input)
     return new_input
+
+def sparse_update(x_input, w, bias):
+    return 0.5 + 0.5 * np.sign((x_input @ w) - bias)
 
 def asynch_update(x_input, w, plot=False, energy=False):
     all_pixels = np.arange(x_input.shape[0])
