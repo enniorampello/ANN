@@ -33,33 +33,36 @@ patterns = np.delete(patterns, (9, 10), 0)
 STORED_PATTERNS = 0
 RANDOM_PATTERNS = 300
 N_DIMS = 100
+BIASED_PATTERNS = True
 ITERATIVE_W = True
 NOISE_P = 0# np.linspace(1, 10, 10) * 0.1
-REMOVE_SELF = True
-
-
+REMOVE_SELF = False
 
 patterns = patterns[:STORED_PATTERNS, :]
 
 if RANDOM_PATTERNS > 0:
-    for _ in range(RANDOM_PATTERNS):
-        x = np.random.choice([-1, 1], size=(N_DIMS,))
-        if patterns.shape[0] == 0:
-            patterns = x
-        else:
-            patterns = np.vstack((patterns, x))
+    if BIASED_PATTERNS:
+        patterns = np.sign(0.5 + np.random.normal(0, 1, size=(RANDOM_PATTERNS, N_DIMS)))
+    else:
+        for _ in range(RANDOM_PATTERNS):
+            x = np.random.choice([-1, 1], size=(N_DIMS,))
+            if patterns.shape[0] == 0:
+                patterns = x
+            else:
+                patterns = np.vstack((patterns, x))
 
 
 # get weight matrix iteratively and check if all patterns remain stable
 if ITERATIVE_W:
     for i in range(patterns.shape[0]):
         w = get_weights(patterns[:i+1], REMOVE_SELF)
+
         c = 0
         for pattern in patterns[:i+1]:
-            pattern = add_noise_to_pattern(pattern, NOISE_P)
+            # pattern = add_noise_to_pattern(pattern, NOISE_P)
             if (pattern == np.sign(pattern @ w)).all():
                 c += 1
-        print(f'{c} out of {i+1} patterns are fixed points ')
+        print(f'{c} / {i+1} patterns are fixed points ')
 else:
     w = patterns.T @ patterns
     # random initialization
@@ -72,6 +75,6 @@ else:
 
 # print_pattern(p11)
 
-# x = synch_update(p11, w, plot=True)
-# x = asynch_update(p11, w, plot=True, energy=True)
+# x = synch_update(p10, w, plot=True)
+# x = asynch_update(p10, w, plot=True, energy=False)
 
