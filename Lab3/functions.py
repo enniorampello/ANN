@@ -1,6 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+def get_weights(patterns, remove_self):
+    w = patterns.T @ patterns
+    if remove_self:
+        np.fill_diagonal(w, 0)
+    return w
 
 def synch_update(x_input, w, plot=False):
     old_input = x_input
@@ -70,3 +75,11 @@ def gen_random_weights(patterns_shape):
 def get_symmetric_weights(patterns_shape):
     w = np.random.normal(0, scale=1, size=(patterns_shape, patterns_shape))
     return 0.5 * (w + np.transpose(w))
+
+
+def add_noise_to_pattern(pattern, perc_noise):
+    pattern_with_noise = np.copy(pattern)
+    len_pattern = pattern_with_noise.shape[0]
+    index = np.random.choice(len_pattern, int(len_pattern * perc_noise), replace=False)
+    pattern_with_noise[index] = pattern_with_noise[index] * -1
+    return pattern_with_noise
