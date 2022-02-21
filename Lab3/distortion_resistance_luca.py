@@ -1,6 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from functions import *
+
+N_TRIALS = 1
+
 
 def synch_update(x_input, w):
     old_input = x_input
@@ -35,8 +36,11 @@ def add_noise_to_pattern(pattern, perc_noise):
     return pattern_with_noise
 
 
+def get_perc_of_recovered_pixels(pattern, updated_pattern):
+    return np.sum(pattern == updated_pattern) / pattern.shape[0]
+
+
 def main():
-    np.random.seed(2)
     # patterns = np.vstack((x1, x2, x3))
     # w = patterns.T @ patterns
     # x = synch_update(x3d, w)
@@ -49,21 +53,33 @@ def main():
     train_patterns = patterns[:3, :]
     w = train_patterns.T @ train_patterns
 
-    noise_range = [0.45] #np.linspace(1, 10, 10) * 0.1
-
-    # do also n trials without seed
-    for train_pattern in train_patterns:
+    noise_range = np.linspace(1, 10, 100) * 0.1
+    perc_recovered_pixels_dict = {}
+    for i, train_pattern in enumerate(train_patterns):
+        perc_recovered_pixels_dict[i] = []
+        print("_" * 80)
+        print("pattern " + str(i))
         for noise_perc in noise_range:
-            pattern_with_noise = add_noise_to_pattern(train_pattern, noise_perc)
+            recovered_pixels_of_pattern = []
+            for trial_idx in range(N_TRIALS):
+                pattern_with_noise = add_noise_to_pattern(train_pattern, noise_perc)
 
-            print_pattern(train_pattern)
-            print_pattern(pattern_with_noise)
-            first_synch = synch_update(pattern_with_noise, w)
-            print_pattern(first_synch)
-            second_synch = synch_update(first_synch, w)
-            print_pattern(second_synch)
+                #print_pattern(train_pattern)
+                #print_pattern(pattern_with_noise)
+                updated_pattern = synch_update(pattern_with_noise, w)
+                #print_pattern(updated_pattern)
+                recovered_pixels_of_pattern.append(get_perc_of_recovered_pixels(train_pattern, updated_pattern))
 
-            #print_pattern(asynch_update(pattern_with_noise, w, plot=False, energy=False))
+            perc_recovered_pixels_dict[i].append(np.mean(recovered_pixels_of_pattern))
+
+        plt.plot(noise_range, perc_recovered_pixels_dict[i], label="pattern " + str(i))
+    plt.title("Percentage of recovered units with increasing percentage of flipped units")
+    plt.xlabel("Percentage of noise (flipped units)")
+    plt.ylabel("Percentage of recovered units")
+    plt.legend()
+    plt.show()
+
+    print(perc_recovered_pixels_dict)
 
 
 if __name__ == "__main__":

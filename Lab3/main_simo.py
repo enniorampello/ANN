@@ -2,62 +2,7 @@ from functions import *
 import itertools
 import numpy as np
 import itertools
-
-
-def synch_update(x_input, w):
-    old_input = x_input
-    new_input = np.sign(old_input @ w)
-    while (old_input != new_input).any():
-        old_input = new_input
-        new_input = np.array([1 if x >= 0 else -1 for x in old_input @ w])
-
-    return new_input
-
-def asynch_update(x_input, w, plot=False):
-    all_pixels = np.arange(x_input.shape[0])
-    old_input = x_input
-    new_input = old_input
-
-    it = 1
-    while True:
-        np.random.shuffle(all_pixels)
-
-        for pixel in all_pixels:
-            new_input[pixel] = 1 if new_input @ w[pixel] >= 0 else -1
-
-            if it % 100 == 0:
-                print_pattern(new_input, it=it)
-            it += 1
-
-        if (old_input == new_input).all():
-            print_pattern(new_input, it=it)
-            return new_input
-
-
-
-        old_input = new_input
-
-
-
-def print_pattern(pattern, it=None):
-    pattern = pattern.reshape((32, 32))
-
-    # creating a plot
-    plt.figure()
-
-    # customizing plot
-    title = "pixel_plot"
-    if it is not None:
-        title += f' - it: {it}'
-
-    plt.title(title)
-    plt.imshow(pattern)
-
-    # save a plot
-    #plt.savefig('pixel_plot.png')
-
-    plt.show()
-
+import matplotlib.pyplot as plt
 
 
 # x1 = np.array([-1, -1, 1, -1, 1, -1, -1, 1], ndmin=2)
@@ -84,15 +29,92 @@ p11 = patterns[10, :]
 patterns = np.delete(patterns, (9, 10), 0)
 
 
-# for this part only store first 3 patterns
-patterns = patterns[:3, :]
-w = patterns.T @ patterns
+# patterns[[3, 4]] = patterns[[4, 3]]
+
+# for pattern in patterns:
+#     print_pattern(pattern)
+
+np.random.seed(0)
+# patterns we want to store (least is 3)
+STORED_PATTERNS = 0
+
+RANDOM_PATTERNS = 300
+N_DIMS = 100
+
+BIASED_PATTERNS = False
+SPARSE = True
+ITERATIVE_W = True
+NOISE_P = 0. # np.linspace(1, 10, 10) * 0.1
+REMOVE_SELF = True
+
+BIASES_SPARSE = np.linspace(5, 10, 10) * 0.1
+ACTIVITIES = [0.1, 0.05, 0.01]
+
+
+bias_act_max = {}
+for BIAS_SPARSE in BIASES_SPARSE:
+    for ACTIVITY in ACTIVITIES:
+        patterns = patterns[:STORED_PATTERNS, :]
+        average_activity = None
+        if RANDOM_PATTERNS > 0:
+            if BIASED_PATTERNS:
+                patterns = np.sign(0.5 + np.random.normal(0, 1, size=(RANDOM_PATTERNS, N_DIMS)))
+            elif SPARSE:
+                for _ in range(RANDOM_PATTERNS):
+                    x = np.random.choice([0, 1], size=(N_DIMS,), p=[1-ACTIVITY, ACTIVITY])
+                    if patterns.shape[0] == 0:
+                        patterns = x
+                    else:
+                        patterns = np.vstack((patterns, x))
+                average_activity = (1/(N_DIMS * RANDOM_PATTERNS)) * np.sum(patterns, axis=(0, 1))
+            else:
+                for _ in range(RANDOM_PATTERNS):
+                    x = np.random.choice([-1, 1], size=(N_DIMS,))
+                    if patterns.shape[0] == 0:
+                        patterns = add_noise_to_pattern(x, NOISE_P)
+                    else:
+                        new_p = add_noise_to_pattern(x, NOISE_P)
+                        patterns = np.vstack((patterns, new_p))
+
+
+        # get weight matrix iteratively and check if all patterns remain stable
+        if ITERATIVE_W:
+            stable_points = []
+            max_stored = 0
+            for i in range(patterns.shape[0]):
+                w = get_weights(patterns[:i+1], average_activity, REMOVE_SELF, SPARSE)
+                c = 0
+                for pattern in patterns[:i+1]:
+                    # pattern = add_noise_to_pattern(pattern, NOISE_P)
+                    # if i+1== patterns.shape[0]:
+                    #     print_pattern(pattern)
+                    if SPARSE:
+                        if (pattern == sparse_update(pattern, w, BIAS_SPARSE)).all():
+                            c += 1
+                    else:
+                        if (pattern == np.sign(pattern @ w)).all():
+                            c += 1
+                stable_points.append(c/(i+1))
+                if c > max_stored:
+                    max_stored = c
+                # print(f'{c} / {i+1} patterns are fixed points ')
+            bias_act_max[(BIAS_SPARSE, ACTIVITY)] = max_stored
+            plt.plot(np.arange(1, len(stable_points) + 1), stable_points)
+            # plt.show()
+
+        else:
+            w = patterns.T @ patterns
+print(bias_act_max)
+    # random initialization
+    # w = gen_random_weights(patterns.shape[1])
+    # w = get_symmetric_weights(patterns.shape[1])
 
 # check that they are all stable points
 # for pattern in patterns:
 #     print((pattern == np.sign(pattern @ w)).all())
 
 # print_pattern(p11)
-# print_pattern(synch_update(p11, w))
 
-x = asynch_update(p11, w, plot=True)
+# x = synch_update(p10, w, plot=True)
+# x = asynch_update(p10, w, plot=True, energy=False)
+

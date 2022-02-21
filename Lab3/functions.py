@@ -6,9 +6,10 @@ def get_weights(patterns, average_activity=None, remove_self=False, sparse=False
         w = (patterns - average_activity).T @ (patterns - average_activity)
     else:
         w = patterns.T @ patterns
+
     if remove_self:
         np.fill_diagonal(w, 0)
-    return w / patterns.shape[1]
+    return w #/ patterns.shape[1]
 
 def synch_update(x_input, w, plot=False):
     old_input = x_input
