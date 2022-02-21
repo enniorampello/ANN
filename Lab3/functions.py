@@ -35,8 +35,8 @@ def asynch_update(x_input, w, plot=False, energy=False):
         np.random.shuffle(all_pixels)
 
         for pixel in all_pixels:
-            new_input[pixel] = 1 if new_input @ w[pixel] >= 0 else -1
             energies.append(get_energy(new_input, w))
+            new_input[pixel] = 1 if new_input @ w[pixel] >= 0 else -1
             if it % 100 == 0 and plot:
                 print_pattern(new_input, it=it)
             it += 1

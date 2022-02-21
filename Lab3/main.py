@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 # x = synch_update(x3d, w)
 
 
-pic_data = np.genfromtxt('pict.dat', delimiter=',')
+pic_data = np.array()
 
 patterns = pic_data.reshape((-1, 1024))
 
