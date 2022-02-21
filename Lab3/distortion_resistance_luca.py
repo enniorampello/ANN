@@ -1,6 +1,6 @@
 from functions import *
 
-N_TRIALS = 10
+N_TRIALS = 1
 
 
 def synch_update(x_input, w):
@@ -54,7 +54,6 @@ def main():
     w = train_patterns.T @ train_patterns
 
     noise_range = np.linspace(1, 10, 100) * 0.1
-
     perc_recovered_pixels_dict = {}
     for i, train_pattern in enumerate(train_patterns):
         perc_recovered_pixels_dict[i] = []
@@ -71,7 +70,6 @@ def main():
                 #print_pattern(updated_pattern)
                 recovered_pixels_of_pattern.append(get_perc_of_recovered_pixels(train_pattern, updated_pattern))
 
-            print(np.mean(recovered_pixels_of_pattern))
             perc_recovered_pixels_dict[i].append(np.mean(recovered_pixels_of_pattern))
 
         plt.plot(noise_range, perc_recovered_pixels_dict[i], label="pattern " + str(i))
@@ -80,6 +78,8 @@ def main():
     plt.ylabel("Percentage of recovered units")
     plt.legend()
     plt.show()
+
+    print(perc_recovered_pixels_dict)
 
 
 if __name__ == "__main__":
