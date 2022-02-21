@@ -29,16 +29,24 @@ p11 = patterns[10, :]
 patterns = np.delete(patterns, (9, 10), 0)
 
 
+# patterns[[3, 4]] = patterns[[4, 3]]
+
+# for pattern in patterns:
+#     print_pattern(pattern)
+
+np.random.seed(0)
 # patterns we want to store (least is 3)
 STORED_PATTERNS = 0
+
 RANDOM_PATTERNS = 300
 N_DIMS = 100
+
 BIASED_PATTERNS = False
 SPARSE = True
 ITERATIVE_W = True
-NOISE_P = 0# np.linspace(1, 10, 10) * 0.1
-REMOVE_SELF = False
-BIAS_SPARSE = 0.1
+NOISE_P = 0.1 # np.linspace(1, 10, 10) * 0.1
+REMOVE_SELF = True
+BIAS_SPARSE = 0.1, 0.2
 ACTIVITY = 0.05
 
 patterns = patterns[:STORED_PATTERNS, :]
@@ -54,30 +62,37 @@ if RANDOM_PATTERNS > 0:
                 patterns = x
             else:
                 patterns = np.vstack((patterns, x))
-        average_activity = (1/(N_DIMS*RANDOM_PATTERNS)) * np.sum(patterns, axis=(0, 1))
+        average_activity = (1/(N_DIMS * RANDOM_PATTERNS)) * np.sum(patterns, axis=(0, 1))
     else:
         for _ in range(RANDOM_PATTERNS):
             x = np.random.choice([-1, 1], size=(N_DIMS,))
             if patterns.shape[0] == 0:
-                patterns = x
+                patterns = add_noise_to_pattern(x, NOISE_P)
             else:
-                patterns = np.vstack((patterns, x))
+                new_p = add_noise_to_pattern(x, NOISE_P)
+                patterns = np.vstack((patterns, new_p))
 
 
 # get weight matrix iteratively and check if all patterns remain stable
 if ITERATIVE_W:
+    stable_points = []
     for i in range(patterns.shape[0]):
         w = get_weights(patterns[:i+1], average_activity, REMOVE_SELF, SPARSE)
         c = 0
         for pattern in patterns[:i+1]:
             # pattern = add_noise_to_pattern(pattern, NOISE_P)
+            # if i+1== patterns.shape[0]:
+            #     print_pattern(pattern)
             if SPARSE:
                 if (pattern == sparse_update(pattern, w, BIAS_SPARSE)).all():
                     c += 1
             else:
                 if (pattern == np.sign(pattern @ w)).all():
                     c += 1
+        stable_points.append(c/(i+1))
         print(f'{c} / {i+1} patterns are fixed points ')
+    plt.plot(np.arange(1, len(stable_points) + 1), stable_points)
+    plt.show()
 else:
     w = patterns.T @ patterns
     # random initialization
