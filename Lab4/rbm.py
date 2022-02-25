@@ -1,5 +1,5 @@
 from util import *
-
+from tqdm import tqdm
 
 class RestrictedBoltzmannMachine():
     '''
@@ -68,6 +68,9 @@ class RestrictedBoltzmannMachine():
 
         return
 
+    def sigmoid(x):
+        return 1 / (1 + np.exp(x))
+
     def cd1(self, visible_trainset, n_iterations=10000):
 
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
@@ -81,15 +84,22 @@ class RestrictedBoltzmannMachine():
 
         n_samples = visible_trainset.shape[0]
 
+
         for it in range(n_iterations):
 
             # [TODO TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
             # you may need to use the inference functions 'get_h_given_v' and 'get_v_given_h'.
-            # note that inference methods returns both probabilities and activations (samples from probablities)
+            # note that inference methods returns both probabilities and activations (samples from probabilities)
             # and you may have to decide when to use what.
 
-            # [TODO TASK 4.1] update the parameters using function 'update_params'
+            v_0 = visible_trainset[it * self.batch_size: it * self.batch_size + self.batch_size, :]
+            h_0_probs, h_0_samples = self.get_h_given_v(v_0)
+            v_1_probs, v_1_samples = self.get_v_given_h(h_0_samples)
+            h_1_probs, h_1_samples = self.get_h_given_v(v_1_samples)
 
+            # [TODO TASK 4.1] update the parameters using function 'update_params'
+            # update using samples (not probabilities)
+            self.update_params(v_0, h_0_samples, v_1_samples, h_1_samples)
             # visualize once in a while when visible layer is input images
 
             if it % self.rf["period"] == 0 and self.is_bottom:
@@ -119,9 +129,17 @@ class RestrictedBoltzmannMachine():
 
         # [TODO TASK 4.1] get the gradients from the arguments (replace the 0s below) and update the weight and bias parameters
 
-        self.delta_bias_v += 0
-        self.delta_weight_vh += 0
-        self.delta_bias_h += 0
+        self.delta_bias_v = np.zeros(shape=self.bias_v.shape)
+        self.delta_weight_vh = np.zeros(shape=self.weight_vh.shape)
+        self.delta_bias_h = np.zeros(shape=self.bias_h.shape)
+
+        # weights update, looked here: https://github.com/echen/restricted-boltzmann-machines/blob/master/rbm.py
+        data_expect = np.dot(v_0.T, h_0)
+        model_expect = np.dot(v_k.T, h_k)
+
+
+        self.delta_weight_vh += self.learning_rate * \
+                                (data_expect - model_expect) / v_0.shape[0]
 
         self.bias_v += self.delta_bias_v
         self.weight_vh += self.delta_weight_vh
@@ -148,7 +166,11 @@ class RestrictedBoltzmannMachine():
 
         # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of hidden layer (replace the zeros below) 
 
-        return np.zeros((n_samples, self.ndim_hidden)), np.zeros((n_samples, self.ndim_hidden))
+        probs = sigmoid(self.bias_h + visible_minibatch @ self.weight_vh)
+        uniform = np.random.uniform(size=(n_samples, self.ndim_hidden))
+        samples = np.where((probs-uniform) >= 0, 1, 0)
+
+        return probs, samples
 
     def get_v_given_h(self, hidden_minibatch):
 
@@ -166,6 +188,7 @@ class RestrictedBoltzmannMachine():
         assert self.weight_vh is not None
 
         n_samples = hidden_minibatch.shape[0]
+        probs, samples = np.zeros((n_samples, self.ndim_visible)), np.zeros((n_samples, self.ndim_visible))
 
         if self.is_top:
 
@@ -185,9 +208,12 @@ class RestrictedBoltzmannMachine():
 
             # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)             
 
-            pass
 
-        return np.zeros((n_samples, self.ndim_visible)), np.zeros((n_samples, self.ndim_visible))
+            probs = sigmoid(self.bias_v + hidden_minibatch @ self.weight_vh.reshape((self.ndim_hidden, -1)))
+            uniform = np.random.uniform(size=(n_samples, self.ndim_visible))
+            samples = np.where((probs - uniform) >= 0, 1, 0)
+
+        return probs, samples
 
     """ rbm as a belief layer : the functions below do not have to be changed until running a deep belief net """
 
