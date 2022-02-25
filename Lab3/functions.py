@@ -40,11 +40,13 @@ def asynch_update(x_input, w, plot=False, energy=False):
             new_input[pixel] = 1 if new_input @ w[pixel] >= 0 else -1
             if it % 100 == 0 and plot:
                 print_pattern(new_input, it=it)
+
             it += 1
 
         if (old_input == new_input).all():
             if plot:
                 print_pattern(new_input, it=it)
+
             if energy:
                 energy_plot(energies)
             return new_input
@@ -63,6 +65,7 @@ def print_pattern(pattern, it=None):
     plt.imshow(pattern)
     # save a plot
     #plt.savefig('pixel_plot.png')
+    # plt.savefig(f'retrieved_noisy_p10_asynch_it{it}')
     plt.show()
 
 def energy_plot(energies):

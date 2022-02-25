@@ -5,21 +5,20 @@ import itertools
 import matplotlib.pyplot as plt
 
 
-# x1 = np.array([-1, -1, 1, -1, 1, -1, -1, 1], ndmin=2)
-# x2 = np.array([-1, -1, -1, -1, -1, 1, -1, -1], ndmin=2)
-# x3 = np.array([-1, 1, 1, -1, -1, 1, -1, 1], ndmin=2)
+# x1 = np.array([-1, -1, 1, -1, 1, -1, -1, 1])
+# x2 = np.array([-1, -1, -1, -1, -1, 1, -1, -1])
+# x3 = np.array([-1, 1, 1, -1, -1, 1, -1, 1])
 #
-# x1d = np.array([1, -1, 1, -1, 1, -1, -1, 1], ndmin=2)
-# x2d = np.array([1, 1, -1, -1, -1, 1, -1, -1], ndmin=2)
-# x3d = np.array([1, 1, 1, -1, 1, 1, -1, 1], ndmin=2)
-#
-#
+# x1d = np.array([1, -1, 1, -1, 1, -1, -1, 1])
+# x2d = np.array([1, 1, -1, -1, -1, 1, -1, -1])
+# x3d = np.array([1, 1, 1, -1, 1, 1, -1, 1])
+# #
+# #
 # patterns = np.vstack((x1, x2, x3))
 # w = patterns.T @ patterns
-# x = synch_update(x3d, w)
+# x = synch_update(x2d, w)
 
-
-pic_data = np.array()
+pic_data = np.genfromtxt('pict.dat', delimiter=',')
 
 patterns = pic_data.reshape((-1, 1024))
 
@@ -36,20 +35,22 @@ patterns = np.delete(patterns, (9, 10), 0)
 
 np.random.seed(0)
 # patterns we want to store (least is 3)
-STORED_PATTERNS = 0
+STORED_PATTERNS = 4
 
-RANDOM_PATTERNS = 300
+RANDOM_PATTERNS = 0
 N_DIMS = 100
 
 BIASED_PATTERNS = False
-SPARSE = True
+SPARSE = False
 ITERATIVE_W = True
 NOISE_P = 0.1 # np.linspace(1, 10, 10) * 0.1
-REMOVE_SELF = True
+REMOVE_SELF = False
 BIAS_SPARSE = 0.1, 0.2
 ACTIVITY = 0.05
 
 patterns = patterns[:STORED_PATTERNS, :]
+print_pattern(add_noise_to_pattern(patterns[0], 0.8))
+exit()
 
 average_activity = None
 if RANDOM_PATTERNS > 0:
