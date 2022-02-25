@@ -72,7 +72,9 @@ numpy and matplotlib.pyplot are essential for running the code. If you do not ha
 4. Implementing the tasks
 -------------------------
 
-The tasks in the lab will involve modifying rbm.py and dbn.py. The util.py contains necessary utility functions that are already implemented, and it is recommended that you read through the functions for your tasks. The run.py is a general wrapper which you might also have to edit based on your needs.
+The tasks in the lab will involve modifying rbm.py and dbn.py.
+The util.py contains necessary utility functions that are already implemented, and it is recommended that you read through the functions for your tasks.
+The run.py is a general wrapper which you might also have to edit based on your needs.
 
 TASK 4.1 Here you will create a Restricted Boltzmann Machine, implement the inference rules, and learn the parameters with contrastive divergence. You would have to work on the following functions :
 
