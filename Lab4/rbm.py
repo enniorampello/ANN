@@ -21,43 +21,24 @@ class RestrictedBoltzmannMachine():
         """
 
         self.ndim_visible = ndim_visible
-
         self.ndim_hidden = ndim_hidden
-
         self.is_bottom = is_bottom
-
         if is_bottom: self.image_size = image_size
-
         self.is_top = is_top
-
         if is_top: self.n_labels = 10
-
         self.batch_size = batch_size
-
         self.delta_bias_v = 0
-
         self.delta_weight_vh = 0
-
         self.delta_bias_h = 0
-
         self.bias_v = np.random.normal(loc=0.0, scale=0.01, size=(self.ndim_visible))
-
         self.weight_vh = np.random.normal(loc=0.0, scale=0.01, size=(self.ndim_visible, self.ndim_hidden))
-
         self.bias_h = np.random.normal(loc=0.0, scale=0.01, size=(self.ndim_hidden))
-
         self.delta_weight_v_to_h = 0
-
         self.delta_weight_h_to_v = 0
-
         self.weight_v_to_h = None
-
         self.weight_h_to_v = None
-
         self.learning_rate = 0.01
-
         self.momentum = 0.7
-
         self.print_period = 5000
 
         self.rf = {  # receptive-fields. Only applicable when visible layer is input data
@@ -69,7 +50,7 @@ class RestrictedBoltzmannMachine():
         return
 
     def sigmoid(x):
-        return 1 / (1 + np.exp(x))
+        return 1 / (1 + np.exp(-x))
 
     def cd1(self, visible_trainset, n_iterations=10000):
 
@@ -97,6 +78,7 @@ class RestrictedBoltzmannMachine():
                 v_0 = visible_trainset[idx: idx + self.batch_size, :]
             except:
                 v_0 = visible_trainset[idx:, :]
+
             h_0_probs, h_0_samples = self.get_h_given_v(v_0)
             v_1_probs, v_1_samples = self.get_v_given_h(h_0_samples)
             h_1_probs, h_1_samples = self.get_h_given_v(v_1_samples)
@@ -142,10 +124,21 @@ class RestrictedBoltzmannMachine():
         # weights update, looked here: https://github.com/echen/restricted-boltzmann-machines/blob/master/rbm.py
         data_expect = np.dot(v_0.T, h_0)
         model_expect = np.dot(v_k.T, h_k)
-
-
         self.delta_weight_vh += self.learning_rate * \
                                 (data_expect - model_expect) / v_0.shape[0]
+
+        # TOO SLOW...
+
+        # for i in range(v_0.shape[1]):
+        #     for j in range(h_0.shape[1]):
+        #         data_sum = 0
+        #         model_sum = 0
+        #         for n in range(v_0.shape[0]):
+        #             data_sum += v_0[n, i] * h_0[n, j]
+        #             model_sum += v_k[n, i] * h_k[n, j]
+        #         self.delta_weight_vh += self.learning_rate * (data_sum - model_sum) / v_0.shape[0]
+
+
         self.delta_bias_v += np.mean(v_0, axis=0) - np.mean(v_k, axis=0)
         self.delta_bias_h += np.mean(h_0, axis=0) - np.mean(h_k, axis=0)
 
@@ -214,9 +207,7 @@ class RestrictedBoltzmannMachine():
 
         else:
 
-            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)             
-
-
+            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)
             probs = sigmoid(self.bias_v + hidden_minibatch @ self.weight_vh.reshape((self.ndim_hidden, -1)))
             uniform = np.random.uniform(size=(n_samples, self.ndim_visible))
             samples = np.where((probs - uniform) >= 0, 1, 0)
