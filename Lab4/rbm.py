@@ -85,14 +85,18 @@ class RestrictedBoltzmannMachine():
         n_samples = visible_trainset.shape[0]
 
 
-        for it in range(n_iterations):
+        for it in tqdm(range(n_iterations)):
 
             # [TODO TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
             # you may need to use the inference functions 'get_h_given_v' and 'get_v_given_h'.
             # note that inference methods returns both probabilities and activations (samples from probabilities)
             # and you may have to decide when to use what.
 
-            v_0 = visible_trainset[it * self.batch_size: it * self.batch_size + self.batch_size, :]
+            idx = (it * self.batch_size) % n_samples
+            try:
+                v_0 = visible_trainset[idx: idx + self.batch_size, :]
+            except:
+                v_0 = visible_trainset[idx:, :]
             h_0_probs, h_0_samples = self.get_h_given_v(v_0)
             v_1_probs, v_1_samples = self.get_v_given_h(h_0_samples)
             h_1_probs, h_1_samples = self.get_h_given_v(v_1_samples)
@@ -100,8 +104,8 @@ class RestrictedBoltzmannMachine():
             # [TODO TASK 4.1] update the parameters using function 'update_params'
             # update using samples (not probabilities)
             self.update_params(v_0, h_0_samples, v_1_samples, h_1_samples)
-            # visualize once in a while when visible layer is input images
 
+            # visualize once in a while when visible layer is input images
             if it % self.rf["period"] == 0 and self.is_bottom:
                 viz_rf(weights=self.weight_vh[:, self.rf["ids"]].reshape((self.image_size[0], self.image_size[1], -1)),
                        it=it, grid=self.rf["grid"])
@@ -109,7 +113,9 @@ class RestrictedBoltzmannMachine():
             # print progress
 
             if it % self.print_period == 0:
-                print("iteration=%7d recon_loss=%4.4f" % (it, np.linalg.norm(visible_trainset - visible_trainset)))
+                _, all_h_1_samples = self.get_h_given_v(visible_trainset)
+                _, reconstructions = self.get_v_given_h(all_h_1_samples)
+                print("iteration=%7d recon_loss=%4.4f" % (it, np.linalg.norm(visible_trainset - reconstructions)))
 
         return
 
@@ -140,6 +146,8 @@ class RestrictedBoltzmannMachine():
 
         self.delta_weight_vh += self.learning_rate * \
                                 (data_expect - model_expect) / v_0.shape[0]
+        self.delta_bias_v += np.mean(v_0, axis=0) - np.mean(v_k, axis=0)
+        self.delta_bias_h += np.mean(h_0, axis=0) - np.mean(h_k, axis=0)
 
         self.bias_v += self.delta_bias_v
         self.weight_vh += self.delta_weight_vh
