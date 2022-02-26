@@ -41,10 +41,10 @@ class RestrictedBoltzmannMachine():
         self.weight_h_to_v = None
         self.learning_rate = 0.01
         self.momentum = 0.7
-        self.print_period = 5000
+        self.print_period = 1
         self.reconstruction_err = []
         self.rf = {  # receptive-fields. Only applicable when visible layer is input data
-            "period": 5000,  # iteration period to visualize
+            "period": 1,  # iteration period to visualize
             "grid": [5, 5],  # size of the grid
             "ids": np.random.randint(0, self.ndim_hidden, 25)  # pick some random hidden units
         }
@@ -68,7 +68,7 @@ class RestrictedBoltzmannMachine():
         n_samples = visible_trainset.shape[0]
         np.random.shuffle(visible_trainset)
 
-        for it in tqdm(range(epochs)):
+        for epoch in tqdm(range(epochs)):
 
             # [TODO TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
             # you may need to use the inference functions 'get_h_given_v' and 'get_v_given_h'.
@@ -88,17 +88,17 @@ class RestrictedBoltzmannMachine():
                 self.update_params(v_0, h_0_samples, v_1_probs, h_1_probs)
 
             # visualize once in a while when visible layer is input images
-            if it % self.rf["period"] == 0 and self.is_bottom:
+            if epoch % self.rf["period"] == 0 and self.is_bottom:
                 viz_rf(weights=self.weight_vh[:, self.rf["ids"]].reshape((self.image_size[0], self.image_size[1], -1)),
-                       it=it, grid=self.rf["grid"])
+                       it=epoch, grid=self.rf["grid"])
 
             # print progress
             _, all_h_1_samples = self.get_h_given_v(visible_trainset)
             _, reconstructions = self.get_v_given_h(all_h_1_samples)
             rec_error = np.linalg.norm(visible_trainset - reconstructions) / n_samples
             self.reconstruction_err.append(rec_error)
-            if it % self.print_period == 0:
-                print("iteration=%7d recon_loss=%4.4f" % (it, rec_error))
+            if epoch % self.print_period == 0:
+                print("iteration=%7d recon_loss=%4.4f" % (epoch, rec_error))
 
         return
 
@@ -124,19 +124,8 @@ class RestrictedBoltzmannMachine():
         self.delta_weight_vh = self.learning_rate * \
                                 (data_expect - model_expect) / v_0.shape[0]
 
-        # TOO SLOW...
 
-        # for i in range(v_0.shape[1]):
-        #     for j in range(h_0.shape[1]):
-        #         data_sum = 0
-        #         model_sum = 0
-        #         for n in range(v_0.shape[0]):
-        #             data_sum += v_0[n, i] * h_0[n, j]
-        #             model_sum += v_k[n, i] * h_k[n, j]
-        #         self.delta_weight_vh += self.learning_rate * (data_sum - model_sum) / v_0.shape[0]
-
-
-        self.delta_bias_v = (np.mean(v_0, axis=0) - np.mean(v_k, axis=0))
+        self.delta_bias_v = np.mean(v_0, axis=0) - np.mean(v_k, axis=0)
         self.delta_bias_h = np.mean(h_0, axis=0) - np.mean(h_k, axis=0)
 
 
