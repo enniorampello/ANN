@@ -42,7 +42,7 @@ class RestrictedBoltzmannMachine():
         self.learning_rate = 0.01
         self.momentum = 0.7
         self.print_period = 5000
-
+        self.reconstruction_err = []
         self.rf = {  # receptive-fields. Only applicable when visible layer is input data
             "period": 5000,  # iteration period to visualize
             "grid": [5, 5],  # size of the grid
@@ -54,7 +54,7 @@ class RestrictedBoltzmannMachine():
     def sigmoid(x):
         return 1. / (1. + np.exp(-x))
 
-    def cd1(self, visible_trainset, n_iterations=10000):
+    def cd1(self, visible_trainset, epochs=10000):
 
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
 
@@ -68,24 +68,24 @@ class RestrictedBoltzmannMachine():
         n_samples = visible_trainset.shape[0]
         np.random.shuffle(visible_trainset)
 
-        for it in tqdm(range(n_iterations)):
+        for it in tqdm(range(epochs)):
 
             # [TODO TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
             # you may need to use the inference functions 'get_h_given_v' and 'get_v_given_h'.
             # note that inference methods returns both probabilities and activations (samples from probabilities)
             # and you may have to decide when to use what.
+            for it in range(int(n_samples / self.batch_size)):
+                idx_low = (it * self.batch_size) % n_samples
+                idx_high = min(idx_low + self.batch_size, n_samples)
 
-            idx_low = (it * self.batch_size) % n_samples
-            idx_high = min(idx_low + self.batch_size, n_samples)
+                v_0 = visible_trainset[idx_low:idx_high]
+                h_0_probs, h_0_samples = self.get_h_given_v(v_0)
+                v_1_probs, v_1_samples = self.get_v_given_h(h_0_samples)
+                h_1_probs, h_1_samples = self.get_h_given_v(v_1_probs)
 
-            v_0 = visible_trainset[idx_low:idx_high]
-            h_0_probs, h_0_samples = self.get_h_given_v(v_0)
-            v_1_probs, v_1_samples = self.get_v_given_h(h_0_samples)
-            h_1_probs, h_1_samples = self.get_h_given_v(v_1_probs)
-
-            # [TODO TASK 4.1] update the parameters using function 'update_params'
-            # update using samples (not probabilities)
-            self.update_params(v_0, h_0_samples, v_1_probs, h_1_probs)
+                # [TODO TASK 4.1] update the parameters using function 'update_params'
+                # update using samples (not probabilities)
+                self.update_params(v_0, h_0_samples, v_1_probs, h_1_probs)
 
             # visualize once in a while when visible layer is input images
             if it % self.rf["period"] == 0 and self.is_bottom:
@@ -93,11 +93,12 @@ class RestrictedBoltzmannMachine():
                        it=it, grid=self.rf["grid"])
 
             # print progress
-
+            _, all_h_1_samples = self.get_h_given_v(visible_trainset)
+            _, reconstructions = self.get_v_given_h(all_h_1_samples)
+            rec_error = np.linalg.norm(visible_trainset - reconstructions) / n_samples
+            self.reconstruction_err.append(rec_error)
             if it % self.print_period == 0:
-                _, all_h_1_samples = self.get_h_given_v(visible_trainset)
-                _, reconstructions = self.get_v_given_h(all_h_1_samples)
-                print("iteration=%7d recon_loss=%4.4f" % (it, np.linalg.norm(visible_trainset - reconstructions) / n_samples))
+                print("iteration=%7d recon_loss=%4.4f" % (it, rec_error))
 
         return
 
