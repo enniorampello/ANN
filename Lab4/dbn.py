@@ -60,7 +60,8 @@ class DeepBeliefNet():
 
         Args:
           true_imgs: visible data shaped (number of samples, size of visible layer)
-          true_lbl: true labels shaped (number of samples, size of label layer). Used only for calculating accuracy, not driving the net
+          true_lbl: true labels shaped (number of samples, size of label layer).
+          Used only for calculating accuracy, not driving the net
         """
 
         n_samples = true_img.shape[0]
@@ -108,13 +109,13 @@ class DeepBeliefNet():
         # top to the bottom visible layer (replace 'vis' from random to your generated visible layer).
 
         for _ in range(self.n_gibbs_gener):
-            vis = np.random.rand(n_sample, self.sizes["vis"])
 
-            records.append([ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True,
-                                      interpolation=None)])
-
-        anim = stitch_video(fig, records).save("%s.generate%d.mp4" % (name, np.argmax(true_lbl)))
-
+            vis = np.random.rand(n_sample,self.sizes["vis"])
+            
+            records.append( [ ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)])
+            
+        anim = stitch_video(fig,records).save("%s.generate%d.mp4"%(name,np.argmax(true_lbl)))            
+            
         return
 
     def train_greedylayerwise(self, vis_trainset, lbl_trainset, n_iterations):
@@ -148,25 +149,30 @@ class DeepBeliefNet():
             """ 
             CD-1 training for vis--hid 
             """
-            self.rbm_stack["vis--hid"].cd1(vis_trainset, epochs=n_iterations)
-            hid_prob, hid_samples = self.rbm_stack["vis--hid"].get_h_given_v_dir(vis_trainset)
-            self.savetofile_rbm(loc="trained_rbm", name="vis--hid")
+            self.rbm_stack["vis--hid"].cd1(visible_trainset=vis_trainset, epochs=n_iterations)
+            # self.savetofile_rbm(loc="trained_rbm", name="vis--hid")
 
             print("training hid--pen")
             """ 
             CD-1 training for hid--pen 
-            """
+            """            
             self.rbm_stack["vis--hid"].untwine_weights()
-            self.rbm_stack["hid--pen"].cd1(hid_samples, epochs=n_iterations)
-            pen_prob, pen_samples = self.rbm_stack["hid--pen"].get_h_given_v_dir(hid_samples)
-            self.savetofile_rbm(loc="trained_rbm", name="hid--pen")
+            new_inputs = self.rbm_stack["vis--hid"].get_h_given_v_dir(vis_trainset)[1]
+
+            self.rbm_stack["hid--pen"].cd1(visible_trainset=new_inputs, epochs=n_iterations)
+            # self.savetofile_rbm(loc="trained_rbm", name="hid--pen")
 
             print("training pen+lbl--top")
             """ 
             CD-1 training for pen+lbl--top 
             """
+
             self.rbm_stack["hid--pen"].untwine_weights()
-            self.savetofile_rbm(loc="trained_rbm", name="pen+lbl--top")
+            new_inputs = self.rbm_stack["hid--pen"].get_h_given_v_dir(new_inputs)[1]
+
+            new_inputs = np.concatenate((new_inputs, lbl_trainset), axis=1)
+            self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=new_inputs, epochs=n_iterations)
+            # self.savetofile_rbm(loc="trained_rbm", name="pen+lbl--top")
 
         return
 

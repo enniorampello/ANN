@@ -187,7 +187,18 @@ class RestrictedBoltzmannMachine():
             # Note that this section can also be postponed until TASK 4.2, since in this task,
             # stand-alone RBMs do not contain labels in visible layer.
 
+            x = self.bias_v + np.dot(hidden_minibatch, self.weight_vh.T)
 
+            labels_probs = softmax(x[:, -self.n_labels:])
+            probs_500 = sigmoid(x[:, :-self.n_labels])
+
+
+            labels_samples = sample_categorical(labels_probs)
+            samples_500 = sample_binary(probs_500)
+
+
+            probs = np.concatenate((probs_500, labels_probs), axis=1)
+            samples = np.concatenate((samples_500, labels_samples), axis=1)
 
         else:
 
@@ -260,7 +271,8 @@ class RestrictedBoltzmannMachine():
             # this case should never be executed : when the RBM is a part of a DBN and is at the top, it will have not have directed connections.
             # Appropriate code here is to raise an error (replace pass below)
 
-            pass
+            print('WTF are you even doing???')
+            exit()
 
         else:
 
