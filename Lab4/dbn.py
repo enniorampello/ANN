@@ -44,7 +44,7 @@ class DeepBeliefNet():
 
         self.batch_size = batch_size
 
-        self.n_gibbs_recog = 15
+        self.n_gibbs_recog = 20
 
         self.n_gibbs_gener = 200
 
@@ -76,11 +76,18 @@ class DeepBeliefNet():
         # NOTE : inferring entire train/test set may require too much compute memory (depends on your system).
         # In that case, divide into mini-batches.
 
+        out_1 = self.rbm_stack['vis--hid'].get_h_given_v_dir(vis)[1]
+        out_2 = self.rbm_stack['hid--pen'].get_h_given_v_dir(out_1)[1]
+
+        v = np.concatenate((out_2, lbl), axis=1)
+
         for _ in range(self.n_gibbs_recog):
-            pass
+            h = self.rbm_stack['pen+lbl--top'].get_h_given_v(v)[1]
+            v = self.rbm_stack['pen+lbl--top'].get_v_given_h(h)[1]
 
-        predicted_lbl = np.zeros(true_lbl.shape)
-
+        predicted_lbl = v[:, -len(lbl[0]):]
+        print(predicted_lbl.shape)
+        exit()
         print("accuracy = %.2f%%" % (100. * np.mean(np.argmax(predicted_lbl, axis=1) == np.argmax(true_lbl, axis=1))))
 
         return
