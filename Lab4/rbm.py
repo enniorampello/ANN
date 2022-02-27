@@ -187,8 +187,7 @@ class RestrictedBoltzmannMachine():
             # Note that this section can also be postponed until TASK 4.2, since in this task,
             # stand-alone RBMs do not contain labels in visible layer.
 
-            probs = sigmoid(self.bias_v + np.dot(hidden_minibatch, self.weight_vh.T))
-            samples = sample_binary(probs)
+
 
         else:
 
