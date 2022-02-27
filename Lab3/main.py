@@ -44,10 +44,10 @@ N_DIMS = 100
 BIASED_PATTERNS = False
 SPARSE = True
 ITERATIVE_W = True
-NOISE_P = 0.1 # np.linspace(1, 10, 10) * 0.1
-REMOVE_SELF = True
+NOISE_P = 0. # np.linspace(1, 10, 10) * 0.1
+REMOVE_SELF = False
 BIAS_SPARSE = 0.1, 0.2
-ACTIVITY = 0.05
+ACTIVITY = 0.1
 
 patterns = patterns[:STORED_PATTERNS, :]
 
