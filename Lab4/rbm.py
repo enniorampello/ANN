@@ -3,6 +3,7 @@ import numpy as np
 from util import *
 from tqdm import tqdm
 
+
 class RestrictedBoltzmannMachine():
     '''
     For more details : A Practical Guide to Training Restricted Boltzmann Machines https://www.cs.toronto.edu/~hinton/absps/guideTR.pdf
@@ -53,13 +54,9 @@ class RestrictedBoltzmannMachine():
 
         return
 
-    def sigmoid(x):
-        return 1. / (1. + np.exp(-x))
-
     def cd1(self, visible_trainset, epochs=10000):
 
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
-
         Args:
           visible_trainset: training data for this rbm, shape is (size of training set, size of visible layer)
           n_iterations: number of iterations of learning (each iteration learns a mini-batch)
@@ -68,7 +65,6 @@ class RestrictedBoltzmannMachine():
         print("learning CD1")
 
         n_samples = visible_trainset.shape[0]
-
 
         for epoch in tqdm(range(epochs)):
             np.random.shuffle(visible_trainset)
@@ -109,9 +105,7 @@ class RestrictedBoltzmannMachine():
     def update_params(self, v_0, h_0, v_k, h_k):
 
         """Update the weight and bias parameters.
-
         You could also add weight decay and momentum for weight updates.
-
         Args:
            v_0: activities or probabilities of visible layer (data to the rbm)
            h_0: activities or probabilities of hidden layer
@@ -126,12 +120,10 @@ class RestrictedBoltzmannMachine():
         data_expect = np.dot(v_0.T, h_0)
         model_expect = np.dot(v_k.T, h_k)
         self.delta_weight_vh = self.learning_rate * \
-                                (data_expect - model_expect) / v_0.shape[0]
-
+                               (data_expect - model_expect) / v_0.shape[0]
 
         self.delta_bias_v = np.mean(v_0, axis=0) - np.mean(v_k, axis=0)
         self.delta_bias_h = np.mean(h_0, axis=0) - np.mean(h_k, axis=0)
-
 
         self.bias_v += self.delta_bias_v
         self.weight_vh += self.delta_weight_vh
@@ -141,14 +133,13 @@ class RestrictedBoltzmannMachine():
 
     def get_h_given_v(self, visible_minibatch):
 
-        """Compute probabilities p(h|v) and activations h ~ p(h|v) 
-
+        """Compute probabilities p(h|v) and activations h ~ p(h|v)
         Uses undirected weight "weight_vh" and bias "bias_h"
-        
-        Args: 
+
+        Args:
            visible_minibatch: shape is (size of mini-batch, size of visible layer)
-        Returns:        
-           tuple ( p(h|v) , h) 
+        Returns:
+           tuple ( p(h|v) , h)
            both are shaped (size of mini-batch, size of hidden layer)
         """
 
@@ -168,13 +159,12 @@ class RestrictedBoltzmannMachine():
     def get_v_given_h(self, hidden_minibatch):
 
         """Compute probabilities p(v|h) and activations v ~ p(v|h)
-
         Uses undirected weight "weight_vh" and bias "bias_v"
-        
-        Args: 
+
+        Args:
            hidden_minibatch: shape is (size of mini-batch, size of hidden layer)
-        Returns:        
-           tuple ( p(v|h) , v) 
+        Returns:
+           tuple ( p(v|h) , v)
            both are shaped (size of mini-batch, size of visible layer)
         """
 
@@ -220,13 +210,12 @@ class RestrictedBoltzmannMachine():
     def get_h_given_v_dir(self, visible_minibatch):
 
         """Compute probabilities p(h|v) and activations h ~ p(h|v)
-
         Uses directed weight "weight_v_to_h" and bias "bias_h"
-        
-        Args: 
+
+        Args:
            visible_minibatch: shape is (size of mini-batch, size of visible layer)
-        Returns:        
-           tuple ( p(h|v) , h) 
+        Returns:
+           tuple ( p(h|v) , h)
            both are shaped (size of mini-batch, size of hidden layer)
         """
 
@@ -237,18 +226,21 @@ class RestrictedBoltzmannMachine():
         # [TODO TASK 4.2] perform same computation as the function 'get_h_given_v'
         #  but with directed connections (replace the zeros below)
 
-        return np.zeros((n_samples, self.ndim_hidden)), np.zeros((n_samples, self.ndim_hidden))
+        probs = sigmoid(self.bias_h + np.dot(visible_minibatch, self.weight_v_to_h))
+        # uniform = np.random.uniform(size=(n_samples, self.ndim_hidden))
+        # samples = np.where((probs-uniform) >= 0, 1, 0)
+        samples = sample_binary(probs)
+        return probs, samples
 
     def get_v_given_h_dir(self, hidden_minibatch):
 
         """Compute probabilities p(v|h) and activations v ~ p(v|h)
-
         Uses directed weight "weight_h_to_v" and bias "bias_v"
-        
-        Args: 
+
+        Args:
            hidden_minibatch: shape is (size of mini-batch, size of hidden layer)
-        Returns:        
-           tuple ( p(v|h) , v) 
+        Returns:
+           tuple ( p(v|h) , v)
            both are shaped (size of mini-batch, size of visible layer)
         """
 
@@ -273,7 +265,7 @@ class RestrictedBoltzmannMachine():
 
         else:
 
-            # [TODO TASK 4.2] performs same computaton as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)             
+            # [TODO TASK 4.2] performs same computaton as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)
 
             pass
 
@@ -282,7 +274,7 @@ class RestrictedBoltzmannMachine():
     def update_generate_params(self, inps, trgs, preds):
 
         """Update generative weight "weight_h_to_v" and bias "bias_v"
-        
+
         Args:
            inps: activities or probabilities of input unit
            trgs: activities or probabilities of output unit (target)
@@ -303,7 +295,7 @@ class RestrictedBoltzmannMachine():
     def update_recognize_params(self, inps, trgs, preds):
 
         """Update recognition weight "weight_v_to_h" and bias "bias_h"
-        
+
         Args:
            inps: activities or probabilities of input unit
            trgs: activities or probabilities of output unit (target)
