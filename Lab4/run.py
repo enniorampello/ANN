@@ -2,21 +2,20 @@ import numpy as np
 
 from util import *
 from rbm import RestrictedBoltzmannMachine
-# from rb_friend import RestrictedBoltzmannMachine
 from dbn import DeepBeliefNet
 
 if __name__ == "__main__":
 
     image_size = [28, 28]
     # n_train = 60000
-    train_imgs, train_lbls, test_imgs, test_lbls = read_mnist(dim=image_size, n_train=1000, n_test=10000)
+    train_imgs, train_lbls, test_imgs, test_lbls = read_mnist(dim=image_size, n_train=60000, n_test=1000)
 
     ''' restricted boltzmann machine '''
     
     print ("\nStarting a Restricted Boltzmann Machine..")
 
-    BATCH_SIZE = 20
-    EPOCHS = 2
+    BATCH_SIZE = 10
+    EPOCHS = 20
     RBM = False
     PLOT_ERRORS = False
 
@@ -32,7 +31,7 @@ if __name__ == "__main__":
                                              batch_size=BATCH_SIZE
             )
 
-            rbm.cd1(visible_trainset=train_imgs, epochs=EPOCHS)
+            rbm.cd1(visible_trainset=train_imgs, n_iterations=EPOCHS)
             rec_errs[n_hidden] = rbm.reconstruction_err
 
         if PLOT_ERRORS:
@@ -51,7 +50,7 @@ if __name__ == "__main__":
     dbn = DeepBeliefNet(sizes={"vis":image_size[0]*image_size[1], "hid": 500, "pen": 500, "top": 2000, "lbl": 10},
                         image_size=image_size,
                         n_labels=10,
-                        batch_size=10
+                        batch_size=20
     )
     
     ''' greedy layer-wise training '''

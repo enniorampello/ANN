@@ -79,15 +79,13 @@ class DeepBeliefNet():
         out_1 = self.rbm_stack['vis--hid'].get_h_given_v_dir(vis)[1]
         out_2 = self.rbm_stack['hid--pen'].get_h_given_v_dir(out_1)[1]
 
-        v = np.concatenate((out_2, lbl), axis=1)
+        p_v = np.concatenate((out_2, lbl), axis=1)
 
         for _ in range(self.n_gibbs_recog):
-            h = self.rbm_stack['pen+lbl--top'].get_h_given_v(v)[1]
-            v = self.rbm_stack['pen+lbl--top'].get_v_given_h(h)[1]
+            p_h, h = self.rbm_stack['pen+lbl--top'].get_h_given_v(p_v)
+            p_v, v = self.rbm_stack['pen+lbl--top'].get_v_given_h(p_h)
 
-        predicted_lbl = v[:, -len(lbl[0]):]
-        print(predicted_lbl[0])
-        print(true_lbl[0])
+        predicted_lbl = v[:, -self.sizes['lbl']:]
         print("accuracy = %.2f%%" % (100. * np.mean(np.argmax(predicted_lbl, axis=1) == np.argmax(true_lbl, axis=1))))
 
         return
@@ -153,31 +151,24 @@ class DeepBeliefNet():
             # [TODO TASK 4.2] use CD-1 to train all RBMs greedily
 
             print("training vis--hid")
-            """ 
-            CD-1 training for vis--hid 
-            """
-            self.rbm_stack["vis--hid"].cd1(visible_trainset=vis_trainset, epochs=n_iterations)
+
+            self.rbm_stack["vis--hid"].cd1(visible_trainset=vis_trainset, n_iterations=n_iterations)
+            _, h1 = self.rbm_stack["vis--hid"].get_h_given_v(vis_trainset)
             # self.savetofile_rbm(loc="trained_rbm", name="vis--hid")
 
             print("training hid--pen")
-            """ 
-            CD-1 training for hid--pen 
-            """            
-            self.rbm_stack["vis--hid"].untwine_weights()
-            new_inputs = self.rbm_stack["vis--hid"].get_h_given_v_dir(vis_trainset)[1]
 
-            self.rbm_stack["hid--pen"].cd1(visible_trainset=new_inputs, epochs=n_iterations)
+            self.rbm_stack["vis--hid"].untwine_weights()
+            self.rbm_stack["hid--pen"].cd1(visible_trainset=h1, n_iterations=n_iterations)
+            _, h2 = self.rbm_stack["hid--pen"].get_h_given_v(h1)
             # self.savetofile_rbm(loc="trained_rbm", name="hid--pen")
 
             print("training pen+lbl--top")
-            """ 
-            CD-1 training for pen+lbl--top 
-            """
+
 
             self.rbm_stack["hid--pen"].untwine_weights()
-            new_inputs = self.rbm_stack["hid--pen"].get_h_given_v_dir(new_inputs)[1]
-            new_inputs = np.concatenate((new_inputs, lbl_trainset), axis=1)
-            self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=new_inputs, epochs=n_iterations)
+            h2_lbl = np.concatenate((h2, lbl_trainset), axis=1)
+            self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=h2_lbl, n_iterations=n_iterations)
             # self.savetofile_rbm(loc="trained_rbm", name="pen+lbl--top")
 
         return
