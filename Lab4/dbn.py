@@ -86,8 +86,8 @@ class DeepBeliefNet():
             v = self.rbm_stack['pen+lbl--top'].get_v_given_h(h)[1]
 
         predicted_lbl = v[:, -len(lbl[0]):]
-        print(predicted_lbl.shape)
-        exit()
+        print(predicted_lbl[0])
+        print(true_lbl[0])
         print("accuracy = %.2f%%" % (100. * np.mean(np.argmax(predicted_lbl, axis=1) == np.argmax(true_lbl, axis=1))))
 
         return
@@ -121,7 +121,7 @@ class DeepBeliefNet():
             
             records.append( [ ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)])
             
-        anim = stitch_video(fig,records).save("%s.generate%d.mp4"%(name,np.argmax(true_lbl)))            
+        anim = stitch_video(fig,records).save("%s.generate%d.mp4"%(name, np.argmax(true_lbl)))
             
         return
 
@@ -176,7 +176,6 @@ class DeepBeliefNet():
 
             self.rbm_stack["hid--pen"].untwine_weights()
             new_inputs = self.rbm_stack["hid--pen"].get_h_given_v_dir(new_inputs)[1]
-
             new_inputs = np.concatenate((new_inputs, lbl_trainset), axis=1)
             self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=new_inputs, epochs=n_iterations)
             # self.savetofile_rbm(loc="trained_rbm", name="pen+lbl--top")

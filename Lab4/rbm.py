@@ -122,8 +122,10 @@ class RestrictedBoltzmannMachine():
         self.delta_weight_vh = self.learning_rate * \
                                (data_expect - model_expect) / v_0.shape[0]
 
-        self.delta_bias_v = np.mean(v_0, axis=0) - np.mean(v_k, axis=0)
-        self.delta_bias_h = np.mean(h_0, axis=0) - np.mean(h_k, axis=0)
+        self.delta_bias_v = self.learning_rate * \
+                            np.mean(v_0, axis=0) - np.mean(v_k, axis=0)
+        self.delta_bias_h = self.learning_rate * \
+                            np.mean(h_0, axis=0) - np.mean(h_k, axis=0)
 
         self.bias_v += self.delta_bias_v
         self.weight_vh += self.delta_weight_vh
@@ -151,8 +153,6 @@ class RestrictedBoltzmannMachine():
         #  of hidden layer (replace the zeros below)
 
         probs = sigmoid(self.bias_h + np.dot(visible_minibatch, self.weight_vh))
-        # uniform = np.random.uniform(size=(n_samples, self.ndim_hidden))
-        # samples = np.where((probs-uniform) >= 0, 1, 0)
         samples = sample_binary(probs)
         return probs, samples
 
@@ -171,8 +171,7 @@ class RestrictedBoltzmannMachine():
         assert self.weight_vh is not None
 
         n_samples = hidden_minibatch.shape[0]
-        probs, samples = np.zeros((n_samples, self.ndim_visible)), np.zeros((n_samples, self.ndim_visible))
-
+        x = self.bias_v + np.dot(hidden_minibatch, self.weight_vh.T)
         if self.is_top:
 
             """
@@ -187,7 +186,7 @@ class RestrictedBoltzmannMachine():
             # Note that this section can also be postponed until TASK 4.2, since in this task,
             # stand-alone RBMs do not contain labels in visible layer.
 
-            x = self.bias_v + np.dot(hidden_minibatch, self.weight_vh.T)
+
 
             labels_probs = softmax(x[:, -self.n_labels:])
             probs_500 = sigmoid(x[:, :-self.n_labels])
@@ -202,10 +201,9 @@ class RestrictedBoltzmannMachine():
 
         else:
 
-            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)
-            probs = sigmoid(self.bias_v + np.dot(hidden_minibatch, self.weight_vh.T))
-            # uniform = np.random.uniform(size=(n_samples, self.ndim_visible))
-            # samples = np.where((probs - uniform) >= 0, 1, 0)
+            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities)
+            #  of visible layer (replace the pass and zeros below)
+            probs = sigmoid(x)
             samples = sample_binary(probs)
         return probs, samples
 
@@ -237,8 +235,6 @@ class RestrictedBoltzmannMachine():
         #  but with directed connections (replace the zeros below)
 
         probs = sigmoid(self.bias_h + np.dot(visible_minibatch, self.weight_v_to_h))
-        # uniform = np.random.uniform(size=(n_samples, self.ndim_hidden))
-        # samples = np.where((probs-uniform) >= 0, 1, 0)
         samples = sample_binary(probs)
         return probs, samples
 
@@ -277,9 +273,7 @@ class RestrictedBoltzmannMachine():
         else:
 
             # [TODO TASK 4.2] performs same computaton as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)
-            probs = sigmoid(self.bias_v + np.dot(hidden_minibatch, self.weight_h_to_v.T))
-            # uniform = np.random.uniform(size=(n_samples, self.ndim_visible))
-            # samples = np.where((probs - uniform) >= 0, 1, 0)
+            probs = sigmoid(self.bias_v + np.dot(hidden_minibatch, self.weight_h_to_v))
             samples = sample_binary(probs)
 
         return probs, samples
