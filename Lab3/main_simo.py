@@ -1,6 +1,7 @@
 from functions import *
 import itertools
 import numpy as np
+import pandas as pd
 import itertools
 import matplotlib.pyplot as plt
 
@@ -19,7 +20,7 @@ import matplotlib.pyplot as plt
 # x = synch_update(x3d, w)
 
 
-pic_data = np.genfromtxt('pict.dat', delimiter=',')
+pic_data = np.genfromtxt('Lab3/pict.dat', delimiter=',')
 
 patterns = pic_data.reshape((-1, 1024))
 
@@ -45,13 +46,13 @@ BIASED_PATTERNS = False
 SPARSE = True
 ITERATIVE_W = True
 NOISE_P = 0. # np.linspace(1, 10, 10) * 0.1
-REMOVE_SELF = True
+REMOVE_SELF = False
 
-BIASES_SPARSE = np.linspace(5, 10, 10) * 0.1
+BIASES_SPARSE = np.linspace(0, 10, 10) * 0.1
 ACTIVITIES = [0.1, 0.05, 0.01]
 
 
-bias_act_max = {}
+bias_act_max = pd.DataFrame(index=ACTIVITIES, columns=BIASES_SPARSE)
 for BIAS_SPARSE in BIASES_SPARSE:
     for ACTIVITY in ACTIVITIES:
         patterns = patterns[:STORED_PATTERNS, :]
@@ -97,14 +98,14 @@ for BIAS_SPARSE in BIASES_SPARSE:
                 stable_points.append(c/(i+1))
                 if c > max_stored:
                     max_stored = c
-                # print(f'{c} / {i+1} patterns are fixed points ')
-            bias_act_max[(BIAS_SPARSE, ACTIVITY)] = max_stored
+                print(f'{c} / {i+1} patterns are fixed points ')
+            bias_act_max.loc[ACTIVITY, BIAS_SPARSE] = max_stored
             plt.plot(np.arange(1, len(stable_points) + 1), stable_points)
             # plt.show()
 
         else:
             w = patterns.T @ patterns
-print(bias_act_max)
+print(bias_act_max.to_latex())
     # random initialization
     # w = gen_random_weights(patterns.shape[1])
     # w = get_symmetric_weights(patterns.shape[1])
