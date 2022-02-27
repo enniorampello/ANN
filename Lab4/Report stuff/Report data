@@ -1,0 +1,9 @@
+Report material
+
+4.1 
+• More specifically, please first initialize the weight matrix (including hidden and visible biases) with small random values (normally distributed, N(0,0.01)). Then, iterate the training process (CD) for the number of epochs varying between 10 and 20 for minibatches of size around 20 (i.e. each epoch corresponds to a full swipe through a training set divided into minibatches). The idea is to obtain some level of convergence or stability in the behaviour of the units. How can you monitor and measure such stability?
+
+we can monitor the stability by using the reconstruction error, and watching if it changes too much from one iteration to the next
+
+• Please investigate how the average reconstruction loss (the mean error between the original input and the reconstructed input) is affected by thenumber of hidden units decreasing from 500 down to 200.
+
