@@ -22,6 +22,8 @@ class RestrictedBoltzmannMachine():
           batch_size: Size of mini-batch.
         """
 
+        # np.random.seed(0)
+
         self.ndim_visible = ndim_visible
         self.ndim_hidden = ndim_hidden
         self.is_bottom = is_bottom
@@ -66,14 +68,15 @@ class RestrictedBoltzmannMachine():
         print("learning CD1")
 
         n_samples = visible_trainset.shape[0]
-        np.random.shuffle(visible_trainset)
+
 
         for epoch in tqdm(range(epochs)):
-
+            np.random.shuffle(visible_trainset)
             # [TODO TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
             # you may need to use the inference functions 'get_h_given_v' and 'get_v_given_h'.
             # note that inference methods returns both probabilities and activations (samples from probabilities)
             # and you may have to decide when to use what.
+            print(f'Epoch {epoch}')
             for it in range(int(n_samples / self.batch_size)):
                 idx_low = (it * self.batch_size) % n_samples
                 idx_high = min(idx_low + self.batch_size, n_samples)
@@ -96,6 +99,7 @@ class RestrictedBoltzmannMachine():
             _, all_h_1_samples = self.get_h_given_v(visible_trainset)
             _, reconstructions = self.get_v_given_h(all_h_1_samples)
             rec_error = np.linalg.norm(visible_trainset - reconstructions) / n_samples
+
             self.reconstruction_err.append(rec_error)
             if epoch % self.print_period == 0:
                 print("iteration=%7d recon_loss=%4.4f" % (epoch, rec_error))
@@ -152,7 +156,8 @@ class RestrictedBoltzmannMachine():
 
         n_samples = visible_minibatch.shape[0]
 
-        # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of hidden layer (replace the zeros below) 
+        # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities)
+        #  of hidden layer (replace the zeros below)
 
         probs = sigmoid(self.bias_h + np.dot(visible_minibatch, self.weight_vh))
         # uniform = np.random.uniform(size=(n_samples, self.ndim_hidden))
@@ -187,10 +192,13 @@ class RestrictedBoltzmannMachine():
             to get activities. The probabilities as well as activities can then be concatenated back into a normal visible layer.
             """
 
-            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass below). \
-            # Note that this section can also be postponed until TASK 4.2, since in this task, stand-alone RBMs do not contain labels in visible layer.
+            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities)
+            #  of visible layer (replace the pass below). \
+            # Note that this section can also be postponed until TASK 4.2, since in this task,
+            # stand-alone RBMs do not contain labels in visible layer.
 
-            pass
+            probs = sigmoid(self.bias_v + np.dot(hidden_minibatch, self.weight_vh.T))
+            samples = sample_binary(probs)
 
         else:
 
@@ -226,7 +234,8 @@ class RestrictedBoltzmannMachine():
 
         n_samples = visible_minibatch.shape[0]
 
-        # [TODO TASK 4.2] perform same computation as the function 'get_h_given_v' but with directed connections (replace the zeros below) 
+        # [TODO TASK 4.2] perform same computation as the function 'get_h_given_v'
+        #  but with directed connections (replace the zeros below)
 
         return np.zeros((n_samples, self.ndim_hidden)), np.zeros((n_samples, self.ndim_hidden))
 

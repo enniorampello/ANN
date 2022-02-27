@@ -52,7 +52,7 @@ class DeepBeliefNet():
         
         return
 
-    def recognize(self,true_img,true_lbl):
+    def recognize(self,true_img ,true_lbl):
 
         """Recognize/Classify the data into label categories and calculate the accuracy
 
@@ -67,9 +67,11 @@ class DeepBeliefNet():
         
         lbl = np.ones(true_lbl.shape)/10. # start the net by telling you know nothing about labels        
         
-        # [TODO TASK 4.2] fix the image data in the visible layer and drive the network bottom to top. In the top RBM, run alternating Gibbs sampling \
+        # [TODO TASK 4.2] fix the image data in the visible layer and drive the network bottom to top. In the top RBM,
+        #  run alternating Gibbs sampling \
         # and read out the labels (replace pass below and 'predicted_lbl' to your predicted labels).
-        # NOTE : inferring entire train/test set may require too much compute memory (depends on your system). In that case, divide into mini-batches.
+        # NOTE : inferring entire train/test set may require too much compute memory (depends on your system).
+        # In that case, divide into mini-batches.
         
         for _ in range(self.n_gibbs_recog):
 
@@ -99,7 +101,8 @@ class DeepBeliefNet():
 
         lbl = true_lbl
 
-        # [TODO TASK 4.2] fix the label in the label layer and run alternating Gibbs sampling in the top RBM. From the top RBM, drive the network \ 
+        # [TODO TASK 4.2] fix the label in the label layer and run alternating Gibbs sampling in the top RBM.
+        #  From the top RBM, drive the network \
         # top to the bottom visible layer (replace 'vis' from random to your generated visible layer).
             
         for _ in range(self.n_gibbs_gener):
@@ -143,14 +146,14 @@ class DeepBeliefNet():
             """ 
             CD-1 training for vis--hid 
             """            
-            self.savetofile_rbm(loc="trained_rbm",name="vis--hid")
+            self.savetofile_rbm(loc="trained_rbm", name="vis--hid")
 
             print ("training hid--pen")
             """ 
             CD-1 training for hid--pen 
             """            
             self.rbm_stack["vis--hid"].untwine_weights()            
-            self.savetofile_rbm(loc="trained_rbm",name="hid--pen")            
+            self.savetofile_rbm(loc="trained_rbm", name="hid--pen")
 
             print ("training pen+lbl--top")
             """ 
