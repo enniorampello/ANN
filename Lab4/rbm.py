@@ -57,9 +57,16 @@ class RestrictedBoltzmannMachine():
 
         self.learning_rate = 0.01
 
+        self.use_momentum = True
+        self.weight_vh_change = 0
+        self.bias_v_change = 0
+        self.bias_h_change = 0
         self.momentum = 0.7
 
+        self.weight_decay = 0.2
+
         self.print_period = 5000
+        self.reconstruction_err = {}
 
         self.rf = {  # receptive-fields. Only applicable when visible layer is input data
             "period": 2,  # iteration period to visualize
@@ -98,7 +105,7 @@ class RestrictedBoltzmannMachine():
                 p_h_1, h_1 = self.get_h_given_v(v_1)
 
                 # [TASK 4.1] update the parameters using function 'update_params'
-                self.update_params(v_0, h_0, p_v_1, p_h_1)
+                self.update_params(v_0, h_0, p_v_1, p_h_1, it)
 
             reconstruct = self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[0]
 
@@ -112,7 +119,7 @@ class RestrictedBoltzmannMachine():
 
             # if it % self.print_period == 0 :
 
-            # print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(visible_trainset -  reconstruct)))
+            # print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(visible_trainset -  reconstruct) / n_samples))
             print("iteration=%7d recon_loss=%4.4f" % (it, mean_squared_error(visible_trainset, reconstruct)))
         # for i in range(5):
         #     self.plot_number(visible_trainset[i])
@@ -125,7 +132,7 @@ class RestrictedBoltzmannMachine():
         plt.imshow(pattern)
         plt.show()
 
-    def update_params(self, v_0, h_0, v_k, h_k):
+    def update_params(self, v_0, h_0, v_k, h_k, it):
 
         """Update the weight and bias parameters.
 
@@ -140,10 +147,46 @@ class RestrictedBoltzmannMachine():
         """
 
         # [TASK 4.1] get the gradients from the arguments (replace the 0s below) and update the weight and bias parameters
+        if not self.use_momentum:
+            # self.delta_bias_v = (1 / self.batch_size) * self.learning_rate * (np.sum(v_0, axis=0) - np.sum(v_k, axis=0))
+            # self.delta_weight_vh = (1 / self.batch_size) * self.learning_rate * ((v_0.T @ h_0) - (v_k.T @ h_k))
+            # self.delta_bias_h = (1 / self.batch_size) * self.learning_rate * (np.sum(h_0, axis=0) - np.sum(h_k, axis=0))
 
-        self.delta_bias_v = (1 / self.batch_size) * self.learning_rate * (np.sum(v_0, axis=0) - np.sum(v_k, axis=0))
-        self.delta_weight_vh = (1 / self.batch_size) * self.learning_rate * ((v_0.T @ h_0) - (v_k.T @ h_k))
-        self.delta_bias_h = (1 / self.batch_size) * self.learning_rate * (np.sum(h_0, axis=0) - np.sum(h_k, axis=0))
+            self.delta_bias_v = (1 / self.batch_size) * \
+                                (self.learning_rate * (np.sum(v_0, axis=0) - np.sum(v_k, axis=0))
+                                 + 2 * self.weight_decay * self.bias_v)
+            self.delta_weight_vh = (1 / self.batch_size) * \
+                                   (self.learning_rate * ((v_0.T @ h_0) - (v_k.T @ h_k))
+                                    + 2 * self.weight_decay * self.weight_vh)
+            self.delta_bias_h = (1 / self.batch_size) * \
+                                (self.learning_rate * (np.sum(h_0, axis=0) - np.sum(h_k, axis=0))
+                                 + 2 * self.weight_decay * self.bias_h)
+        else:
+            if it == 0:
+                self.weight_vh_change = 0
+                self.bias_v_change = 0
+                self.bias_h_change = 0
+
+            gradient_weight_vh = (1 / self.batch_size) * \
+                                 (((v_0.T @ h_0) - (v_k.T @ h_k)) +
+                                  2 * self.weight_decay * self.weight_vh)
+            gradient_bias_v = (1 / self.batch_size) *\
+                              ((np.sum(v_0, axis=0) - np.sum(v_k, axis=0)) +
+                              2 * self.weight_decay * self.bias_v)
+            gradient_bias_h = (1 / self.batch_size) * \
+                              ((np.sum(h_0, axis=0) - np.sum(h_k, axis=0)) +
+                               2 * self.weight_decay * self.bias_h)
+
+            self.weight_vh_change = self.momentum * self.weight_vh_change + \
+                                    self.learning_rate * gradient_weight_vh
+            self.bias_v_change = self.momentum * self.bias_v_change + \
+                                    self.learning_rate * gradient_bias_v
+            self.bias_h_change = self.momentum * self.bias_h_change + \
+                                    self.learning_rate * gradient_bias_h
+
+            self.delta_weight_vh = self.weight_vh_change
+            self.delta_bias_v = self.bias_v_change
+            self.delta_bias_h = self.bias_h_change
 
         self.bias_v += self.delta_bias_v
         self.weight_vh += self.delta_weight_vh
